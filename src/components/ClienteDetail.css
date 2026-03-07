@@ -1,0 +1,184 @@
+/* src/components/ClienteDetail.css */
+.cliente-detail {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+.cliente-detail h2 {
+  color: #333;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 10px;
+}
+
+.datos-personales, .modulo-financiero, .modulo-sanitario, .historial-tabla, .charts-section {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.datos-personales h3, .modulo-financiero h3, .modulo-sanitario h3, .historial-tabla h3 {
+  color: #444;
+  margin-top: 0;
+}
+
+.datos-personales p {
+  margin: 8px 0;
+}
+
+.modulo-financiero .acciones-financieras {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.pago-parcial {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pago-parcial input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 150px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.btn-success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #45a049;
+}
+
+.btn-warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #e68900;
+}
+
+.btn-primary {
+  background-color: #2196F3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0b7dda;
+}
+
+.modulo-sanitario .formulario-salud {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-group input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.historial-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.historial-tabla th, .historial-tabla td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.historial-tabla th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.historial-tabla tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.historial-tabla tr:hover {
+  background-color: #ddd;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 8px;
+  color: white;
+}
+
+.badge-success {
+  background-color: #4CAF50;
+}
+
+.badge-warning {
+  background-color: #ff9800;
+}
+
+.badge-danger {
+  background-color: #f44336;
+}
+
+/* Estilos para gráficos (ya los agregamos en HealthCharts, pero podríamos tener algunos adicionales aquí) */
+.charts-section {
+  margin-top: 30px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modulo-sanitario .formulario-salud {
+    grid-template-columns: 1fr;
+  }
+
+  .pago-parcial {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pago-parcial input {
+    width: 100%;
+  }
+
+  .historial-tabla table {
+    font-size: 14px;
+  }
+
+  .historial-tabla th, .historial-tabla td {
+    padding: 8px;
+  }
+}

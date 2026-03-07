@@ -1,0 +1,113 @@
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  min-width: 200px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+.dropdownWrapper {
+  position: relative;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  min-width: 140px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdownButton:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.dropdownButton:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.dropdownArrow {
+  margin-left: 8px;
+  font-size: 10px;
+  color: #64748b;
+  transition: transform 0.2s;
+}
+
+.dropdownButton[aria-expanded="true"] .dropdownArrow {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 160px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdownItem:hover {
+  background-color: #f1f5f9;
+}
+
+.dropdownItem.active {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  font-weight: 500;
+}
+
+.dropdownItem:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+}

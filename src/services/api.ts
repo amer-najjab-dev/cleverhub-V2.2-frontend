@@ -1,13 +1,22 @@
 import axios from 'axios';
 
 const getBaseUrl = (): string => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  // 1. Intentar leer la variable de Vite (Vercel)
+  const envUrl = import.meta.env.VITE_API_URL;
+  
+  if (envUrl) {
+    return envUrl;
+  }
+
+  // 2. Si estamos en local, usar localhost
+  if (typeof window !== 'undefined' && 
+     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     return 'http://localhost:5001/api';
   }
-  if (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) {
-    return process.env.VITE_API_URL;
-  }
-  return 'http://localhost:5001/api';
+
+  // 3. ¡IMPORTANTE! Hardcode de seguridad para producción
+  // Si todo lo anterior falla, forzamos la URL de Railway
+  return 'https://cleverhub-v2-backend-production.up.railway.app/api';
 };
 
 export const API_URL = getBaseUrl();

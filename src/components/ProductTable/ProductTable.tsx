@@ -56,7 +56,7 @@ const ProductTable: React.FC = () => {
     try {
       setLoading(true);
       const response = await productsService.getAll();
-      setProducts(response.data);
+      setProducts(response);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {

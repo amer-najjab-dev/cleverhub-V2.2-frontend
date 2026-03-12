@@ -43,7 +43,7 @@ export const TemplateBuilder: React.FC<TemplateBuilderProps> = ({
     }
     try {
       const response = await productsService.search(query);
-      setSearchResults(response.data.slice(0, 5));
+      setSearchResults(response.slice(0, 5));
     } catch (error) {
       console.error('Error searching products:', error);
     }

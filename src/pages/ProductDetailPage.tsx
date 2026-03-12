@@ -23,7 +23,7 @@ export const ProductDetailPage = () => {
     try {
       setLoading(true);
       const response = await productsService.getById(productId);
-      const productData = response.data;
+      const productData = response;
       // Convertir precios de string a número
       if (productData.pricePPV) productData.pricePPV = Number(productData.pricePPV);
       if (productData.pricePPH) productData.pricePPH = Number(productData.pricePPH);

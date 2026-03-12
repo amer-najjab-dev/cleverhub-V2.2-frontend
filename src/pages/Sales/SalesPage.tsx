@@ -65,10 +65,10 @@ export const SalesPage = () => {
       
       try {
         const response = await productsService.search(debouncedProductSearch);
-        let results = response.data;
+        let results = response;
         
         if (productFilter !== 'Todos') {
-          results = results.filter(product => {
+          results = results.filter((product: Product) => {
             switch (productFilter) {
               case 'Medicamentos':
                 return product.category === 'Medicamentos' || product.category?.includes('Medicamento');

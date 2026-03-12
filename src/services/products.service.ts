@@ -62,36 +62,86 @@ export interface StockMovement {
   lot?: InventoryLot;
 }
 
+// Interfaz para respuesta paginada
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export const productsService = {
-  // Obtener todos los productos
-  getAll: (params?: ProductSearchParams) => 
-    api.get<Product[]>('/products', { params }), // Cambiado de '/productos' a '/products'
+  // Obtener todos los productos (con paginación)
+  getAll: async (params?: ProductSearchParams): Promise<Product[]> => {
+    const response = await api.get('/products', { params });
+    return response.data.data; // Devuelve solo el array de productos
+  },
+
+  // Obtener productos con paginación (incluye meta)
+  getAllPaginated: async (params?: ProductSearchParams): Promise<PaginatedResponse<Product>> => {
+    const response = await api.get('/products', { params });
+    return response.data; // Devuelve toda la estructura { data, meta }
+  },
 
   // Obtener producto por ID
-  getById: (id: number) => 
-    api.get<Product>(`/products/${id}`), // Cambiado
+  getById: async (id: number): Promise<Product> => {
+    const response = await api.get(`/products/${id}`);
+    return response.data.data;
+  },
 
   // Buscar productos
-  search: (query: string) => 
-    api.get<Product[]>(`/products/search?q=${query}`), // Cambiado
+  search: async (query: string): Promise<Product[]> => {
+    const response = await api.get('/products', { params: { q: query } });
+    return response.data.data;
+  },
 
   // Crear producto
-  create: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => 
-    api.post<Product>('/products', data), // Cambiado
+  create: async (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
+    const response = await api.post('/products', data);
+    return response.data.data;
+  },
 
   // Actualizar producto
-  update: (id: number, data: Partial<Product>) => 
-    api.put<Product>(`/products/${id}`, data), // Cambiado
+  update: async (id: number, data: Partial<Product>): Promise<Product> => {
+    const response = await api.put(`/products/${id}`, data);
+    return response.data.data;
+  },
 
   // Actualizar stock
-  updateStock: (id: number, stockChange: number) => 
-    api.patch(`/products/${id}/stock`, { stock: stockChange }), // Cambiado
+  updateStock: async (id: number, stockChange: number): Promise<Product> => {
+    const response = await api.patch(`/products/${id}/stock`, { stock: stockChange });
+    return response.data.data;
+  },
 
   // Eliminar producto
-  delete: (id: number) => 
-    api.delete(`/products/${id}`), // Cambiado
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/products/${id}`);
+  },
 
   // Obtener productos por categoría
-  getByCategory: (categoryId: number) => 
-    api.get<Product[]>(`/products/category/${categoryId}`), // Cambiado
+  getByCategory: async (categoryId: number): Promise<Product[]> => {
+    const response = await api.get(`/products/category/${categoryId}`);
+    return response.data.data;
+  },
+
+  // Obtener productos con stock bajo
+  getLowStock: async (threshold: number = 10): Promise<Product[]> => {
+    const response = await api.get('/products', { params: { lowStock: threshold } });
+    return response.data.data;
+  },
+
+  // Obtener productos próximos a caducar
+  getExpiringSoon: async (days: number = 30): Promise<Product[]> => {
+    const response = await api.get('/products', { params: { expiringIn: days } });
+    return response.data.data;
+  },
+
+  // Contar productos por categoría
+  countByCategory: async (): Promise<Record<string, number>> => {
+    const response = await api.get('/products/stats/categories');
+    return response.data.data;
+  }
 };

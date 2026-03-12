@@ -1,13 +1,10 @@
-// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN MODIFICADA
+// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN CORREGIDA
 import { Brain, TrendingUp, AlertTriangle, Trophy } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
 import { ToastNotification } from '../ui/ToastNotification';
 import { useState, useEffect } from 'react';
 import { productsService, Product } from '../../services/products.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
-
-// Eliminar array hardcodeado upsellProducts
-// Usar productos reales del backend
 
 export const CleverHubPanel = () => {
   const { addItem } = useCartStore();
@@ -23,12 +20,12 @@ export const CleverHubPanel = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await productsService.getAll();
+        const productsData = await productsService.getAll();
         
         // Filtrar productos para mostrar solo algunos (puedes ajustar la lógica)
         // Por ejemplo: productos con buen stock, margen interesante, etc.
-        const filteredProducts = response.data
-          .filter(product => product.stock > 0) // Solo productos con stock
+        const filteredProducts = productsData
+          .filter((product: Product) => product.stock > 0) // Solo productos con stock
           .slice(0, 4); // Mostrar máximo 4 productos
         
         setProducts(filteredProducts);

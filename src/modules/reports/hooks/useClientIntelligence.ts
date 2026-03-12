@@ -23,9 +23,9 @@ export const useClientIntelligence = () => {
       console.log('🔵 Fetching client intelligence data...');
 
       const [intelligenceData, scoresData, segmentsData] = await Promise.all([
-        clientIntelligenceService.getIntelligence(),
+        clientIntelligenceService.getClientIntelligence(),
         clientIntelligenceService.getAllRiskScores(),
-        clientIntelligenceService.getSegments()
+        clientIntelligenceService.getClientSegments()
       ]);
 
       console.log('📦 Intelligence:', intelligenceData);
@@ -45,7 +45,7 @@ export const useClientIntelligence = () => {
 
   const fetchClientBehavior = async (clientId: number) => {
     try {
-      const behavior = await clientIntelligenceService.getPurchaseBehavior(clientId);
+      const behavior = await clientIntelligenceService.getClientPurchaseBehavior(clientId);
       setSelectedClientBehavior(behavior);
       return behavior;
     } catch (err: any) {

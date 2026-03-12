@@ -12,10 +12,10 @@ export interface ChronicPatient {
   clientName: string;
   clientPhone: string;
   medication: string;
-  lastPurchaseDate: Date;
+  lastPurchaseDate: string;
   daysSinceLastPurchase: number;
   riskLevel: 'low' | 'medium' | 'high';
-  nextExpectedPurchaseDate: Date;
+  nextExpectedPurchaseDate: string;
 }
 
 export interface DormantClient {
@@ -23,15 +23,21 @@ export interface DormantClient {
   name: string;
   phone: string;
   email?: string;
-  lastPurchaseDate: Date | null;
+  lastPurchaseDate: string | null;
   daysSinceLastPurchase: number;
+}
+
+export interface TierData {
+  count: number;
+  totalSpent: number;
+  clients: any[];
 }
 
 export interface TierAnalysis {
   tiers: {
-    Bronze: { count: number; totalSpent: number; clients: any[] };
-    Argent: { count: number; totalSpent: number; clients: any[] };
-    Or: { count: number; totalSpent: number; clients: any[] };
+    Bronze: TierData;
+    Argent: TierData;
+    Or: TierData;
   };
   totalClients: number;
   averageSpentByTier: {
@@ -64,45 +70,38 @@ export interface LoyaltySummary {
 }
 
 export const loyaltyService = {
-  // Obtener resumen completo de fidelización
-  getSummary: async (): Promise<LoyaltySummary> => {
+  getLoyaltySummary: async (): Promise<LoyaltySummary> => {
     const response = await api.get('/ai/loyalty/summary');
     return response.data.data;
   },
 
-  // Obtener puntos en circulación
+  getClientLoyalty: async (clientId: number) => {
+    const response = await api.get(`/ai/loyalty/client/${clientId}`);
+    return response.data.data;
+  },
+
   getPointsInCirculation: async (): Promise<LoyaltyPoints> => {
-    const response = await api.get('/ai/loyalty/points/circulation');
+    const response = await api.get('/ai/loyalty/points-in-circulation');
     return response.data.data;
   },
 
-  // Obtener puntos de un cliente específico
-  getClientPoints: async (clientId: number): Promise<any> => {
-    const response = await api.get(`/ai/loyalty/points/client/${clientId}`);
-    return response.data.data;
-  },
-
-  // Obtener pacientes crónicos
   getChronicPatients: async (): Promise<ChronicPatient[]> => {
     const response = await api.get('/ai/loyalty/chronic-patients');
     return response.data.data;
   },
 
-  // Obtener clientes dormidos
-  getDormantClients: async (days: number = 90): Promise<DormantClient[]> => {
-    const response = await api.get(`/ai/loyalty/dormant-clients?days=${days}`);
+  getDormantClients: async (days?: number): Promise<DormantClient[]> => {
+    const response = await api.get('/ai/loyalty/dormant-clients', { params: { days } });
     return response.data.data;
   },
 
-  // Obtener análisis por tiers
   getTierAnalysis: async (): Promise<TierAnalysis> => {
-    const response = await api.get('/ai/loyalty/tiers');
+    const response = await api.get('/ai/loyalty/tier-analysis');
     return response.data.data;
   },
 
-  // Obtener categorías favoritas por tier
-  getFavoriteCategories: async (tier: 'Or'): Promise<FavoriteCategory[]> => {
-    const response = await api.get(`/ai/loyalty/categories/${tier}`);
+  getFavoriteCategoriesByTier: async (tier: string): Promise<FavoriteCategory[]> => {
+    const response = await api.get(`/ai/loyalty/favorite-categories/${tier}`);
     return response.data.data;
-  }
+  },
 };

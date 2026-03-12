@@ -12,7 +12,7 @@ export const useLoyalty = () => {
       setError(null);
 
       console.log('🔵 Fetching loyalty data...');
-      const data = await loyaltyService.getSummary();
+      const data = await loyaltyService.getLoyaltySummary();
 
       console.log('📦 Loyalty summary:', data);
       setSummary(data);

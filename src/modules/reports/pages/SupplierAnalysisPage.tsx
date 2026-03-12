@@ -39,7 +39,7 @@ export const SupplierAnalysisPage: React.FC = () => {
       });
       
       console.log('📦 Datos recibidos:', data);
-      setAnalyses(data);
+      setAnalyses(data as SupplierPurchaseAnalysis[]);
     } catch (error) {
       console.error('Error loading supplier analysis:', error);
       setError('Error al cargar los datos');

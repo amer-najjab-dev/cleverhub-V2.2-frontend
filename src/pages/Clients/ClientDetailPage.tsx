@@ -78,8 +78,8 @@ const ClientDetailPage = () => {
       try {
         const purchaseResponse = await clientsService.getClientPurchases(clientId);
         console.log('📦 Purchase history response:', purchaseResponse);
-        console.log('📦 Purchase data:', purchaseResponse.data.data);
-        setPurchaseHistory(purchaseResponse.data.data);
+        console.log('📦 Purchase data:', purchaseResponse.data); // ← solo data, no data.data
+        setPurchaseHistory(purchaseResponse.data || []); 
       } catch (error) {
         console.log('No purchase history found for client');
       }

@@ -92,8 +92,8 @@ export const CashClosurePage: React.FC = () => {
     
     setLoading(true);
     try {
-      const data = await reportService.getDailyClosure(selectedDate);
-      setClosureData(data);
+      const data = await reportService.getDailyClosure(selectedDate.toISOString().split('T')[0]);
+      setClosureData(data as any);
       setActualCash(data.cashAudit.expectedCash);
     } catch (error) {
       console.error('Error loading closure:', error);

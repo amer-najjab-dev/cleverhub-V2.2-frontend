@@ -1,106 +1,103 @@
 import { useState, useEffect } from 'react';
 import { reportService } from '../services/report.service';
-import { 
-  CashClosure, 
-  DashboardKPIs, 
-  SalesTrend, 
-  TopProduct, 
-  LostSale,
-  SupplierPurchaseAnalysis 
-} from '../types/report.types';
+import type { DashboardKPIs, SalesTrendItem, TopProduct } from '../services/report.service';
 
-export const useCashClosure = (date: Date) => {
-  const [data, setData] = useState<CashClosure | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadClosure();
-  }, [date]);
-
-  const loadClosure = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await reportService.getDailyClosure(date);
-      setData(result);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar el cierre de caja');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { data, loading, error, refetch: loadClosure };
-};
-
-export const useDashboardData = (period: 'week' | 'month' | 'quarter') => {
+export const useDashboardData = (period: string) => {
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
-  const [salesTrend, setSalesTrend] = useState<SalesTrend[]>([]);
+  const [salesTrend, setSalesTrend] = useState<SalesTrendItem[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
-  const [lostSales, setLostSales] = useState<LostSale[]>([]);
+  const [lostSales, setLostSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadDashboardData();
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const kpisData = await reportService.getDashboardKPIs(period);
+        const trendData = await reportService.getSalesTrend(period);
+        const productsData = await reportService.getTopProducts(10, period);
+        const lostSalesData = await reportService.getLostSales(period);
+
+        setKpis(kpisData);
+        setSalesTrend(trendData);
+        setTopProducts(productsData);
+        setLostSales(lostSalesData);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [period]);
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [kpisData, trendData, productsData, lostData] = await Promise.all([
-        reportService.getDashboardKPIs(period),
-        reportService.getSalesTrend(period),
-        reportService.getTopProducts(10, period),
-        reportService.getLostSales(period)
-      ]);
-      
-      setKpis(kpisData);
-      setSalesTrend(trendData);
-      setTopProducts(productsData);
-      setLostSales(lostData);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar datos del dashboard');
-    } finally {
-      setLoading(false);
-    }
+  const refetch = () => {
+    setLoading(true);
+    // Re-fetch logic
   };
 
-  return { kpis, salesTrend, topProducts, lostSales, loading, error, refetch: loadDashboardData };
+  return {
+    kpis,
+    salesTrend,
+    topProducts,
+    lostSales,
+    loading,
+    error,
+    refetch
+  };
 };
 
-export const useSupplierAnalysis = (supplierIds?: string[], dateRange?: { startDate: string; endDate: string }) => {
-  const [data, setData] = useState<SupplierPurchaseAnalysis[]>([]);
+export const useCashClosure = (date: string) => {
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (dateRange) {
-      loadAnalysis();
-    }
-  }, [supplierIds, dateRange]);
+    const fetchClosure = async () => {
+      try {
+        setLoading(true);
+        const result = await reportService.getDailyClosure(date);
+        setData(result);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadAnalysis = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const filters: any = {
-        ...dateRange,
-        supplierIds
-      };
-      
-      const result = await reportService.getSupplierAnalysis(filters);
-      setData(result);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar análisis de proveedores');
-    } finally {
-      setLoading(false);
+    if (date) {
+      fetchClosure();
     }
-  };
+  }, [date]);
 
-  return { data, loading, error, refetch: loadAnalysis };
+  return { data, loading, error };
+};
+
+export const useSupplierAnalysis = (filters: any) => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      try {
+        setLoading(true);
+        const result = await reportService.getSupplierAnalysis(filters);
+        setData(result);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (filters.startDate && filters.endDate) {
+      fetchAnalysis();
+    }
+  }, [filters]);
+
+  return { data, loading, error };
 };

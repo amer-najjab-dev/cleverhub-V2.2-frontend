@@ -2,76 +2,167 @@ import { api } from '../../../services/api';
 import { Supplier, CreditNote, ProductPurchase } from '../types/supplier.types';
 
 export const supplierService = {
-  // ========== CRUD BÁSICO ==========
-  
-  getAll: async (filters?: { search?: string; city?: string; minBalance?: number; maxBalance?: number }) => {
-    const params: any = {};
-    if (filters?.search) params.search = filters.search;
-    if (filters?.city) params.city = filters.city;
-    if (filters?.minBalance !== undefined) params.minBalance = filters.minBalance;
-    if (filters?.maxBalance !== undefined) params.maxBalance = filters.maxBalance;
-    
+  getAll: async (params?: any): Promise<Supplier[]> => {
     const response = await api.get('/suppliers', { params });
-    return response.data.data as Supplier[];
+    // Mapear snake_case a camelCase para que coincida con los tipos
+    return response.data.data.map((item: any) => ({
+      id: item.id,
+      companyName: item.company_name,
+      email: item.email,
+      website: item.website,
+      fax: item.fax,
+      paymentTerms: item.payment_terms,
+      taxId: item.tax_id,
+      registrationNumber: item.registration_number,
+      balance: item.balance,
+      isActive: item.is_active,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+      phones: item.phones?.map((p: any) => ({
+        id: p.id,
+        supplierId: p.supplier_id,
+        number: p.number,
+        type: p.type,
+        description: p.description,
+        isPrimary: p.is_primary,
+        createdAt: p.created_at
+      })),
+      addresses: item.addresses?.map((a: any) => ({
+        id: a.id,
+        supplierId: a.supplier_id,
+        streetNumber: a.street_number,
+        streetName: a.street_name,
+        city: a.city,
+        postalCode: a.postal_code,
+        country: a.country,
+        complement: a.complement,
+        isPrimary: a.is_primary,
+        createdAt: a.created_at
+      }))
+    }));
   },
-  
-  getById: async (id: string) => {
+
+  getById: async (id: string): Promise<Supplier> => {
     const response = await api.get(`/suppliers/${id}`);
-    return response.data.data as Supplier;
+    const item = response.data.data;
+    return {
+      id: item.id,
+      companyName: item.company_name,
+      email: item.email,
+      website: item.website,
+      fax: item.fax,
+      paymentTerms: item.payment_terms,
+      taxId: item.tax_id,
+      registrationNumber: item.registration_number,
+      balance: item.balance,
+      isActive: item.is_active,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+      phones: item.phones?.map((p: any) => ({
+        id: p.id,
+        supplierId: p.supplier_id,
+        number: p.number,
+        type: p.type,
+        description: p.description,
+        isPrimary: p.is_primary,
+        createdAt: p.created_at
+      })),
+      addresses: item.addresses?.map((a: any) => ({
+        id: a.id,
+        supplierId: a.supplier_id,
+        streetNumber: a.street_number,
+        streetName: a.street_name,
+        city: a.city,
+        postalCode: a.postal_code,
+        country: a.country,
+        complement: a.complement,
+        isPrimary: a.is_primary,
+        createdAt: a.created_at
+      }))
+    };
   },
-  
-  search: async (query: string) => {
-    const response = await api.get('/suppliers/search', { params: { q: query } });
-    return response.data.data as Supplier[];
+
+  create: async (data: Partial<Supplier>): Promise<Supplier> => {
+    // Convertir camelCase a snake_case para el backend
+    const payload: any = {};
+    if (data.companyName) payload.company_name = data.companyName;
+    if (data.email) payload.email = data.email;
+    if (data.website) payload.website = data.website;
+    if (data.fax) payload.fax = data.fax;
+    if (data.paymentTerms) payload.payment_terms = data.paymentTerms;
+    if (data.taxId) payload.tax_id = data.taxId;
+    if (data.registrationNumber) payload.registration_number = data.registrationNumber;
+    if (data.balance !== undefined) payload.balance = data.balance;
+    if (data.isActive !== undefined) payload.is_active = data.isActive;
+    if (data.notes) payload.notes = data.notes;
+
+    const response = await api.post('/suppliers', payload);
+    return supplierService.getById(response.data.data.id);
   },
-  
-  create: async (data: Partial<Supplier>) => {
-    const response = await api.post('/suppliers', data);
-    return response.data.data as Supplier;
+
+  update: async (id: string, data: Partial<Supplier>): Promise<Supplier> => {
+    // Convertir camelCase a snake_case para el backend
+    const payload: any = {};
+    if (data.companyName) payload.company_name = data.companyName;
+    if (data.email) payload.email = data.email;
+    if (data.website) payload.website = data.website;
+    if (data.fax) payload.fax = data.fax;
+    if (data.paymentTerms) payload.payment_terms = data.paymentTerms;
+    if (data.taxId) payload.tax_id = data.taxId;
+    if (data.registrationNumber) payload.registration_number = data.registrationNumber;
+    if (data.balance !== undefined) payload.balance = data.balance;
+    if (data.isActive !== undefined) payload.is_active = data.isActive;
+    if (data.notes) payload.notes = data.notes;
+
+    await api.put(`/suppliers/${id}`, payload);
+    return supplierService.getById(id);
   },
-  
-  update: async (id: string, data: Partial<Supplier>) => {
-    const response = await api.put(`/suppliers/${id}`, data);
-    return response.data.data as Supplier;
-  },
-  
-  delete: async (id: string) => {
+
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/suppliers/${id}`);
   },
-  
-  // ========== NOTAS DE CRÉDITO ==========
-  
-  getCreditNotes: async (supplierId: string) => {
-    const response = await api.get(`/suppliers/${supplierId}/credits`);
-    return response.data.data as CreditNote[];
+
+  getCreditNotes: async (supplierId: string, params?: any): Promise<CreditNote[]> => {
+    const response = await api.get(`/suppliers/${supplierId}/credit-notes`, { params });
+    return response.data.data.map((item: any) => ({
+      id: item.id,
+      supplierId: item.supplier_id,
+      reference: item.reference,
+      issueDate: item.issue_date,
+      totalAmount: item.total_amount,
+      usedAmount: item.used_amount,
+      remainingAmount: item.remaining_amount,
+      status: item.status,
+      reason: item.reason,
+      linkedBL: item.linked_bl,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
   },
-  
-  createCreditNote: async (data: any) => {
-    const response = await api.post('/suppliers/credits', data);
-    return response.data.data as CreditNote;
+
+  getPurchaseHistory: async (supplierId: string, months?: number): Promise<ProductPurchase[]> => {
+    const response = await api.get(`/suppliers/${supplierId}/purchases`, { params: { months } });
+    return response.data.data.map((item: any) => ({
+      id: item.id,
+      supplierId: item.supplier_id,
+      productId: item.product_id,
+      productName: item.product?.name,
+      purchaseDate: item.purchase_date,
+      quantity: item.quantity,
+      pricePPH: item.price_pph,
+      previousPPH: item.previous_pph,
+      batchNumber: item.batch_number,
+      expiryDate: item.expiry_date,
+      deliveryNoteId: item.delivery_note_id,
+      createdAt: item.created_at
+    }));
   },
-  
-  applyCreditNote: async (creditId: string, amount: number, appliedTo: string) => {
-    const response = await api.post(`/suppliers/credits/${creditId}/apply`, { amount, appliedTo });
-    return response.data.data as CreditNote;
+
+  updateBalance: async (id: string, amount: number): Promise<Supplier> => {
+    await api.patch(`/suppliers/${id}/balance`, { amount });
+      return supplierService.getById(id);
   },
-  
-  // ========== RECEPCIÓN ==========
-  
-  processDelivery: async (data: any) => {
-    const response = await api.post('/suppliers/delivery', data);
-    return response.data.data;
-  },
-  
-  getDeliveryNote: async (id: string) => {
-    const response = await api.get(`/suppliers/delivery/${id}`);
-    return response.data.data;
-  },
-  
-  // ========== HISTORIAL ==========
-  
-  getProductHistory: async (productId: number) => {
-    const response = await api.get(`/suppliers/products/${productId}/history`);
-    return response.data.data as ProductPurchase[];
-  }
 };

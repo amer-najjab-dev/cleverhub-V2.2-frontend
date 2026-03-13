@@ -73,14 +73,14 @@ const HealthCharts: React.FC<HealthChartsProps> = ({ healthRecords = [] }) => {
   }
 
   const sortedHistorial = [...validRecords].sort((a, b) => {
-    const dateA = new Date(a.recordDate);
-    const dateB = new Date(b.recordDate);
+    const dateA = a.recordDate ? new Date(a.recordDate) : new Date(0);
+    const dateB = b.recordDate ? new Date(b.recordDate) : new Date(0);
     return dateA.getTime() - dateB.getTime();
   });
 
   // Preparar datos para gráficos
   const dates = sortedHistorial.map(h => 
-    new Date(h.recordDate).toLocaleDateString('es-ES')
+    h.recordDate ? new Date(h.recordDate).toLocaleDateString('es-ES') : 'Fecha inválida'
   );
   
   const glucemia = sortedHistorial.map(h => h.glucoseLevel || null);

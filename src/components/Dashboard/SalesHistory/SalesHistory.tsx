@@ -4,7 +4,6 @@ import { Clock, User, CheckCircle, Clock as ClockIcon, AlertCircle } from 'lucid
 import { useCurrencyFormatter } from '../../../utils/formatters';
 import { salesService, Sale } from '../../../services/sales.service';
 
-
 export const SalesHistory = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,11 +27,13 @@ export const SalesHistory = () => {
       
       const response = await salesService.getAll(params);
       
-      if (Array.isArray(response)) {
-        setSales(response);
-      } 
-      else if (response && response.data && Array.isArray(response.data)) {
+      // La respuesta ahora tiene la estructura { success, data, meta }
+      if (response && response.success && Array.isArray(response.data)) {
         setSales(response.data);
+      } 
+      else if (Array.isArray(response)) {
+        // Fallback por si el mapeo no se aplicó correctamente
+        setSales(response);
       }
       else {
         console.warn('Formato de respuesta inesperado:', response);
@@ -75,82 +76,56 @@ export const SalesHistory = () => {
   const getPaymentStatusColor = (status: string | undefined) => {
     if (!status) return 'bg-gray-100 text-gray-800';
     
-    switch (status.toLowerCase()) {
-      case 'paid':
-      case 'pagado':
-        return 'bg-green-100 text-green-800';
-      case 'partial':
-      case 'parcial':
-        return 'bg-amber-100 text-amber-800';
-      case 'pending':
-      case 'pendiente':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    const statusLower = status.toLowerCase();
+    if (['paid', 'pagado'].includes(statusLower)) {
+      return 'bg-green-100 text-green-800';
     }
+    if (['partial', 'parcial'].includes(statusLower)) {
+      return 'bg-amber-100 text-amber-800';
+    }
+    if (['pending', 'pendiente'].includes(statusLower)) {
+      return 'bg-red-100 text-red-800';
+    }
+    return 'bg-gray-100 text-gray-800';
   };
 
   const getPaymentStatusIcon = (status: string | undefined) => {
     if (!status) return null;
     
-    switch (status.toLowerCase()) {
-      case 'paid':
-      case 'pagado':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'partial':
-      case 'parcial':
-        return <ClockIcon className="w-4 h-4" />;
-      case 'pending':
-      case 'pendiente':
-        return <AlertCircle className="w-4 h-4" />;
-      default:
-        return null;
+    const statusLower = status.toLowerCase();
+    if (['paid', 'pagado'].includes(statusLower)) {
+      return <CheckCircle className="w-4 h-4" />;
     }
+    if (['partial', 'parcial'].includes(statusLower)) {
+      return <ClockIcon className="w-4 h-4" />;
+    }
+    if (['pending', 'pendiente'].includes(statusLower)) {
+      return <AlertCircle className="w-4 h-4" />;
+    }
+    return null;
   };
 
   const getPaymentStatusText = (status: string | undefined) => {
     if (!status) return 'Desconocido';
     
-    switch (status.toLowerCase()) {
-      case 'paid':
-      case 'pagado':
-        return 'Pagado';
-      case 'partial':
-      case 'parcial':
-        return 'Parcial';
-      case 'pending':
-      case 'pendiente':
-        return 'Pendiente';
-      default:
-        return status;
-    }
+    const statusLower = status.toLowerCase();
+    if (['paid', 'pagado'].includes(statusLower)) return 'Pagado';
+    if (['partial', 'parcial'].includes(statusLower)) return 'Parcial';
+    if (['pending', 'pendiente'].includes(statusLower)) return 'Pendiente';
+    return status;
   };
 
   const getPaymentMethodText = (method: string | undefined) => {
     if (!method) return 'No especificado';
     
-    switch (method.toLowerCase()) {
-      case 'cash':
-      case 'efectivo':
-        return 'Efectivo';
-      case 'Credit Card':
-      case 'tarjeta':
-        return 'Tarjeta';
-      case 'credit':
-      case 'crédito':
-        return 'Crédito';
-      case 'Bank Transfer':
-      case 'transferencia':
-        return 'Transferencia';
-      case 'Bank Cheque':
-      case 'cheque':
-        return 'Cheque';
-      case 'mixed':
-      case 'mixto':
-        return 'Mixto';
-      default:
-        return method;
-    }
+    const methodLower = method.toLowerCase();
+    if (['cash', 'efectivo'].includes(methodLower)) return 'Efectivo';
+    if (['credit card', 'tarjeta'].includes(methodLower)) return 'Tarjeta';
+    if (['credit', 'crédito'].includes(methodLower)) return 'Crédito';
+    if (['bank transfer', 'transferencia'].includes(methodLower)) return 'Transferencia';
+    if (['bank cheque', 'cheque'].includes(methodLower)) return 'Cheque';
+    if (['mixed', 'mixto'].includes(methodLower)) return 'Mixto';
+    return method;
   };
 
   const getClientName = (sale: Sale): string => {

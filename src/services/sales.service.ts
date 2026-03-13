@@ -220,24 +220,112 @@ export class SaleHelper {
   }
 }
 
+// Función auxiliar para mapear snake_case a camelCase
+const mapSaleFromBackend = (item: any): Sale => ({
+  id: item.id,
+  saleNumber: item.sale_number,
+  clientId: item.client_id,
+  userId: item.user_id,
+  subtotal: Number(item.subtotal),
+  discountAmount: item.discount_amount ? Number(item.discount_amount) : undefined,
+  discountType: item.discount_type,
+  discountPercentage: item.discount_percentage ? Number(item.discount_percentage) : undefined,
+  taxAmount: item.tax_amount ? Number(item.tax_amount) : undefined,
+  total: Number(item.total),
+  paidAmount: Number(item.paid_amount),
+  changeAmount: item.change_amount ? Number(item.change_amount) : undefined,
+  amountReceived: item.amount_received ? Number(item.amount_received) : undefined,
+  amountApplied: item.amount_applied ? Number(item.amount_applied) : undefined,
+  amountPending: item.amount_pending ? Number(item.amount_pending) : undefined,
+  paymentMethod: item.payment_method,
+  paymentStatus: item.payment_status,
+  saleStatus: item.sale_status,
+  notes: item.notes,
+  adultFlag: item.adult_flag,
+  pregnantFlag: item.pregnant_flag,
+  lactatingFlag: item.lactating_flag,
+  chronicConditionFlag: item.chronic_condition_flag,
+  usualMedicationFlag: item.usual_medication_flag,
+  createdAt: item.created_at,
+  updatedAt: item.updated_at,
+  client: item.client ? {
+    id: item.client.id,
+    firstName: item.client.first_name,
+    lastName: item.client.last_name,
+    email: item.client.email,
+    phone: item.client.phone
+  } : undefined,
+  user: item.user ? {
+    id: item.user.id,
+    email: item.user.email,
+    fullName: item.user.full_name,
+    role: item.user.role
+  } : undefined,
+  items: item.sale_items?.map((si: any) => ({
+    id: si.id,
+    productId: si.product_id,
+    quantity: si.quantity,
+    unitPricePPV: Number(si.unit_price_ppv),
+    unitPricePPH: Number(si.unit_price_pph),
+    discountAmount: si.discount_amount ? Number(si.discount_amount) : undefined,
+    discountPercentage: si.discount_percentage ? Number(si.discount_percentage) : undefined,
+    subtotal: Number(si.subtotal),
+    total: Number(si.total),
+    margin: Number(si.margin),
+    marginPercentage: Number(si.margin_percentage),
+    product: si.product ? {
+      id: si.product.id,
+      name: si.product.name,
+      pricePPV: Number(si.product.pricePPV),
+      pricePPH: Number(si.product.pricePPH)
+    } : undefined
+  }))
+});
+
 export const salesService = {
   // Crear nueva venta
   create: (saleData: CreateSaleDto): Promise<ApiResponse<Sale>> => 
     api.post<ApiResponse<Sale>>('/sales', saleData).then(extractData),
 
-  // Obtener todas las ventas
-  getAll: (params?: any): Promise<ApiResponse<Sale[]>> => 
-    api.get<ApiResponse<Sale[]>>('/sales', { params }).then(extractData),
+  // Obtener todas las ventas (CON MAPEO CORREGIDO)
+  getAll: async (params?: any): Promise<ApiResponse<Sale[]>> => {
+    const response = await api.get<ApiResponse<any[]>>('/sales', { params });
+    
+    // Mapear snake_case a camelCase
+    const mappedData = response.data.data.map(mapSaleFromBackend);
+    
+    return {
+      ...response.data,
+      data: mappedData
+    };
+  },
 
-  // Obtener venta por ID
-  getById: (id: number): Promise<ApiResponse<Sale>> => 
-    api.get<ApiResponse<Sale>>(`/sales/${id}`).then(extractData),
+  // Obtener venta por ID (CON MAPEO CORREGIDO)
+  getById: async (id: number): Promise<ApiResponse<Sale>> => {
+    const response = await api.get<ApiResponse<any>>(`/sales/${id}`);
+    
+    // Mapear snake_case a camelCase
+    const mappedData = mapSaleFromBackend(response.data.data);
+    
+    return {
+      ...response.data,
+      data: mappedData
+    };
+  },
 
-  // Obtener venta por número
-  getByNumber: (saleNumber: string): Promise<ApiResponse<Sale>> => 
-    api.get<ApiResponse<Sale>>(`/sales/number/${saleNumber}`).then(extractData),
+  // Obtener venta por número (CON MAPEO CORREGIDO)
+  getByNumber: async (saleNumber: string): Promise<ApiResponse<Sale>> => {
+    const response = await api.get<ApiResponse<any>>(`/sales/number/${saleNumber}`);
+    
+    // Mapear snake_case a camelCase
+    const mappedData = mapSaleFromBackend(response.data.data);
+    
+    return {
+      ...response.data,
+      data: mappedData
+    };
+  },
 
- 
   // Aplicar pago FIFO a cliente
   applyPaymentFIFO: (
     clientId: number, 
@@ -259,8 +347,17 @@ export const salesService = {
     api.get<ApiResponse<any>>(`/clients/${clientId}/credit-summary`).then(extractData),
 
   // Obtener ventas por estado de pago
-  getSalesByPaymentStatus: (status: string): Promise<ApiResponse<Sale[]>> =>
-    api.get<ApiResponse<Sale[]>>('/sales', { params: { paymentStatus: status } }).then(extractData),
+  getSalesByPaymentStatus: async (status: string): Promise<ApiResponse<Sale[]>> => {
+    const response = await api.get<ApiResponse<any[]>>('/sales', { params: { paymentStatus: status } });
+    
+    // Mapear snake_case a camelCase
+    const mappedData = response.data.data.map(mapSaleFromBackend);
+    
+    return {
+      ...response.data,
+      data: mappedData
+    };
+  },
 
   // Reportes
   getDailySales: (date?: Date): Promise<ApiResponse<any>> => {

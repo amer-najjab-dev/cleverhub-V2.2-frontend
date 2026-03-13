@@ -177,7 +177,7 @@ export const clientsService = {
 
   // --- Deudas del Cliente ---
   getDebt: async (clientId: number) => {
-    const response = await api.get<ApiResponse<ClientDebt>>(`/clients/${clientId}/debt`);
+    const response = await api.get<ApiResponse<ClientDebt>>(`/clients/${clientId}/debts`);
     return response.data;
   },
 

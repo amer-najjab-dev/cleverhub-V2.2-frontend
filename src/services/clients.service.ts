@@ -202,18 +202,67 @@ export const clientsService = {
 
   // --- Registros de Salud ---
   createHealthRecord: async (clientId: number, data: CreateHealthRecordDto) => {
-    const response = await api.post<ApiResponse<ClientHealthRecord>>(
-      `/clients/${clientId}/health-records`, 
-      data
-    );
-    return response.data;
+  // Convertir camelCase a snake_case para el backend
+  const payload = {
+    client_id: clientId,
+    glucose_level: data.glucoseLevel,
+    blood_pressure_systolic: data.bloodPressureSystolic,
+    blood_pressure_diastolic: data.bloodPressureDiastolic,
+    weight: data.weight,
+    heart_rate: data.heartRate,
+    record_date: data.recordDate,
+    notes: data.notes
+  };
+  
+  const response = await api.post(`/clients/${clientId}/health-records`, payload);
+
+  const item = response.data.data;
+    const mappedData = {
+      id: item.id,
+      clientId: item.client_id,
+      glucoseLevel: item.glucose_level,
+      bloodPressureSystolic: item.blood_pressure_systolic,
+      bloodPressureDiastolic: item.blood_pressure_diastolic,
+      weight: item.weight,
+      heartRate: item.heart_rate,
+      recordDate: item.record_date,
+      notes: item.notes,
+      glucoseStatus: item.glucose_status,
+      bloodPressureStatus: item.blood_pressure_status,
+      heartRateStatus: item.heart_rate_status,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    };
+    
+    return {
+      ...response.data,
+      data: mappedData
+    };
   },
 
   getHealthRecords: async (clientId: number) => {
-    const response = await api.get<ApiResponse<ClientHealthRecord[]>>(
-      `/clients/${clientId}/health-records`
-    );
-    return response.data;
+    const response = await api.get(`/clients/${clientId}/health-records`);
+    // Mapear snake_case a camelCase
+    const mappedData = response.data.data.map((item: any) => ({
+      id: item.id,
+      clientId: item.client_id,
+      glucoseLevel: item.glucose_level,
+      bloodPressureSystolic: item.blood_pressure_systolic,
+      bloodPressureDiastolic: item.blood_pressure_diastolic,
+      weight: item.weight,
+      heartRate: item.heart_rate,
+      recordDate: item.record_date,  // ← Mapeo clave
+      notes: item.notes,
+      glucoseStatus: item.glucose_status,
+      bloodPressureStatus: item.blood_pressure_status,
+      heartRateStatus: item.heart_rate_status,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    return {
+      ...response.data,
+      data: mappedData
+    };
   },
 
   getHealthRecordById: async (id: number) => {

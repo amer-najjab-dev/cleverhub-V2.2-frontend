@@ -254,7 +254,7 @@ export const SalesHistory = () => {
                         <span className="text-sm font-medium text-gray-900">
                           {formatCurrency(sale.total || 0)}
                         </span>
-                        {sale.discountAmount && sale.discountAmount > 0 && (
+                        {sale.discountAmount !== undefined && sale.discountAmount > 0 && (
                           <span className="text-xs text-green-600 mt-0.5 font-medium">
                             -{formatCurrency(sale.discountAmount)} desc
                           </span>

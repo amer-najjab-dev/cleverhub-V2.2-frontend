@@ -35,7 +35,7 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <p className="text-sm text-gray-600 mb-2">Crecimiento</p>
         <p className={`text-2xl font-bold ${kpis?.growth && kpis.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {kpis?.growth ? kpis.growth.toFixed(1) : 0}%
+          {typeof kpis?.growth === 'number' ? kpis.growth.toFixed(1) : '0.0'}%
         </p>
       </div>
     </>

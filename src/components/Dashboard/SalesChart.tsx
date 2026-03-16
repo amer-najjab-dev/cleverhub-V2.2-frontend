@@ -33,9 +33,8 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
     }
   };
 
-  // Calcular el valor máximo para el eje Y
   const maxValue = data.length > 0 
-    ? Math.max(...data.map(item => item.value)) * 1.1 // 10% más para espacio
+    ? Math.max(...data.map(item => item.value)) * 1.1
     : 100;
 
   return (
@@ -47,14 +46,14 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
         </div>
       </div>
       
-      <div className="h-72 min-w-0" style={{ minHeight: "288px" }}>
+      <div className="h-72 w-full" style={{ minHeight: "288px", width: "100%" }}>
         {loading ? (
           <div className="h-full flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis dataKey="hour" stroke="#6b7280" fontSize={12} />
               <YAxis 

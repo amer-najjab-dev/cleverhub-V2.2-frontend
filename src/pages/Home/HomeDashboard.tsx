@@ -140,7 +140,12 @@ export const HomeDashboard = () => {
 
         {/* KPIs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <QuickStats kpis={kpis} loading={loading} formatCurrency={formatCurrency} />
+          {loading ? (
+            // Mostrar skeletons mientras carga
+            <QuickStats kpis={null} loading={true} formatCurrency={formatCurrency} />
+          ) : (
+            <QuickStats kpis={kpis} loading={false} formatCurrency={formatCurrency} />
+          )}
         </div>
 
         {/* Charts Grid */}

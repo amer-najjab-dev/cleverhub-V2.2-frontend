@@ -15,6 +15,15 @@ interface TopProductsProps {
 export const TopProductsTable = ({ products }: TopProductsProps) => {
   const { formatCurrency } = useCurrencyFormatter();
 
+  // Validar que products sea un array
+  if (!Array.isArray(products)) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <p className="text-gray-500">No hay datos de productos</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 10 Productos</h3>
@@ -32,19 +41,26 @@ export const TopProductsTable = ({ products }: TopProductsProps) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {products.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                <td className="py-3 px-4 text-sm text-gray-900 font-medium">{product.name}</td>
-                <td className="py-3 px-4 text-sm text-gray-600">{product.category || 'N/A'}</td>
-                <td className="py-3 px-4 text-sm text-gray-900">{product.quantity} u.</td>
-                <td className="py-3 px-4 text-sm text-gray-900">{formatCurrency(product.revenue)}</td>
-                <td className="py-3 px-4 text-sm">
-                  <span className={`font-medium ${product.marginPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {product.marginPercentage >= 0 ? '+' : ''}{product.marginPercentage.toFixed(1)}%
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {products.map((product) => {
+              // Validar que marginPercentage sea un número
+              const marginPercentage = typeof product.marginPercentage === 'number' 
+                ? product.marginPercentage 
+                : 0;
+              
+              return (
+                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="py-3 px-4 text-sm text-gray-900 font-medium">{product.name}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600">{product.category || 'N/A'}</td>
+                  <td className="py-3 px-4 text-sm text-gray-900">{product.quantity} u.</td>
+                  <td className="py-3 px-4 text-sm text-gray-900">{formatCurrency(product.revenue || 0)}</td>
+                  <td className="py-3 px-4 text-sm">
+                    <span className={`font-medium ${marginPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {marginPercentage >= 0 ? '+' : ''}{marginPercentage.toFixed(1)}%
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

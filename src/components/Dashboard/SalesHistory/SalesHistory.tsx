@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, User, CheckCircle, Clock as ClockIcon, AlertCircle, RefreshCw, ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { useCurrencyFormatter } from '../../../utils/formatters';
 import { salesService, Sale } from '../../../services/sales.service';
@@ -199,11 +199,11 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
               {sales.map((sale) => {
                 const isExpanded = expandedRowId === sale.id;
                 const items = getProductItems(sale);
+                const discountAmount = sale.discountAmount || 0;
                 
                 return (
-                  <>
+                  <React.Fragment key={sale.id}>
                     <tr 
-                      key={sale.id} 
                       className="hover:bg-gray-50 transition-colors cursor-pointer"
                       onClick={() => toggleRow(sale.id)}
                     >
@@ -240,9 +240,9 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
                           <span className="text-sm font-medium text-gray-900">
                             {formatCurrency(sale.total || 0)}
                           </span>
-                          {sale.discountAmount && sale.discountAmount > 0 && (
+                          {discountAmount > 0 && (
                             <span className="text-xs text-green-600 mt-0.5">
-                              -{formatCurrency(sale.discountAmount)} desc
+                              -{formatCurrency(discountAmount)} desc
                             </span>
                           )}
                         </div>
@@ -298,7 +298,7 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </tbody>

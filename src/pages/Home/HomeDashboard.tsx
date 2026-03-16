@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  TrendingUp, 
   ShoppingCart, 
   Package, 
   Calendar,
   ArrowRight,
   RefreshCw,
-  BarChart3,
-  AlertCircle
+  BarChart3
 } from 'lucide-react';
 import { SalesChart } from '../../components/Dashboard/SalesChart';
 import { ComparativeChart } from '../../components/Dashboard/ComparativeChart';

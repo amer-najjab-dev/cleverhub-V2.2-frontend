@@ -20,60 +20,62 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
     );
   }
 
-  const stats = [
-    {
-      label: 'Ventas Hoy',
-      value: formatCurrency(kpis?.todaySales || 0),
-      icon: TrendingUp,
-      color: 'bg-blue-500',
-      bgLight: 'bg-blue-50',
-      textColor: 'text-blue-600'
-    },
-    {
-      label: 'Ticket Promedio',
-      value: formatCurrency(kpis?.averageTicket || 0),
-      icon: DollarSign,
-      color: 'bg-green-500',
-      bgLight: 'bg-green-50',
-      textColor: 'text-green-600'
-    },
-    {
-      label: 'Stock Bajo',
-      value: kpis?.lowStockCount || 0,
-      icon: Package,
-      color: 'bg-amber-500',
-      bgLight: 'bg-amber-50',
-      textColor: 'text-amber-600'
-    },
-    {
-      label: 'Crecimiento',
-      value: `${typeof kpis?.growth === 'number' ? kpis.growth.toFixed(1) : '0.0'}%`,
-      icon: Activity,
-      color: 'bg-purple-500',
-      bgLight: 'bg-purple-50',
-      textColor: 'text-purple-600'
-    }
-  ];
+  const todaySales = typeof kpis?.todaySales === 'number' ? kpis.todaySales : 0;
+  const averageTicket = typeof kpis?.averageTicket === 'number' ? kpis.averageTicket : 0;
+  const lowStockCount = typeof kpis?.lowStockCount === 'number' ? kpis.lowStockCount : 0;
+  const growth = typeof kpis?.growth === 'number' ? kpis.growth : 0;
 
   return (
     <>
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-2">{stat.label}</p>
-              <p className={`text-2xl font-bold ${stat.textColor}`}>{stat.value}</p>
-            </div>
-            <div className={`${stat.bgLight} p-3 rounded-lg`}>
-              <stat.icon className={`w-6 h-6 ${stat.textColor}`} />
-            </div>
+      <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Ventas Hoy</p>
+            <p className="text-2xl font-bold text-blue-600">{formatCurrency(todaySales)}</p>
+          </div>
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <TrendingUp className="w-6 h-6 text-blue-600" />
           </div>
         </div>
-      ))}
+      </div>
+
+      <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '100ms' }}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Ticket Promedio</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(averageTicket)}</p>
+          </div>
+          <div className="bg-green-50 p-3 rounded-lg">
+            <DollarSign className="w-6 h-6 text-green-600" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Stock Bajo</p>
+            <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
+          </div>
+          <div className="bg-amber-50 p-3 rounded-lg">
+            <Package className="w-6 h-6 text-amber-600" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '300ms' }}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Crecimiento</p>
+            <p className={`text-2xl font-bold ${growth >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+              {growth.toFixed(1)}%
+            </p>
+          </div>
+          <div className="bg-purple-50 p-3 rounded-lg">
+            <Activity className="w-6 h-6 text-purple-600" />
+          </div>
+        </div>
+      </div>
     </>
   );
 };

@@ -121,9 +121,9 @@ export const HomeDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
@@ -139,23 +139,27 @@ export const HomeDashboard = () => {
         </div>
 
         {/* KPIs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {loading ? (
-            // Mostrar skeletons mientras carga
-            <QuickStats kpis={null} loading={true} formatCurrency={formatCurrency} />
-          ) : (
-            <QuickStats kpis={kpis} loading={false} formatCurrency={formatCurrency} />
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <QuickStats kpis={kpis} loading={loading} formatCurrency={formatCurrency} />
+        </div>
+
+        {/* SALES HISTORY - Ahora arriba y ancho completo */}
+        <div className="w-full">
+          <SalesHistory />
         </div>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <SalesChart />
-          <ComparativeChart />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="w-full h-[400px]">
+            <SalesChart />
+          </div>
+          <div className="w-full h-[400px]">
+            <ComparativeChart />
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-6">
+        <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => (
@@ -175,12 +179,12 @@ export const HomeDashboard = () => {
           </div>
         </div>
 
-        {/* Top Products & Sales History */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+        {/* Top Products */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Productos Más Vendidos</h2>
+          <div className="w-full">
             {loadingProducts ? (
               <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4"></div>
                 <div className="space-y-3">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <div key={i} className="h-12 bg-gray-100 rounded animate-pulse"></div>
@@ -190,9 +194,6 @@ export const HomeDashboard = () => {
             ) : (
               <TopProductsTable products={topProducts} />
             )}
-          </div>
-          <div className="lg:col-span-2">
-            <SalesHistory />
           </div>
         </div>
       </div>

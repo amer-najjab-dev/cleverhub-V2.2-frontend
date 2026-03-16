@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, User, CheckCircle, Clock as ClockIcon, AlertCircle } from 'lucide-react';
+import { Clock, User, CheckCircle, Clock as ClockIcon, AlertCircle, ChevronDown, ChevronUp, Package } from 'lucide-react';
 import { useCurrencyFormatter } from '../../../utils/formatters';
 import { salesService, Sale } from '../../../services/sales.service';
+
+// Interfaz para los items de venta
+interface SaleItem {
+  id: number;
+  productId: number;
+  productName?: string;
+  quantity: number;
+  unitPricePPV: number;
+  total: number;
+}
 
 export const SalesHistory = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { formatCurrency } = useCurrencyFormatter();
 
@@ -27,12 +38,10 @@ export const SalesHistory = () => {
       
       const response = await salesService.getAll(params);
       
-      // La respuesta ahora tiene la estructura { success, data, meta }
       if (response && response.success && Array.isArray(response.data)) {
         setSales(response.data);
       } 
       else if (Array.isArray(response)) {
-        // Fallback por si el mapeo no se aplicó correctamente
         setSales(response);
       }
       else {
@@ -48,6 +57,10 @@ export const SalesHistory = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleRow = (saleId: number) => {
+    setExpandedRowId(expandedRowId === saleId ? null : saleId);
   };
 
   const formatDate = (date: Date | string | undefined) => {
@@ -142,6 +155,17 @@ export const SalesHistory = () => {
     return `Usuario #${sale.userId}`;
   };
 
+  const getProductItems = (sale: Sale): SaleItem[] => {
+    return sale.items?.map((item: any) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.product?.name || 'Producto no disponible',
+      quantity: item.quantity,
+      unitPricePPV: item.unitPricePPV || 0,
+      total: item.total || 0
+    })) || [];
+  };
+
   const handleViewFullHistory = () => {
     navigate('/sales/history');
   };
@@ -208,74 +232,125 @@ export const SalesHistory = () => {
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Importe</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Método Pago</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Estado</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-mono text-sm font-medium text-blue-700">
-                        {sale.saleNumber || `V-${sale.id}`}
-                      </div>
-                      <div className="text-xs text-gray-500">ID: {sale.id}</div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center text-sm text-gray-700">
-                        <Clock className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                        <span className="whitespace-nowrap">
-                          {formatDate(sale.createdAt)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                        <div>
-                          <span className="text-sm font-medium text-gray-900">
-                            {getClientName(sale)}
+                {sales.map((sale) => {
+                  const isExpanded = expandedRowId === sale.id;
+                  const items = getProductItems(sale);
+                  
+                  return (
+                    <>
+                      <tr 
+                        key={sale.id} 
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={() => toggleRow(sale.id)}
+                      >
+                        <td className="py-3 px-4">
+                          <div className="font-mono text-sm font-medium text-blue-700">
+                            {sale.saleNumber || `V-${sale.id}`}
+                          </div>
+                          <div className="text-xs text-gray-500">ID: {sale.id}</div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center text-sm text-gray-700">
+                            <Clock className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                            <span className="whitespace-nowrap">
+                              {formatDate(sale.createdAt)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <User className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900">
+                                {getClientName(sale)}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center">
+                            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-xs font-medium text-blue-700">
+                                {sale.user?.fullName?.charAt(0) || 'U'}
+                              </span>
+                            </div>
+                            <span className="text-sm text-gray-900">
+                              {getUserName(sale)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatCurrency(sale.total || 0)}
+                            </span>
+                            {sale.discountAmount !== undefined && sale.discountAmount > 0 && (
+                              <span className="text-xs text-green-600 mt-0.5 font-medium">
+                                -{formatCurrency(sale.discountAmount)} desc
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-sm text-gray-700">
+                            {getPaymentMethodText(sale.paymentMethod)}
                           </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                          <span className="text-xs font-medium text-blue-700">
-                            {sale.user?.fullName?.charAt(0) || 'U'}
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-900">
-                          {getUserName(sale)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">
-                          {formatCurrency(sale.total || 0)}
-                        </span>
-                        {sale.discountAmount !== undefined && sale.discountAmount > 0 && (
-                          <span className="text-xs text-green-600 mt-0.5 font-medium">
-                            -{formatCurrency(sale.discountAmount)} desc
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-700">
-                        {getPaymentMethodText(sale.paymentMethod)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(sale.paymentStatus)}`}>
-                        {getPaymentStatusIcon(sale.paymentStatus)}
-                        <span className="ml-1.5 whitespace-nowrap">
-                          {getPaymentStatusText(sale.paymentStatus)}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(sale.paymentStatus)}`}>
+                            {getPaymentStatusIcon(sale.paymentStatus)}
+                            <span className="ml-1.5 whitespace-nowrap">
+                              {getPaymentStatusText(sale.paymentStatus)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-gray-500" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-gray-500" />
+                          )}
+                        </td>
+                      </tr>
+                      {isExpanded && items.length > 0 && (
+                        <tr className="bg-gray-50">
+                          <td colSpan={8} className="p-4">
+                            <div className="border-t border-gray-200 pt-3">
+                              <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                                <Package className="w-4 h-4" />
+                                Productos de la venta
+                              </h4>
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-gray-300">
+                                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-600">Producto</th>
+                                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-600">Cantidad</th>
+                                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-600">Precio Unit.</th>
+                                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-600">Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                  {items.map((item) => (
+                                    <tr key={item.id}>
+                                      <td className="py-2 px-3 text-sm text-gray-900">{item.productName}</td>
+                                      <td className="py-2 px-3 text-sm text-gray-900">{item.quantity}</td>
+                                      <td className="py-2 px-3 text-sm text-gray-900">{formatCurrency(item.unitPricePPV)}</td>
+                                      <td className="py-2 px-3 text-sm text-gray-900">{formatCurrency(item.total)}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
               </tbody>
             </table>
 

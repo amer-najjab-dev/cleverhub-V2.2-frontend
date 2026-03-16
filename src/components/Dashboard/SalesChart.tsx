@@ -33,6 +33,11 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
     }
   };
 
+  // Calcular el valor máximo para el eje Y
+  const maxValue = data.length > 0 
+    ? Math.max(...data.map(item => item.value)) * 1.1 // 10% más para espacio
+    : 100;
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
@@ -53,6 +58,7 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
               <XAxis dataKey="hour" stroke="#6b7280" fontSize={12} />
               <YAxis 
+                domain={[0, maxValue]}
                 stroke="#6b7280"
                 fontSize={12}
                 tickFormatter={(value) => formatCurrency(value)}

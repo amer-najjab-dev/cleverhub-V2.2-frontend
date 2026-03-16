@@ -1,196 +1,194 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Calendar, CreditCard, Package } from 'lucide-react';
-import { KPICard } from '../../components/Dashboard/KPICard';
+import { useNavigate } from 'react-router-dom';
+import { 
+  TrendingUp, 
+  ShoppingCart, 
+  Package, 
+  Calendar,
+  ArrowRight,
+  RefreshCw
+} from 'lucide-react';
 import { SalesChart } from '../../components/Dashboard/SalesChart';
 import { ComparativeChart } from '../../components/Dashboard/ComparativeChart';
-import { BestSellersTable } from '../../components/Dashboard/BestSellersTable';
+import { QuickStats } from '../../components/Dashboard/QuickStats';
+import { TopProductsTable } from '../../modules/reports/components/bi/TopProductsTable';
 import { SalesHistory } from '../../components/Dashboard/SalesHistory/SalesHistory';
-import { dashboardService } from '../../services/dashboard.service';
-import { DashboardKPI } from '../../services/dashboard.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
+import { dashboardService } from '../../services/dashboard.service';
 
 export const HomeDashboard = () => {
+  const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [kpis, setKpis] = useState<DashboardKPI>({
-    todaySales: 0,
-    weekSales: 0,
-    averageTicket: 0,
-    lowStockCount: 0,
-    growth: 0,
-    totalSales: 0,
-    totalProfit: 0,
-    averageMargin: 0,
-    pendingOrders: 0
-  });
-  const [selectedPeriod, setSelectedPeriod] = useState('today');
+  const [error, setError] = useState<string | null>(null);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const navigate = useNavigate();
   const { formatCurrency } = useCurrencyFormatter();
 
   useEffect(() => {
-    loadDashboardData();
-  }, [selectedPeriod]);
+    fetchKPIs();
+    fetchTopProducts();
+  }, []);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
+  const fetchKPIs = async () => {
     try {
-      const response = await dashboardService.getKPIs(selectedPeriod);
+      setLoading(true);
+      const response = await dashboardService.getKPIs('today');
       if (response.success) {
         setKpis(response.data);
+        setError(null);
       }
-    } catch (error) {
-      console.error('Error loading dashboard:', error);
+    } catch (err) {
+      setError('Error al cargar los indicadores');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchTopProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      const response = await dashboardService.getTopProducts(5, 'week');
+      if (response.success) {
+        setTopProducts(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading top products:', error);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const quickActions = [
+    {
+      title: 'Nueva Venta',
+      description: 'Crear una nueva venta en POS',
+      icon: ShoppingCart,
+      color: 'bg-blue-500',
+      hoverColor: 'hover:bg-blue-600',
+      route: '/sales',
+      enabled: true
+    },
+    {
+      title: 'Reabastecer',
+      description: 'Productos con stock bajo',
+      icon: Package,
+      color: 'bg-green-500',
+      hoverColor: 'hover:bg-green-600',
+      route: '/inventory/low-stock',
+      enabled: false
+    },
+    {
+      title: 'Reportes',
+      description: 'Análisis y estadísticas',
+      icon: TrendingUp,
+      color: 'bg-purple-500',
+      hoverColor: 'hover:bg-purple-600',
+      route: '/reports/bi',
+      enabled: true
+    },
+    {
+      title: 'Caducidades',
+      description: 'Productos próximos a caducar',
+      icon: Calendar,
+      color: 'bg-amber-500',
+      hoverColor: 'hover:bg-amber-600',
+      route: '/reports/batches',
+      enabled: true
+    }
+  ];
+
+  const handleQuickAction = (route: string, enabled: boolean) => {
+    if (enabled) {
+      navigate(route);
+    } else {
+      alert('Esta funcionalidad estará disponible próximamente');
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header con selector de período */}
-        <div className="mb-8 flex justify-between items-center">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard CleverHub</h1>
-            <p className="text-gray-600 mt-2">
-              Sistema de gestión farmacéutica inteligente
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setSelectedPeriod('today')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedPeriod === 'today'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Hoy
-            </button>
-            <button
-              onClick={() => setSelectedPeriod('week')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedPeriod === 'week'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Esta Semana
-            </button>
-            <button
-              onClick={() => setSelectedPeriod('month')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedPeriod === 'month'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Este Mes
-            </button>
-          </div>
+          
+          <button
+            onClick={fetchKPIs}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Actualizar
+          </button>
         </div>
 
         {/* KPIs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <KPICard 
-            title="Ventas Hoy" 
-            value={loading ? 'Cargando...' : formatCurrency(kpis.todaySales)}
-            change={kpis.growth}
-            icon={<DollarSign className="w-6 h-6 text-white" />}
-            color="bg-blue-500"
-            loading={loading}
-          />
-          <KPICard 
-            title="Ventas Semana" 
-            value={loading ? 'Cargando...' : formatCurrency(kpis.weekSales)}
-            change={kpis.growth}
-            icon={<Calendar className="w-6 h-6 text-white" />}
-            color="bg-purple-500"
-            loading={loading}
-          />
-          <KPICard 
-            title="Ticket Medio" 
-            value={loading ? 'Cargando...' : formatCurrency(kpis.averageTicket)}
-            change={kpis.growth}
-            icon={<CreditCard className="w-6 h-6 text-white" />}
-            color="bg-green-500"
-            loading={loading}
-          />
-          <KPICard 
-            title="Stock Bajo" 
-            value={loading ? '...' : kpis.lowStockCount}
-            icon={<Package className="w-6 h-6 text-white" />}
-            color="bg-amber-500"
-            loading={loading}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <QuickStats kpis={kpis} loading={loading} formatCurrency={formatCurrency} />
         </div>
 
-        {/* Historial de Ventas */}
-        <div className="mb-8">
-          <SalesHistory />
-        </div>
-
-        {/* Charts Grid - Primera fila */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2">
-            <SalesChart period={selectedPeriod} />
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumen Rápido</h3>
-            <div className="space-y-4">
-              {loading ? (
-                <div className="animate-pulse space-y-4">
-                  <div className="h-12 bg-gray-200 rounded"></div>
-                  <div className="h-12 bg-gray-200 rounded"></div>
-                  <div className="h-12 bg-gray-200 rounded"></div>
-                </div>
-              ) : (
-                <>
-                  <div>
-                    <div className="text-sm text-gray-500">Mejor hora de ventas</div>
-                    <div className="font-semibold text-gray-900">15:00 - 16:00</div>
-                    <div className="text-sm text-gray-500">
-                      {formatCurrency(kpis.todaySales * 0.15)} promedio
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Producto más vendido</div>
-                    <div className="font-semibold text-gray-900">-</div>
-                    <div className="text-sm text-gray-500">Cargando...</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Cliente más activo</div>
-                    <div className="font-semibold text-gray-900">-</div>
-                    <div className="text-sm text-gray-500">Cargando...</div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Grid - Segunda fila */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <ComparativeChart period={selectedPeriod} />
-          <BestSellersTable period={selectedPeriod} />
+        {/* Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <SalesChart />
+          <ComparativeChart />
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="bg-white border border-gray-300 rounded-lg p-4 hover:bg-gray-50 text-center transition-colors">
-            <div className="text-blue-600 font-medium">Nueva Venta</div>
-            <div className="text-sm text-gray-500 mt-1">Iniciar venta rápida</div>
-          </button>
-          <button className="bg-white border border-gray-300 rounded-lg p-4 hover:bg-gray-50 text-center transition-colors">
-            <div className="text-green-600 font-medium">Reabastecer</div>
-            <div className="text-sm text-gray-500 mt-1">Ver stock bajo</div>
-          </button>
-          <button className="bg-white border border-gray-300 rounded-lg p-4 hover:bg-gray-50 text-center transition-colors">
-            <div className="text-purple-600 font-medium">Reportes</div>
-            <div className="text-sm text-gray-500 mt-1">Generar informes</div>
-          </button>
-          <button className="bg-white border border-gray-300 rounded-lg p-4 hover:bg-gray-50 text-center transition-colors">
-            <div className="text-amber-600 font-medium">Caducidades</div>
-            <div className="text-sm text-gray-500 mt-1">Ver próximas</div>
-          </button>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {quickActions.map((action) => (
+              <button
+                key={action.title}
+                onClick={() => handleQuickAction(action.route, action.enabled)}
+                className={`${action.color} ${action.hoverColor} text-white rounded-xl p-6 shadow-sm transition-all transform hover:scale-105 flex items-start justify-between`}
+              >
+                <div className="flex-1">
+                  <action.icon className="w-8 h-8 mb-3 opacity-90" />
+                  <h3 className="text-lg font-semibold mb-1">{action.title}</h3>
+                  <p className="text-sm opacity-90">{action.description}</p>
+                </div>
+                <ArrowRight className="w-5 h-5 opacity-70" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Products & Sales History */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            {loadingProducts ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-12 bg-gray-100 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <TopProductsTable products={topProducts} />
+            )}
+          </div>
+          <div className="lg:col-span-2">
+            <SalesHistory />
+          </div>
         </div>
       </div>
     </div>

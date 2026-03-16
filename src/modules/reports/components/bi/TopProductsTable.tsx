@@ -57,7 +57,9 @@ export const TopProductsTable: React.FC<TopProductsTableProps> = ({ products }) 
                 <td className="px-6 py-4 text-right font-medium">{formatCurrency(product.revenue)}</td>
                 <td className="px-6 py-4 text-right">
                   <span className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${getMarginColor(product.marginPercentage)}`}>
-                    {product.marginPercentage >= 0 ? '+' : ''}{product.marginPercentage.toFixed(1)}%
+                    {typeof product.marginPercentage === 'number' 
+                    ? `${product.marginPercentage >= 0 ? '+' : ''}${product.marginPercentage.toFixed(1)}%` 
+                    : '0.0%'}
                   </span>
                 </td>
               </tr>

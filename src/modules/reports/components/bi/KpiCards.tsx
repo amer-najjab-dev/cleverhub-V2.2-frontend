@@ -27,7 +27,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Marge moyenne',
-      value: `${kpis.averageMargin.toFixed(1)}%`,
+      value: `${typeof kpis.averageMargin === 'number' ? kpis.averageMargin.toFixed(1) : '0.0'}%`,
       icon: Percent,
       color: 'bg-green-500',
       bgLight: 'bg-green-50',
@@ -35,7 +35,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Produits à risque',
-      value: `${kpis.expiringPercentage.toFixed(1)}%`,
+      value: `${typeof kpis.expiringPercentage === 'number' ? kpis.expiringPercentage.toFixed(1) : '0.0'}%`,
       icon: AlertCircle,
       color: 'bg-red-500',
       bgLight: 'bg-red-50',
@@ -51,7 +51,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Croissance',
-      value: `${kpis.salesGrowth > 0 ? '+' : ''}${kpis.salesGrowth.toFixed(1)}%`,
+      value: `${kpis.salesGrowth > 0 ? '+' : ''}${typeof kpis.salesGrowth === 'number' ? kpis.salesGrowth.toFixed(1) : '0.0'}%`,
       icon: TrendingUp,
       color: kpis.salesGrowth >= 0 ? 'bg-emerald-500' : 'bg-orange-500',
       bgLight: kpis.salesGrowth >= 0 ? 'bg-emerald-50' : 'bg-orange-50',

@@ -54,7 +54,7 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
         {!loading && data.length > 0 && (
           <div className="flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full">
             <TrendingUp className="w-4 h-4 mr-1" />
-            <span className="text-sm font-medium">+{growth.toFixed(1)}%</span>
+            <span className="text-sm font-medium">+{typeof growth === 'number' ? growth.toFixed(1) : '0.0'}%</span>
           </div>
         )}
       </div>
@@ -116,7 +116,7 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
             <div className="text-sm text-gray-500">Total anterior</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">+{growth.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-green-600">+{typeof growth === 'number' ? growth.toFixed(1) : '0.0'}%</div>
             <div className="text-sm text-gray-500">Crecimiento</div>
           </div>
         </div>

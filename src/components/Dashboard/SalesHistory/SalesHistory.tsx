@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Clock, User, CheckCircle, Clock as ClockIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { useCurrencyFormatter } from '../../../utils/formatters';
 import { salesService, Sale } from '../../../services/sales.service';
@@ -15,13 +14,11 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState(initialLimit);
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate();
   const { formatCurrency } = useCurrencyFormatter();
 
   useEffect(() => {
     fetchRecentSales();
-  }, [limit, page]);
+  }, [limit]);
 
   const fetchRecentSales = async () => {
     try {
@@ -30,7 +27,7 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
       
       const params = {
         limit,
-        page
+        page: 1 // Siempre página 1 por ahora
       };
       
       const response = await salesService.getAll(params);

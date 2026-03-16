@@ -23,6 +23,7 @@ import { ProductIntelligencePage } from './modules/reports/pages/ProductIntellig
 import { ClientIntelligencePage } from './modules/reports/pages/ClientIntelligencePage';
 import { LoyaltyPage } from './modules/reports/pages/LoyaltyPage';
 import { ConnectPage } from './modules/connect/pages/ConnectPage';
+import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
               <Route path="/clients/new" element={<ProtectedRoute><NewClientPage /></ProtectedRoute>} />
               <Route path="/clients/:id" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
               <Route path="/clients/:id/edit" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
+              <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
               
               {/* Rutas de proveedores */}
               <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />

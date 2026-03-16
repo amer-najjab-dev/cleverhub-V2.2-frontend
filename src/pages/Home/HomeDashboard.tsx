@@ -16,24 +16,27 @@ import { SalesHistory } from '../../components/Dashboard/SalesHistory/SalesHisto
 import { useCurrencyFormatter } from '../../utils/formatters';
 import { dashboardService } from '../../services/dashboard.service';
 
+type Period = 'today' | 'week' | 'month';
+
 export const HomeDashboard = () => {
   const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('today');
   const navigate = useNavigate();
   const { formatCurrency } = useCurrencyFormatter();
 
   useEffect(() => {
-    fetchKPIs();
-    fetchTopProducts();
-  }, []);
+    fetchKPIs(selectedPeriod);
+    fetchTopProducts(selectedPeriod);
+  }, [selectedPeriod]);
 
-  const fetchKPIs = async () => {
+  const fetchKPIs = async (period: Period) => {
     try {
       setLoading(true);
-      const response = await dashboardService.getKPIs('today');
+      const response = await dashboardService.getKPIs(period);
       if (response.success) {
         setKpis(response.data);
         setError(null);
@@ -46,10 +49,10 @@ export const HomeDashboard = () => {
     }
   };
 
-  const fetchTopProducts = async () => {
+  const fetchTopProducts = async (period: Period) => {
     try {
       setLoadingProducts(true);
-      const response = await dashboardService.getTopProducts(5, 'week');
+      const response = await dashboardService.getTopProducts(10, period);
       if (response.success) {
         setTopProducts(response.data);
       }
@@ -85,7 +88,7 @@ export const HomeDashboard = () => {
       icon: BarChart3,
       color: 'bg-violet-600',
       hover: 'hover:bg-violet-700',
-      route: '/reports/bi',
+      route: '/reports',
       enabled: true
     },
     {
@@ -105,6 +108,10 @@ export const HomeDashboard = () => {
     }
   };
 
+  const handleViewFullHistory = () => {
+    navigate('/sales/history');
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -121,23 +128,64 @@ export const HomeDashboard = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
           </div>
-          <button
-            onClick={fetchKPIs}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Actualizar
-          </button>
+          
+          <div className="flex items-center gap-3">
+            {/* Period Selector */}
+            <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+              <button
+                onClick={() => setSelectedPeriod('today')}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  selectedPeriod === 'today' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Hoy
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('week')}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  selectedPeriod === 'week' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('month')}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  selectedPeriod === 'month' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Mes
+              </button>
+            </div>
+
+            <button
+              onClick={() => fetchKPIs(selectedPeriod)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Actualizar
+            </button>
+          </div>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <QuickStats kpis={kpis} loading={loading} formatCurrency={formatCurrency} />
+          <QuickStats 
+            kpis={kpis} 
+            loading={loading} 
+            formatCurrency={formatCurrency} 
+          />
         </div>
 
         {/* Quick Actions */}
@@ -171,7 +219,7 @@ export const HomeDashboard = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SalesChart />
+          <SalesChart period={selectedPeriod} />
           <ComparativeChart />
         </div>
 
@@ -189,6 +237,17 @@ export const HomeDashboard = () => {
           ) : (
             <TopProductsTable products={topProducts} />
           )}
+        </div>
+
+        {/* Botón para ver historial completo (opcional) */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleViewFullHistory}
+            className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2"
+          >
+            Ver historial completo
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>

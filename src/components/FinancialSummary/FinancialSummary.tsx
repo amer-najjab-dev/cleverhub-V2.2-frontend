@@ -126,8 +126,12 @@ export const FinancialSummary = () => {
   const getPaidAmountToSend = (): number => {
     if (!paymentMethod) return 0;
     
-    if (['tarjeta', 'transferencia', 'cheque', 'credito'].includes(paymentMethod)) {
+    if (['credito'].includes(paymentMethod)) {
       return 0;
+    }
+    // Para tarjeta, transferencia, cheque, devolver el total
+    if (['tarjeta', 'transferencia', 'cheque'].includes(paymentMethod)) {
+      return total;
     }
     
     if (paymentMethod === 'efectivo') {
@@ -340,7 +344,7 @@ export const FinancialSummary = () => {
       const paymentStatus = getPaymentStatus();
       
       let payments = [];
-      
+
       if (paymentMethod === 'mixto' && mixedPayments && mixedPayments.step === 'completed') {
         payments = [
           {

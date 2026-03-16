@@ -1,16 +1,16 @@
 import React from 'react';
 import { TrendingUp, Package, AlertCircle, ShoppingCart, Percent } from 'lucide-react';
-// Eliminado DollarSign y useCurrencyFormatter que no se usaban
 
 interface KpiCardsProps {
   kpis: {
-    totalStockValue: number;
-    averageMargin: number;
-    expiringPercentage: number;
-    totalSales: number;
-    salesGrowth: number;
-    lowStockCount: number;
-    pendingOrders: number;
+    totalSales?: number;
+    averageTicket?: number;
+    averageMargin?: number;
+    growth?: number;
+    lowStockCount?: number;
+    pendingOrders?: number;
+    totalStockValue?: number;
+    expiringPercentage?: number; // Opcional porque no viene del backend
   };
   formatCurrency: (value: number) => string;
 }
@@ -19,7 +19,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
   const cards = [
     {
       title: 'Valeur du stock',
-      value: formatCurrency(kpis.totalStockValue),
+      value: formatCurrency(kpis.totalStockValue || 0),
       icon: Package,
       color: 'bg-blue-500',
       bgLight: 'bg-blue-50',
@@ -35,7 +35,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Produits à risque',
-      value: `${typeof kpis.expiringPercentage === 'number' ? kpis.expiringPercentage.toFixed(1) : '0.0'}%`,
+      value: kpis.expiringPercentage ? `${kpis.expiringPercentage.toFixed(1)}%` : 'N/A',
       icon: AlertCircle,
       color: 'bg-red-500',
       bgLight: 'bg-red-50',
@@ -43,7 +43,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Ventes totales',
-      value: formatCurrency(kpis.totalSales),
+      value: formatCurrency(kpis.totalSales || 0),
       icon: ShoppingCart,
       color: 'bg-purple-500',
       bgLight: 'bg-purple-50',
@@ -51,15 +51,15 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, formatCurrency }) => {
     },
     {
       title: 'Croissance',
-      value: `${kpis.salesGrowth > 0 ? '+' : ''}${typeof kpis.salesGrowth === 'number' ? kpis.salesGrowth.toFixed(1) : '0.0'}%`,
+      value: `${(kpis.growth || 0) > 0 ? '+' : ''}${typeof kpis.growth === 'number' ? kpis.growth.toFixed(1) : '0.0'}%`,
       icon: TrendingUp,
-      color: kpis.salesGrowth >= 0 ? 'bg-emerald-500' : 'bg-orange-500',
-      bgLight: kpis.salesGrowth >= 0 ? 'bg-emerald-50' : 'bg-orange-50',
-      textColor: kpis.salesGrowth >= 0 ? 'text-emerald-700' : 'text-orange-700'
+      color: (kpis.growth || 0) >= 0 ? 'bg-emerald-500' : 'bg-orange-500',
+      bgLight: (kpis.growth || 0) >= 0 ? 'bg-emerald-50' : 'bg-orange-50',
+      textColor: (kpis.growth || 0) >= 0 ? 'text-emerald-700' : 'text-orange-700'
     },
     {
       title: 'Stock faible',
-      value: kpis.lowStockCount,
+      value: kpis.lowStockCount || 0,
       icon: Package,
       color: 'bg-amber-500',
       bgLight: 'bg-amber-50',

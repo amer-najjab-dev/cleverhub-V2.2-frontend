@@ -137,7 +137,7 @@ export const SupplierDetailPage: React.FC = () => {
   if (!supplier) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto text-center">
+        <div className=" text-center">
           <p className="text-gray-600">Fournisseur non trouvé</p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export const SupplierDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         {/* Header con navegación */}
         <div className="mb-6 flex items-center gap-4">
           <button

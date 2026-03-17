@@ -380,7 +380,7 @@ export const SalesPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header fijo en la parte superior */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className=" px-6 py-4">
           <div className="mb-4">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">Punto de Venta CleverHub</h1>
@@ -569,7 +569,7 @@ export const SalesPage = () => {
       </div>
 
       {/* Contenido principal - Debajo del header fijo */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className=" px-6 py-6">
         <div className="grid grid-cols-12 gap-6">
           {/* Columna izquierda - Carrito (8/12) */}
           <div className="col-span-12 lg:col-span-8">

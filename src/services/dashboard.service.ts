@@ -32,9 +32,10 @@ export interface TopProduct {
   id: number;
   name: string;
   category: string;
-  sales: number;
-  change: number;
-  revenue?: number;
+  quantity: number;      // ← Cambiado de 'sales' a 'quantity'
+  revenue: number;
+  margin: number;
+  marginPercentage: number;
 }
 
 export interface QuickSummary {
@@ -71,7 +72,7 @@ const extractData = <T>(response: AxiosResponse<ApiResponse<T>>): ApiResponse<T>
 };
 
 // ============================================
-// DASHBOARD SERVICE
+// DASHBOARD SERVICE CON SOPORTE PARA RANGO DE FECHAS
 // ============================================
 
 export const dashboardService = {
@@ -103,10 +104,24 @@ export const dashboardService = {
   /**
    * Obtener top productos más vendidos
    * @param limit - Número de productos a obtener (por defecto 10)
-   * @param period - 'week' | 'month' (por defecto 'week')
+   * @param period - 'week' | 'month' | 'quarter'
+   * @param startDate - Fecha inicio (YYYY-MM-DD) para rango personalizado
+   * @param endDate - Fecha fin (YYYY-MM-DD) para rango personalizado
    */
-  getTopProducts: (limit: number = 10, period: string = 'week'): Promise<ApiResponse<TopProduct[]>> => 
-    api.get<ApiResponse<TopProduct[]>>('/dashboard/top-products', { params: { limit, period } }).then(extractData),
+  getTopProducts: (
+    limit: number = 10, 
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<ApiResponse<TopProduct[]>> => {
+    const params: any = { limit };
+    if (period) params.period = period;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    
+    return api.get<ApiResponse<TopProduct[]>>('/dashboard/top-products', { params })
+      .then(extractData);
+  },
 
   /**
    * Calcular ticket medio del período

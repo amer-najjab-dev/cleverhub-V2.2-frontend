@@ -27,7 +27,9 @@ export const HomeDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('today');
   const navigate = useNavigate();
   const { formatCurrency } = useCurrencyFormatter();
-
+  const [topProductsPeriod, setTopProductsPeriod] = useState<string>('week');
+  const [topProductsStartDate, setTopProductsStartDate] = useState<string | undefined>();
+  const [topProductsEndDate, setTopProductsEndDate] = useState<string | undefined>();
   useEffect(() => {
     fetchKPIs(selectedPeriod);
     fetchTopProducts(selectedPeriod);
@@ -46,20 +48,6 @@ export const HomeDashboard = () => {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchTopProducts = async (period: Period) => {
-    try {
-      setLoadingProducts(true);
-      const response = await dashboardService.getTopProducts(10, period);
-      if (response.success) {
-        setTopProducts(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading top products:', error);
-    } finally {
-      setLoadingProducts(false);
     }
   };
 
@@ -123,6 +111,38 @@ export const HomeDashboard = () => {
       </div>
     );
   }
+
+  const fetchTopProducts = async (
+    period: string = 'week',
+    startDate?: string,
+    endDate?: string
+  ) => {
+    try {
+      setLoadingProducts(true);
+      const response = await dashboardService.getTopProducts(10, period, startDate, endDate);
+      if (response.success) {
+        setTopProducts(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading top products:', error);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const handleTopProductsPeriodChange = (period: string) => {
+    setTopProductsPeriod(period);
+    setTopProductsStartDate(undefined);
+    setTopProductsEndDate(undefined);
+    fetchTopProducts(period);
+  };
+
+  const handleTopProductsDateRangeChange = (startDate: string, endDate: string) => {
+    setTopProductsPeriod('custom');
+    setTopProductsStartDate(startDate);
+    setTopProductsEndDate(endDate);
+    fetchTopProducts('custom', startDate, endDate);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -235,7 +255,14 @@ export const HomeDashboard = () => {
               </div>
             </div>
           ) : (
-            <TopProductsTable products={topProducts} />
+            <TopProductsTable 
+              products={topProducts}
+              period={topProductsPeriod}
+              startDate={topProductsStartDate}
+              endDate={topProductsEndDate}
+              onPeriodChange={handleTopProductsPeriodChange}
+              onDateRangeChange={handleTopProductsDateRangeChange}
+            />
           )}
         </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useCurrencyFormatter } from '../../utils/formatters';
 import { dashboardService } from '../../services/dashboard.service';
 import { TopProduct } from '../../services/dashboard.service';
 
@@ -11,6 +11,7 @@ interface BestSellersTableProps {
 export const BestSellersTable = ({ period = 'week', limit = 5 }: BestSellersTableProps) => {
   const [products, setProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatCurrency } = useCurrencyFormatter();
 
   useEffect(() => {
     loadData();
@@ -46,13 +47,18 @@ export const BestSellersTable = ({ period = 'week', limit = 5 }: BestSellersTabl
     );
   }
 
+  const periodText = {
+    week: 'Esta semana',
+    month: 'Este mes',
+    quarter: 'Último trimestre',
+    custom: 'Período seleccionado'
+  }[period] || 'Hoy';
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">Productos Más Vendidos</h3>
-        <p className="text-sm text-gray-500 mt-1">
-          {period === 'week' ? 'Esta semana' : period === 'month' ? 'Este mes' : 'Hoy'}
-        </p>
+        <p className="text-sm text-gray-500 mt-1">{periodText}</p>
       </div>
       
       <div className="overflow-x-auto">
@@ -66,46 +72,44 @@ export const BestSellersTable = ({ period = 'week', limit = 5 }: BestSellersTabl
                 Categoría
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ventas
+                Unidades
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tendencia
+                Ingresos
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Margen
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {products.length > 0 ? (
               products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
+                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{product.name}</div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {product.category}
+                      {product.category || 'N/A'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-900 font-medium">{product.sales} unidades</td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {product.change > 0 ? (
-                        <>
-                          <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                          <span className="text-green-600 font-medium">+{product.change}%</span>
-                        </>
-                      ) : (
-                        <>
-                          <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                          <span className="text-red-600 font-medium">{product.change}%</span>
-                        </>
-                      )}
-                    </div>
+                    <span className="font-medium text-gray-900">{product.quantity} u.</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-medium text-gray-900">{formatCurrency(product.revenue)}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`font-medium ${product.marginPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {product.marginPercentage >= 0 ? '+' : ''}{product.marginPercentage.toFixed(1)}%
+                    </span>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                   No hay datos de ventas para este período
                 </td>
               </tr>

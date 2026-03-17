@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SalesCart } from '../../components/SalesCart/SalesCart';
 import { FinancialSummary } from '../../components/FinancialSummary/FinancialSummary';
 import { CleverHubPanel } from '../../components/CleverHubPanel/CleverHubPanel';
 import ProductSearchDropdown from '../../components/ProductSearchDropdown/ProductSearchDropdown';
 import { productsService, Product } from '../../services/products.service';
 import { clientsService, Client } from '../../services/clients.service';
-import { salesService } from '../../services/sales.service'; // <-- AÑADIDO
+import { salesService } from '../../services/sales.service';
 import { useCartStore } from '../../store/cart.store';
 import { useCurrencyFormatter } from '../../utils/formatters';
 import { LoyaltyCheckoutButton } from '../../modules/sales/components/LoyaltyCheckoutButton';
 import { loyaltyCheckoutService } from '../../modules/sales/services/loyaltyCheckout.service';
+import { Search, X, User, Plus } from 'lucide-react';
 
 // Debouncer para búsquedas
 const useDebounce = (value: string, delay: number) => {
@@ -42,11 +43,22 @@ export const SalesPage = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isSearchingCustomers, setIsSearchingCustomers] = useState(false);
   
+  // Refs para control de foco
+  const productSearchRef = useRef<HTMLInputElement>(null);
+  const customerSearchRef = useRef<HTMLInputElement>(null);
+  
   // Estado para items de fidelidad
   const [loyaltyMetadata, setLoyaltyMetadata] = useState<any[]>([]);
   
-  const { addItem, clearCart } = useCartStore();
+  const { addItem, clearCart, setClient, clearClient } = useCartStore();
   const { formatCurrency } = useCurrencyFormatter();
+  
+  // AUTO-FOCUS INICIAL: al cargar la página, el foco va al buscador de productos
+  useEffect(() => {
+    if (productSearchRef.current) {
+      productSearchRef.current.focus();
+    }
+  }, []);
   
   // Debounce para búsqueda de productos (300ms)
   const debouncedProductSearch = useDebounce(productSearchQuery, 300);
@@ -99,11 +111,11 @@ export const SalesPage = () => {
     searchProducts();
   }, [debouncedProductSearch, productFilter]);
   
-  // Búsqueda de clientes con filtrado local
+  // Búsqueda de clientes con filtrado local (mínimo 3 caracteres)
   useEffect(() => {
     const searchCustomers = async () => {
       const query = customerSearchQuery.trim();
-      if (!query) {
+      if (!query || query.length < 3) {
         setCustomerSearchResults([]);
         setShowCustomerResults(false);
         return;
@@ -137,13 +149,20 @@ export const SalesPage = () => {
     return () => clearTimeout(timer);
   }, [customerSearchQuery]);
   
+  // Manejar blur del campo de cliente para volver al producto
+  const handleCustomerBlur = () => {
+    setTimeout(() => {
+      if (productSearchRef.current) {
+        productSearchRef.current.focus();
+      }
+    }, 200);
+  };
+  
   // Función para manejar la adición de items de fidelidad
   const handleAddLoyaltyItems = (items: any[]) => {
-    // Separar metadata de packs de los productos
     const metadata = items.filter(item => item.isPackMetadata);
     const products = items.filter(item => !item.isPackMetadata);
     
-    // Añadir productos al carrito
     products.forEach(item => {
       addItem({
         id: item.productId,
@@ -163,7 +182,6 @@ export const SalesPage = () => {
       });
     });
     
-    // Guardar metadata para el checkout
     setLoyaltyMetadata(prev => [...prev, ...metadata]);
   };
   
@@ -189,7 +207,6 @@ export const SalesPage = () => {
       try {
         const draft = JSON.parse(savedDraft);
         console.log('📂 Borrador recuperado:', draft);
-        // Aquí podrías restaurar el estado si lo deseas
       } catch (error) {
         console.error('Error cargando borrador:', error);
       }
@@ -231,7 +248,7 @@ export const SalesPage = () => {
   
   const handleCustomerSearch = (query: string) => {
     setCustomerSearchQuery(query);
-    setShowCustomerResults(query.length > 0);
+    setShowCustomerResults(query.length >= 3);
   };
   
   const handleNewCustomer = () => {
@@ -249,10 +266,15 @@ export const SalesPage = () => {
       setCustomerSearchResults([]);
       setShowCustomerResults(false);
       
-      useCartStore.getState().setClient(newClient.id);
+      setClient(newClient.id);
       console.log('Nuevo cliente creado:', newClient);
       
       alert(`Cliente ${newClient.firstName} ${newClient.lastName || ''} creado exitosamente`);
+      
+      // Devolver foco al input de productos
+      if (productSearchRef.current) {
+        productSearchRef.current.focus();
+      }
     } catch (error: any) {
       console.error('Error creando cliente:', error);
       alert(error.response?.data?.message || 'Error al crear cliente');
@@ -261,21 +283,31 @@ export const SalesPage = () => {
   
   const handleClearCustomer = () => {
     setCurrentCustomer(null);
-    useCartStore.getState().clearClient();
+    clearClient();
     setCustomerSearchQuery('');
     setCustomerSearchResults([]);
     setShowCustomerResults(false);
     setLoyaltyMetadata([]);
     console.log('🗑️ Cliente limpiado, carrito sin cliente asignado');
+    
+    // Devolver foco al input de productos
+    if (productSearchRef.current) {
+      productSearchRef.current.focus();
+    }
   };
   
   const handleSelectCustomer = (client: Client) => {
     setCurrentCustomer(client);
-    useCartStore.getState().setClient(client.id);
+    setClient(client.id);
     setCustomerSearchQuery('');
     setCustomerSearchResults([]);
     setShowCustomerResults(false);
     console.log('✅ Cliente seleccionado:', client.name);
+    
+    // Devolver foco al input de productos
+    if (productSearchRef.current) {
+      productSearchRef.current.focus();
+    }
   };
   
   const handleAddProductToCart = async (product: Product, event?: React.MouseEvent) => {
@@ -306,6 +338,12 @@ export const SalesPage = () => {
         )
       );
       
+      // Limpiar búsqueda y devolver foco
+      setProductSearchQuery('');
+      if (productSearchRef.current) {
+        productSearchRef.current.focus();
+      }
+      
     } catch (error) {
       console.error('Error añadiendo producto al carrito:', error);
       alert('Error al añadir producto');
@@ -317,7 +355,6 @@ export const SalesPage = () => {
       const cartState = useCartStore.getState();
       const total = cartState.items.reduce((sum, item) => sum + item.pricePPV * item.quantity, 0);
       
-      // Crear la venta primero
       const saleData = {
         userId: 1,
         clientId: currentCustomer?.id,
@@ -335,10 +372,8 @@ export const SalesPage = () => {
       const response = await salesService.create(saleData);
       const saleId = response.data.id;
       
-      // Procesar canjes de puntos
       const itemsToRedeem: Array<{ id: number; type: string }> = [];
       
-      // Agrupar por loyaltyId para no canjear duplicados
       const redeemed = new Set();
       cartState.items.forEach(item => {
         if (item.isLoyalty && item.loyaltyId && !redeemed.has(item.loyaltyId)) {
@@ -358,10 +393,14 @@ export const SalesPage = () => {
         );
       }
       
-      // Limpiar y mostrar éxito
       clearCart();
       setLoyaltyMetadata([]);
       alert('Venta completada con éxito');
+      
+      // Devolver foco al input de productos
+      if (productSearchRef.current) {
+        productSearchRef.current.focus();
+      }
       
     } catch (error) {
       console.error('Error processing sale:', error);
@@ -378,70 +417,65 @@ export const SalesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header fijo en la parte superior */}
-      <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className=" px-6 py-4">
-          <div className="mb-4">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">Punto de Venta CleverHub</h1>
-              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                Modo asesor activo
-              </span>
-            </div>
-            <p className="text-gray-600 mt-1">
-              Venta en curso • 
-              {currentCustomer ? (
-                <>
-                  <span className="inline-flex items-center gap-1">
-                    {getCustomerFullName(currentCustomer)}
-                    <button 
-                      onClick={handleClearCustomer}
-                      className="ml-1 text-red-500 hover:text-red-700 text-xs p-0.5 hover:bg-red-50 rounded"
-                      title="Quitar cliente"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                  {currentCustomer.phone && ` • Tel: ${currentCustomer.phone}`}
-                  {currentCustomer.loyaltyPoints && (
-                    <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                      {currentCustomer.loyaltyPoints} pts
-                    </span>
-                  )}
-                </>
-              ) : 'Sin cliente asignado'}
-            </p>
-          </div>
-
-          {/* Barra de búsqueda superior */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              {/* PARTE IZQUIERDA: Buscar producto + Filtros */}
-              <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                <div className="w-full sm:w-auto flex-1">
-                  <ProductSearchDropdown
-                    onSearch={handleProductSearch}
-                    onFilterChange={handleFilterChange}
-                    placeholder="Buscar productos..."
-                  />
-                </div>
+      {/* HEADER STICKY con backdrop blur - SIN TÍTULO */}
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-3">
+          {/* Barra de búsqueda superior - Compacta */}
+          <div className="flex flex-col gap-3">
+            {/* Fila principal: Productos (ancho completo) + Cliente + Nuevo */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              {/* Buscador de productos (ancho principal) */}
+              <div className="flex-1 w-full">
+                <ProductSearchDropdown
+                  ref={productSearchRef}
+                  onSearch={handleProductSearch}
+                  onFilterChange={handleFilterChange}
+                  onSelectProduct={handleAddProductToCart}  // ← AÑADIR
+                  searchResults={productSearchResults}       // ← AÑADIR
+                  isSearching={isSearching} 
+                  placeholder="Buscar productos... (mínimo 3 caracteres)"
+                />
               </div>
 
-              {/* PARTE DERECHA: Buscar cliente + Nuevo cliente */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto relative">
-                <div className="relative w-full sm:w-64">
+              {/* Cliente actual (si existe) - formato compacto */}
+              {currentCustomer && (
+                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 whitespace-nowrap">
+                  <User className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <div className="text-sm">
+                    <span className="font-medium text-blue-900">
+                      {getCustomerFullName(currentCustomer)}
+                    </span>
+                    {currentCustomer.phone && (
+                      <span className="text-blue-600 ml-2">
+                        • {currentCustomer.phone}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleClearCustomer}
+                    className="ml-1 p-1 hover:bg-blue-100 rounded-full transition-colors"
+                    title="Quitar cliente"
+                  >
+                    <X className="w-4 h-4 text-blue-600" />
+                  </button>
+                </div>
+              )}
+
+              {/* Buscador de clientes + Botón nuevo cliente */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none sm:w-64">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <Search className="h-4 w-4" />
                   </div>
                   <input
+                    ref={customerSearchRef}
                     type="text"
-                    placeholder="Buscar cliente..."
+                    placeholder="Buscar cliente... (3+ letras)"
                     value={customerSearchQuery}
                     onChange={(e) => handleCustomerSearch(e.target.value)}
-                    onFocus={() => customerSearchQuery && setShowCustomerResults(true)}
-                    className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onFocus={() => customerSearchQuery.length >= 3 && setShowCustomerResults(true)}
+                    onBlur={handleCustomerBlur}
+                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                   
                   {/* Resultados de búsqueda de clientes */}
@@ -454,20 +488,11 @@ export const SalesPage = () => {
                           <button
                             key={client.id}
                             onClick={() => handleSelectCustomer(client)}
-                            className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex justify-between items-center"
+                            onMouseDown={(e) => e.preventDefault()}
+                            className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                           >
-                            <div>
-                              <div className="font-medium text-gray-900">{getCustomerFullName(client)}</div>
-                              <div className="text-sm text-gray-600">{client.phone}</div>
-                              {client.email && (
-                                <div className="text-xs text-gray-500">{client.email}</div>
-                              )}
-                            </div>
-                            {client.loyaltyPoints && client.loyaltyPoints > 0 && (
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                {client.loyaltyPoints} pts
-                              </span>
-                            )}
+                            <div className="font-medium text-gray-900">{getCustomerFullName(client)}</div>
+                            <div className="text-xs text-gray-600">{client.phone}</div>
                           </button>
                         ))
                       ) : (
@@ -479,19 +504,18 @@ export const SalesPage = () => {
                 
                 <button
                   onClick={handleNewCustomer}
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap"
+                  title="Nuevo cliente"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Nuevo Cliente
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Nuevo</span>
                 </button>
               </div>
             </div>
             
-            {/* Botón de Pago con Puntos */}
+            {/* Botón de Pago con Puntos (si hay cliente) */}
             {currentCustomer && (
-              <div className="mt-4">
+              <div className="mt-2">
                 <LoyaltyCheckoutButton
                   clientId={currentCustomer.id}
                   clientName={getCustomerFullName(currentCustomer)}
@@ -500,95 +524,98 @@ export const SalesPage = () => {
                 />
               </div>
             )}
-            
-            {/* Mostrar resultados de búsqueda de productos */}
-            {(productSearchResults.length > 0 || isSearching || searchError) && (
-              <div className="mt-4 border-t pt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  {isSearching ? 'Buscando productos...' : searchError ? 'Error' : `Resultados: ${productSearchResults.length} encontrados`}
-                </h4>
-                
-                {isSearching ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : searchError ? (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-                    {searchError}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {productSearchResults.map(product => {
-                      const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
-                      const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
-                      
-                      return (
-                        <div 
-                          key={product.id} 
-                          className="p-3 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 cursor-pointer transition-colors"
-                          onClick={(e) => handleAddProductToCart(product, e)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-medium text-blue-800">{product.name}</h5>
-                              <p className="text-sm text-blue-600">{product.category}</p>
-                              {product.sku && (
-                                <p className="text-xs text-blue-500">SKU: {product.sku}</p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <span className="text-blue-700 font-semibold">{formatCurrency(pricePPV)}</span>
-                              <div className="text-xs text-gray-500">PPH: {formatCurrency(pricePPH)}</div>
-                            </div>
-                          </div>
-                          <div className="mt-2 flex justify-between items-center">
-                            <div className={`text-xs ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-blue-500'}`}>
-                              Stock: {product.stock} {product.stock < 10 && ' (¡Bajo stock!)'}
-                            </div>
-                            <button
-                              onClick={(e) => handleAddProductToCart(product, e)}
-                              disabled={product.stock <= 0}
-                              className={`px-3 py-1 text-xs rounded ${
-                                product.stock <= 0
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-blue-500 text-white hover:bg-blue-600'
-                              }`}
-                            >
-                              {product.stock <= 0 ? 'Sin stock' : 'Añadir'}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Contenido principal - Debajo del header fijo */}
-      <div className=" px-6 py-6">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Columna izquierda - Carrito (8/12) */}
-          <div className="col-span-12 lg:col-span-8">
-            <div className="space-y-6">
-              <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
-              <CleverHubPanel />
-            </div>
+      {/* Mostrar resultados de búsqueda de productos (fuera del sticky) */}
+      {(productSearchResults.length > 0 || isSearching || searchError) && (
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              {isSearching ? 'Buscando productos...' : searchError ? 'Error' : `Resultados: ${productSearchResults.length} encontrados`}
+            </h4>
+            
+            {isSearching ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : searchError ? (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+                {searchError}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {productSearchResults.map(product => {
+                  const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
+                  const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
+                  
+                  return (
+                    <div 
+                      key={product.id} 
+                      className="p-3 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 cursor-pointer transition-colors"
+                      onClick={(e) => handleAddProductToCart(product, e)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h5 className="font-medium text-blue-800">{product.name}</h5>
+                          <p className="text-sm text-blue-600">{product.category}</p>
+                          {product.sku && (
+                            <p className="text-xs text-blue-500">SKU: {product.sku}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="text-blue-700 font-semibold">{formatCurrency(pricePPV)}</span>
+                          <div className="text-xs text-gray-500">PPH: {formatCurrency(pricePPH)}</div>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex justify-between items-center">
+                        <div className={`text-xs ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-blue-500'}`}>
+                          Stock: {product.stock} {product.stock < 10 && ' (¡Bajo stock!)'}
+                        </div>
+                        <button
+                          onClick={(e) => handleAddProductToCart(product, e)}
+                          disabled={product.stock <= 0}
+                          className={`px-3 py-1 text-xs rounded ${
+                            product.stock <= 0
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          {product.stock <= 0 ? 'Sin stock' : 'Añadir'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          
-          {/* Columna derecha - Resumen financiero (4/12) - STICKY */}
-          <div className="col-span-12 lg:col-span-4 sticky top-32 self-start">
-            <FinancialSummary />
-            {/* Botón de checkout añadido aquí */}
-            <button
-              onClick={handleCheckout}
-              className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-            >
-              Finalizar Venta
-            </button>
+        </div>
+      )}
+
+      {/* Contenido principal - Debajo del header sticky */}
+      <div className="px-6 py-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-12 gap-6">
+            {/* Columna izquierda - Carrito (8/12) */}
+            <div className="col-span-12 lg:col-span-8">
+              <div className="space-y-6">
+                <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
+                <CleverHubPanel />
+              </div>
+            </div>
+            
+            {/* Columna derecha - Resumen financiero (4/12) - STICKY */}
+            <div className="col-span-12 lg:col-span-4 sticky top-32 self-start">
+              <FinancialSummary />
+              <button
+                onClick={handleCheckout}
+                className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              >
+                Finalizar Venta
+              </button>
+            </div>
           </div>
         </div>
       </div>

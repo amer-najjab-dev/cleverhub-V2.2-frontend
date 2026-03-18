@@ -369,8 +369,8 @@ export const FinancialSummary = () => {
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          unit_price_ppv: item.pricePPV,  // ← AÑADIR
-          unit_price_pph: item.pricePPH,  // ← AÑADIR
+          unit_price_ppv: item.pricePPV,
+          unit_price_pph: item.pricePPH,
           discountPercentage: item.discountPercentage || 0,
           discountAmount: (item.pricePPV * item.quantity * (item.discountPercentage || 0)) / 100
         })),
@@ -615,234 +615,15 @@ export const FinancialSummary = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-fit">
-      <h3 className="text-lg font-bold text-gray-900 mb-3">Resumen Financiero</h3>
+    <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-fit">
+      {/* Título con menos margen inferior */}
+      <h3 className="text-lg font-bold text-gray-900 mb-2">Resumen Financiero</h3>
       
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Método de pago</h4>
-        <div className="flex flex-wrap gap-1.5">
-          {paymentMethods.map((method) => {
-            const { style, icon: Icon, disabled } = getButtonStyle(method.id);
-            return (
-              <button
-                key={method.id}
-                onClick={() => handlePaymentMethodClick(method.id, disabled)}
-                className={`flex items-center px-2.5 py-1.5 rounded-lg border transition-colors text-xs ${style}`}
-                disabled={disabled}
-                title={disabled ? 'Selecciona un cliente para usar crédito' : ''}
-              >
-                <Icon className="w-3.5 h-3.5 mr-1.5" />
-                {method.label}
-                {disabled && <span className="ml-1 text-xs">(✗)</span>}
-              </button>
-            );
-          })}
-        </div>
-        
-        {paymentMethod === 'credito' && !clientId && (
-          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
-            ⚠️ El método "Crédito" solo está disponible cuando seleccionas un cliente.
-          </div>
-        )}
-      </div>
-
-      {renderMixedPaymentUI()}
-
-      <div className={`mb-4 border rounded-lg p-3 ${hasProductLevelDiscounts ? 'bg-gray-100 border-gray-300' : 'bg-amber-50 border-amber-200'}`}>
-        <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-          <Tag className="w-3.5 h-3.5 mr-1.5" />
-          Descuento por carrito
-          {hasProductLevelDiscounts && (
-            <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
-                No disponible
-            </span>
-          )}
-        </h4>
-        
-        {hasProductLevelDiscounts ? (
-          <div className="flex items-center text-amber-700 text-sm">
-            <AlertCircle className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-            <span className="text-xs">Hay descuentos aplicados a productos individuales. No se puede aplicar descuento al carrito completo.</span>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setDiscountTypeInput('percentage')}
-                className={`flex-1 px-2.5 py-1.5 rounded-lg border text-xs ${
-                  discountTypeInput === 'percentage'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <Percent className="w-3.5 h-3.5 inline mr-1" />
-                Porcentaje
-              </button>
-              <button
-                onClick={() => setDiscountTypeInput('amount')}
-                className={`flex-1 px-2.5 py-1.5 rounded-lg border text-xs ${
-                  discountTypeInput === 'amount'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                Monto fijo
-              </button>
-            </div>
-            
-            <div className="flex gap-1.5">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  value={discountInput}
-                  onChange={(e) => setDiscountInput(e.target.value)}
-                  placeholder={discountTypeInput === 'percentage' ? '10' : '5.00'}
-                  min="0"
-                  step={discountTypeInput === 'percentage' ? '1' : '0.01'}
-                  className="w-full px-3 py-1.5 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  disabled={hasProductLevelDiscounts}
-                />
-                <span className="absolute left-2.5 top-1.5 text-gray-500 text-sm">
-                  {discountTypeInput === 'percentage' ? '%' : formatCurrency(0).split(' ')[1] || 'MAD'}
-                </span>
-              </div>
-              <button
-                onClick={handleApplyDiscount}
-                disabled={hasProductLevelDiscounts}
-                className={`px-3 py-1.5 rounded-lg font-medium text-xs whitespace-nowrap ${
-                  hasProductLevelDiscounts
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                Aplicar
-              </button>
-            </div>
-
-            {discountAmount > 0 && !hasProductLevelDiscounts && (
-              <div className="flex items-center justify-between pt-1.5 border-t border-amber-200">
-                <span className="text-xs text-gray-600">
-                  Descuento aplicado: {discountType === 'percentage' ? `${discountValue}%` : formatCurrency(discountValue)}
-                </span>
-                <button
-                  onClick={handleRemoveDiscount}
-                  className="text-red-600 hover:text-red-800 text-xs font-medium"
-                >
-                  Eliminar
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <div className="text-xs text-gray-600">Costo total (PPH)</div>
-            <div className="font-bold text-md">{formatCurrency(totalCost)}</div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-600">Margen bruto</div>
-            <div className="font-bold text-md text-green-600">
-              {formatCurrency(totalMargin)}
-              <div className="text-xs font-normal">({marginPercentage.toFixed(1)}%)</div>
-            </div>
-          </div>
-        </div>
-        {productDiscountsAmount > 0 && (
-          <div className="mt-1.5 text-xs text-green-700">
-            Descuentos por producto: -{formatCurrency(productDiscountsAmount)}
-          </div>
-        )}
-      </div>
-
-      <div className="mb-4 border border-gray-200 rounded-lg p-3">
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-xs text-gray-600">Subtotal (PPV)</span>
-            <span className="font-medium text-sm">{formatCurrency(subtotal)}</span>
-          </div>
-          
-          {productDiscountsAmount > 0 && (
-            <div className="flex justify-between">
-              <span className="text-xs text-gray-600">Descuentos por producto</span>
-              <span className="font-medium text-sm text-green-600">-{formatCurrency(productDiscountsAmount)}</span>
-            </div>
-          )}
-          
-          {discountAmount > 0 && productDiscountsAmount === 0 && (
-            <div className="flex justify-between">
-              <span className="text-xs text-gray-600">Descuento por carrito</span>
-              <span className="font-medium text-sm text-red-600">-{formatCurrency(discountAmount)}</span>
-            </div>
-          )}
-          
-          {/* IVA - Solo visible para países que no son Marruecos */}
-          {region !== 'MA' && (
-            <div className="flex justify-between">
-              <span className="text-xs text-gray-600">
-                IVA ({region === 'FR' ? '20' : region === 'ES' ? '21' : '19'}%)
-              </span>
-              <span className="font-medium text-sm">{formatCurrency(taxAmount)}</span>
-            </div>
-          )}
-          
-          <div className="flex justify-between pt-2 border-t border-gray-200">
-            <span className="font-bold text-md text-gray-900">Total a pagar</span>
-            <span className="font-bold text-lg text-blue-700">{formatCurrency(total)}</span>
-          </div>
-        </div>
-      </div>
-
-      {showAmountField() && (
-        <div className="mb-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-1.5">
-            Pago recibido
-            {paymentMethod === 'efectivo' && ` (mínimo: ${formatCurrency(total)})`}
-          </h4>
-          <div className="relative">
-            <input
-              type="number"
-              value={paidAmount}
-              onChange={(e) => setPaidAmount(e.target.value)}
-              placeholder={paymentMethod === 'efectivo' ? total.toFixed(2) : '0.00'}
-              min={getMinAmount()}
-              step="0.01"
-              className="w-full px-3 py-1.5 pl-7 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-            <span className="absolute left-2.5 top-1.5 text-gray-500 text-sm">{formatCurrency(0).split(' ')[1] || 'MAD'}</span>
-          </div>
-        </div>
-      )}
-
-      {changeAmount > 0 && (
-        <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
-          <div className="flex justify-between items-center">
-            <span className="text-green-800 font-medium text-sm">Cambio a devolver</span>
-            <span className="text-green-800 font-bold text-md">{formatCurrency(changeAmount)}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="border-t border-gray-200 pt-3 mb-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{items.length}</div>
-            <div className="text-xs text-gray-600">Productos</div>
-          </div>
-          <div className="text-center p-2 bg-blue-50 rounded-lg">
-            <div className="text-lg font-bold text-blue-700">{marginPercentage.toFixed(1)}%</div>
-            <div className="text-xs text-blue-600">Margen %</div>
-          </div>
-        </div>
-      </div>
-
+      {/* Botón Finalizar Venta ARRIBA (justo después del título) */}
       <button
         onClick={handleFinalizeSale}
         disabled={!canCompleteSale() || isProcessing}
-        className={`w-full py-2.5 rounded-lg font-semibold transition-colors text-sm ${
+        className={`w-full mb-3 py-2 rounded-lg font-semibold transition-colors text-sm ${
           canCompleteSale() && !isProcessing
             ? 'bg-blue-600 text-white hover:bg-blue-700'
             : 'bg-gray-200 text-gray-500 cursor-not-allowed'
@@ -861,22 +642,209 @@ export const FinancialSummary = () => {
         )}
       </button>
       
-      {items.length > 0 && (
-        <div className="mt-3 text-xs text-gray-500 text-center">
-          {items.length} producto(s) en carrito • {paymentMethod ? `Pago: ${paymentMethod}` : 'Sin método de pago'}
-          {paymentMethod === 'credito' && !clientId && (
-            <div className="mt-1 text-red-600 text-xs font-medium">
-              ⚠️ Selecciona un cliente para habilitar crédito
+      {/* Método de pago - sin margen superior adicional */}
+      <div className="mb-3">
+        <h4 className="text-sm font-medium text-gray-700 mb-1.5">Método de pago</h4>
+        <div className="flex flex-wrap gap-1">
+          {paymentMethods.map((method) => {
+            const { style, icon: Icon, disabled } = getButtonStyle(method.id);
+            return (
+              <button
+                key={method.id}
+                onClick={() => handlePaymentMethodClick(method.id, disabled)}
+                className={`flex items-center px-2 py-1 rounded-lg border transition-colors text-xs ${style}`}
+                disabled={disabled}
+                title={disabled ? 'Selecciona un cliente para usar crédito' : ''}
+              >
+                <Icon className="w-3 h-3 mr-1" />
+                {method.label}
+                {disabled && <span className="ml-1 text-xs">(✗)</span>}
+              </button>
+            );
+          })}
+        </div>
+        
+        {paymentMethod === 'credito' && !clientId && (
+          <div className="mt-1 text-xs text-red-600 bg-red-50 p-1.5 rounded border border-red-200">
+            ⚠️ Selecciona un cliente para crédito
+          </div>
+        )}
+      </div>
+
+      {renderMixedPaymentUI()}
+
+      {/* Sección de descuento - más compacta */}
+      <div className={`mb-3 border rounded-lg p-2 ${hasProductLevelDiscounts ? 'bg-gray-100 border-gray-300' : 'bg-amber-50 border-amber-200'}`}>
+        <h4 className="text-xs font-medium text-gray-700 mb-1.5 flex items-center">
+          <Tag className="w-3 h-3 mr-1" />
+          Descuento
+          {hasProductLevelDiscounts && (
+            <span className="ml-2 text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full">
+                No disponible
+            </span>
+          )}
+        </h4>
+        
+        {hasProductLevelDiscounts ? (
+          <div className="flex items-center text-amber-700 text-xs">
+            <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+            <span>Descuentos en productos individuales</span>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="flex gap-1">
+              <button
+                onClick={() => setDiscountTypeInput('percentage')}
+                className={`flex-1 px-2 py-1 rounded-lg border text-xs ${
+                  discountTypeInput === 'percentage'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <Percent className="w-3 h-3 inline mr-0.5" />
+                %
+              </button>
+              <button
+                onClick={() => setDiscountTypeInput('amount')}
+                className={`flex-1 px-2 py-1 rounded-lg border text-xs ${
+                  discountTypeInput === 'amount'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <DollarSign className="w-3 h-3 inline mr-0.5" />
+                MAD
+              </button>
+            </div>
+            
+            <div className="flex gap-1">
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  value={discountInput}
+                  onChange={(e) => setDiscountInput(e.target.value)}
+                  placeholder={discountTypeInput === 'percentage' ? '10' : '5.00'}
+                  min="0"
+                  step={discountTypeInput === 'percentage' ? '1' : '0.01'}
+                  className="w-full px-2 py-1 pl-5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 text-xs"
+                  disabled={hasProductLevelDiscounts}
+                />
+                <span className="absolute left-1.5 top-1 text-gray-500 text-xs">
+                  {discountTypeInput === 'percentage' ? '%' : formatCurrency(0).split(' ')[1] || 'MAD'}
+                </span>
+              </div>
+              <button
+                onClick={handleApplyDiscount}
+                disabled={hasProductLevelDiscounts}
+                className={`px-2 py-1 rounded-lg font-medium text-xs ${
+                  hasProductLevelDiscounts
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                OK
+              </button>
+            </div>
+
+            {discountAmount > 0 && !hasProductLevelDiscounts && (
+              <div className="flex items-center justify-between pt-1 border-t border-amber-200">
+                <span className="text-xs text-gray-600">
+                  {discountType === 'percentage' ? `${discountValue}%` : formatCurrency(discountValue)}
+                </span>
+                <button
+                  onClick={handleRemoveDiscount}
+                  className="text-red-600 hover:text-red-800 text-xs font-medium"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* SECCIÓN ELIMINADA: Costo total y Margen bruto */}
+
+      {/* Totales - más compactos */}
+      <div className="mb-3 border border-gray-200 rounded-lg p-2">
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-600">Subtotal</span>
+            <span className="font-medium text-xs">{formatCurrency(subtotal)}</span>
+          </div>
+          
+          {productDiscountsAmount > 0 && (
+            <div className="flex justify-between">
+              <span className="text-xs text-gray-600">Dto. producto</span>
+              <span className="font-medium text-xs text-green-600">-{formatCurrency(productDiscountsAmount)}</span>
             </div>
           )}
-          <div className="mt-1 text-blue-600 text-xs">
-            Usuario ID: 1 • {clientId ? `Cliente ID: ${clientId}` : 'Venta sin cliente registrado'}
+          
+          {discountAmount > 0 && productDiscountsAmount === 0 && (
+            <div className="flex justify-between">
+              <span className="text-xs text-gray-600">Dto. carrito</span>
+              <span className="font-medium text-xs text-red-600">-{formatCurrency(discountAmount)}</span>
+            </div>
+          )}
+          
+          {/* IVA - Solo visible para países que no son Marruecos */}
+          {region !== 'MA' && (
+            <div className="flex justify-between">
+              <span className="text-xs text-gray-600">
+                IVA ({region === 'FR' ? '20' : region === 'ES' ? '21' : '19'}%)
+              </span>
+              <span className="font-medium text-xs">{formatCurrency(taxAmount)}</span>
+            </div>
+          )}
+          
+          <div className="flex justify-between pt-1 border-t border-gray-200">
+            <span className="font-bold text-sm text-gray-900">Total</span>
+            <span className="font-bold text-base text-blue-700">{formatCurrency(total)}</span>
           </div>
-          <div className="mt-1 text-gray-400 text-xs">
-            Al refrescar/navegar fuera, se guardará automáticamente en borradores
+        </div>
+      </div>
+
+      {showAmountField() && (
+        <div className="mb-3">
+          <h4 className="text-xs font-medium text-gray-700 mb-1">
+            Pago recibido
+            {paymentMethod === 'efectivo' && ` (mín: ${formatCurrency(total)})`}
+          </h4>
+          <div className="relative">
+            <input
+              type="number"
+              value={paidAmount}
+              onChange={(e) => setPaidAmount(e.target.value)}
+              placeholder={paymentMethod === 'efectivo' ? total.toFixed(2) : '0.00'}
+              min={getMinAmount()}
+              step="0.01"
+              className="w-full px-2 py-1 pl-5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 text-xs"
+            />
+            <span className="absolute left-1.5 top-1 text-gray-500 text-xs">{formatCurrency(0).split(' ')[1] || 'MAD'}</span>
           </div>
         </div>
       )}
+
+      {changeAmount > 0 && (
+        <div className="mb-3 bg-green-50 border border-green-200 rounded-lg p-2">
+          <div className="flex justify-between items-center">
+            <span className="text-green-800 font-medium text-xs">Cambio</span>
+            <span className="text-green-800 font-bold text-sm">{formatCurrency(changeAmount)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* SOLO NÚMERO DE PRODUCTOS - eliminado Margen % */}
+      <div className="border-t border-gray-200 pt-2 mb-1">
+        <div className="flex justify-center">
+          <div className="text-center">
+            <div className="text-lg font-bold text-gray-900">{items.length}</div>
+            <div className="text-xs text-gray-600">Productos</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECCIÓN ELIMINADA: Textos de usuario y borrador */}
     </div>
   );
 };

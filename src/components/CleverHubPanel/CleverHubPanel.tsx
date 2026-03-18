@@ -1,4 +1,4 @@
-// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN CORREGIDA
+// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN FINAL
 import { Brain, TrendingUp, AlertTriangle, Trophy } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
 import { ToastNotification } from '../ui/ToastNotification';
@@ -22,8 +22,7 @@ export const CleverHubPanel = () => {
         setLoading(true);
         const productsData = await productsService.getAll();
         
-        // Filtrar productos para mostrar solo algunos (puedes ajustar la lógica)
-        // Por ejemplo: productos con buen stock, margen interesante, etc.
+        // Filtrar productos para mostrar solo algunos
         const filteredProducts = productsData
           .filter((product: Product) => product.stock > 0) // Solo productos con stock
           .slice(0, 4); // Mostrar máximo 4 productos
@@ -47,20 +46,14 @@ export const CleverHubPanel = () => {
       name: product.name,
       category: product.category,
       stock: product.stock,
-      pricePPV: parseFloat(product.pricePPV.toString()), // Convertir a número
-      pricePPH: parseFloat(product.pricePPH.toString()), // Convertir a número
+      pricePPV: parseFloat(product.pricePPV.toString()),
+      pricePPH: parseFloat(product.pricePPH.toString()),
       hasInteraction: false,
       lowStock: product.stock < 20
     });
     
-    // Mostrar notificación
     setNotificationMessage(`✅ ${product.name} añadido al carrito`);
     setShowNotification(true);
-  };
-
-  // Función para calcular margen
-  const calculateMargin = (pricePPV: number, pricePPH: number) => {
-    return pricePPV - pricePPH;
   };
 
   return (
@@ -74,7 +67,7 @@ export const CleverHubPanel = () => {
             <div>
               <h3 className="text-lg font-bold text-gray-900">CleverHub IA</h3>
               <p className="text-sm text-gray-600">
-                Sugerencias basadas en productos con buen stock y margen
+                Sugerencias basadas en productos con buen stock
               </p>
             </div>
           </div>
@@ -104,9 +97,6 @@ export const CleverHubPanel = () => {
           ) : error ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-yellow-700">{error}</p>
-              <p className="text-yellow-600 text-sm mt-1">
-                Mostrando productos de ejemplo temporalmente
-              </p>
             </div>
           ) : products.length === 0 ? (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -116,8 +106,6 @@ export const CleverHubPanel = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {products.map((product) => {
                 const pricePPV = parseFloat(product.pricePPV.toString());
-                const pricePPH = parseFloat(product.pricePPH.toString());
-                const margin = calculateMargin(pricePPV, pricePPH);
                 
                 return (
                   <div 
@@ -127,29 +115,32 @@ export const CleverHubPanel = () => {
                   >
                     <div className="font-medium text-gray-900">{product.name}</div>
                     <div className="text-sm text-gray-500 mt-1">{product.category}</div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className={`text-xs ${product.stock < 20 ? 'text-red-600' : 'text-gray-400'}`}>
-                        Stock: {product.stock}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        Coste: {formatCurrency(pricePPH)}
+                    
+                    {/* SOLO STOCK - SIN COSTE */}
+                    <div className="mt-2 text-center">
+                      <span className={`text-xs ${product.stock < 20 ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+                        Stock: {product.stock} {product.stock < 10 ? '⚠️' : ''}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center mt-3 w-full">
-                      <div className="flex-1">
-                        <span className="font-bold text-gray-900">{formatCurrency(pricePPV)}</span>
-                        <div className="text-xs text-green-600">
-                          Margen: {formatCurrency(margin)}
-                        </div>
+                    
+                    {/* PRECIO MÁS PEQUEÑO + BOTÓN DEBAJO */}
+                    <div className="mt-4 space-y-3">
+                      {/* Precio más pequeño */}
+                      <div className="text-center">
+                        <span className="text-base font-semibold text-gray-900">
+                          {formatCurrency(pricePPV)}
+                        </span>
                       </div>
+                      
+                      {/* Botón Añadir centrado */}
                       <button 
-                        className="bg-blue-600 text-white text-sm px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors ml-2 flex-shrink-0"
+                        className="w-full bg-blue-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleAddToCart(product);
                         }}
                       >
-                        Añadir
+                        Añadir al carrito
                       </button>
                     </div>
                   </div>

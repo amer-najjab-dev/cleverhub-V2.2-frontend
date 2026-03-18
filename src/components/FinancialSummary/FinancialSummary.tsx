@@ -36,8 +36,6 @@ export const FinancialSummary = () => {
   const {
     getSubtotal,
     getSubtotalWithProductDiscounts,
-    getTotalCost,
-    getTotalMargin,
     getDiscountAmount,
     getTaxAmount,
     getTotal,
@@ -57,14 +55,10 @@ export const FinancialSummary = () => {
 
   const subtotal = getSubtotal();
   const subtotalWithProductDiscounts = getSubtotalWithProductDiscounts();
-  const totalCost = getTotalCost();
-  const totalMargin = getTotalMargin();
   const discountAmount = getDiscountAmount();
   const taxAmount = getTaxAmount(region);
   const total = getTotal(region);
   const changeAmount = paidAmount ? parseFloat(paidAmount) - total : 0;
-  const marginPercentage = subtotalWithProductDiscounts > 0 ? (totalMargin / subtotalWithProductDiscounts) * 100 : 0;
-  
   const hasProductLevelDiscounts = hasProductDiscounts();
   const productDiscountsAmount = subtotal - subtotalWithProductDiscounts;
 

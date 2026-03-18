@@ -135,17 +135,17 @@ export const CleverHubPanel = () => {
                         Coste: {formatCurrency(pricePPH)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center mt-3">
-                      <div>
+                    <div className="flex justify-between items-center mt-3 w-full">
+                      <div className="flex-1">
                         <span className="font-bold text-gray-900">{formatCurrency(pricePPV)}</span>
                         <div className="text-xs text-green-600">
                           Margen: {formatCurrency(margin)}
                         </div>
                       </div>
                       <button 
-                        className="bg-blue-600 text-white text-sm px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="bg-blue-600 text-white text-sm px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors ml-2 flex-shrink-0"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevenir doble click
+                          e.stopPropagation();
                           handleAddToCart(product);
                         }}
                       >

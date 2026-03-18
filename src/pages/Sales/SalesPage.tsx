@@ -422,7 +422,7 @@ export const SalesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* HEADER STICKY con backdrop blur - SIN TÍTULO */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div className="px-6 py-3">
           {/* Barra de búsqueda superior - Compacta */}
           <div className="flex flex-col gap-3">
@@ -602,16 +602,14 @@ export const SalesPage = () => {
       <div className="px-6 py-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-12 gap-6">
-            {/* Columna izquierda - Carrito (8/12) */}
-            <div className="col-span-12 lg:col-span-8">
-              <div className="space-y-6">
-                <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
-                <CleverHubPanel />
-              </div>
+            {/* Carrito - 7 columnas */}
+            <div className="col-span-12 lg:col-span-7">
+              <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
+              <CleverHubPanel />
             </div>
             
-            {/* Columna derecha - Resumen financiero (4/12) - STICKY */}
-            <div className="col-span-12 lg:col-span-4 sticky top-32 self-start">
+            {/* Resumen - 5 columnas */}
+            <div className="col-span-12 lg:col-span-5 sticky top-32 self-start">
               <FinancialSummary />
               <button
                 onClick={handleCheckout}

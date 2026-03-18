@@ -187,16 +187,16 @@ export const FinancialSummary = () => {
   };
 
   const getBackendPaymentMethod = (method: string): 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' => {
-    switch (method) {
-      case 'efectivo': return 'cash';
-      case 'tarjeta': return 'Credit Card';
-      case 'credito': return 'credit';
-      case 'transferencia': return 'Bank Transfer';
-      case 'cheque': return 'Bank Cheque';
-      case 'mixto': return 'mixed';
-      default: return 'cash';
-    }
-  };
+  switch (method) {
+    case 'efectivo': return 'cash';
+    case 'tarjeta': return 'Credit Card';
+    case 'credito': return 'credit';
+    case 'transferencia': return 'Bank Transfer';
+    case 'cheque': return 'Bank Cheque';
+    case 'mixto': return 'mixed';
+    default: return 'cash';
+  }
+};
 
   const getBackendDiscountType = (type: string): 'percentage' | 'fixed' | 'product' | 'cart' | 'none' | undefined => {
     if (type === 'none') return undefined;

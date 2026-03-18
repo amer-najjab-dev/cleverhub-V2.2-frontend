@@ -408,9 +408,13 @@ export const SalesPage = () => {
     }
   };
 
-  const getCustomerFullName = (client: Client) => {
-    if (client.firstName || client.lastName) {
-      return `${client.firstName || ''} ${client.lastName || ''}`.trim();
+  const getCustomerFullName = (client: any) => {
+  // Intentar con camelCase (frontend) y snake_case (backend)
+  const firstName = client.firstName || client.first_name || '';
+  const lastName = client.lastName || client.last_name || '';
+  
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
     }
     return client.name || 'Cliente';
   };

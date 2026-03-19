@@ -9,18 +9,19 @@ export interface Client {
   phone: string;
   address?: string | null;
   dni?: string;
-  birthDate?: string | null;
+  birth_date?: string | null;
   allergies?: string | null;
-  chronicConditions?: string | null;
-  isPregnant?: boolean;
-  isLactating?: boolean;
-  loyaltyPoints?: number;
-  totalPurchases?: string;
+  chronic_conditions?: string | null;
+  is_pregnant?: boolean;
+  is_lactating?: boolean;
+  loyalty_points?: number;
+  total_purchases?: string;
   favorite?: boolean;
   notes?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  lastPurchaseDate?: string | null;
+  created_at: string;
+  updated_at: string;
+  last_purchase_date?: string | null;
+  total_debt?: number;
 }
 
 export interface ClientDebt {

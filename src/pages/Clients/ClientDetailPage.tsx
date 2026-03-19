@@ -389,7 +389,7 @@ const ClientDetailPage = () => {
               <div>
                 <label className="text-sm text-gray-500">Fecha de Nacimiento</label>
                 <p className="text-gray-900">
-                  {client.birthDate ? new Date(client.birthDate).toLocaleDateString('es-ES') : 'No especificada'}
+                  {client.birth_date ? new Date(client.birth_date).toLocaleDateString('es-ES') : 'No especificada'}
                 </p>
               </div>
             </div>
@@ -405,16 +405,16 @@ const ClientDetailPage = () => {
               </div>
               <div>
                 <label className="text-sm text-gray-500">Condiciones Crónicas</label>
-                <p className="text-gray-900">{client.chronicConditions || 'Ninguna registrada'}</p>
+                <p className="text-gray-900">{client.chronic_conditions || 'Ninguna registrada'}</p>
               </div>
               <div className="flex gap-4">
                 <div>
                   <label className="text-sm text-gray-500">Embarazada</label>
-                  <p className="text-gray-900">{client.isPregnant ? 'Sí' : 'No'}</p>
+                  <p className="text-gray-900">{client.is_pregnant ? 'Sí' : 'No'}</p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Lactando</label>
-                  <p className="text-gray-900">{client.isLactating ? 'Sí' : 'No'}</p>
+                  <p className="text-gray-900">{client.is_lactating ? 'Sí' : 'No'}</p>
                 </div>
               </div>
             </div>
@@ -427,7 +427,7 @@ const ClientDetailPage = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <label className="text-sm text-gray-500">Compras Totales</label>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(Number(client.totalPurchases || 0))}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(Number(client.total_purchases || 0))}</p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Última Compra</label>
@@ -439,7 +439,7 @@ const ClientDetailPage = () => {
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Puntos de Fidelidad</label>
-                  <p className="text-2xl font-bold text-blue-600">{client.loyaltyPoints || 0}</p>
+                  <p className="text-2xl font-bold text-blue-600">{client.loyalty_points || 0}</p>
                 </div>
               </div>
             </div>

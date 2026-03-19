@@ -50,7 +50,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
         last_name: client.last_name || '',
         phone: client.phone || '',
         email: client.email,
-        loyaltyPoints: client.loyaltyPoints,
+        loyaltyPoints: client.loyalty_points,
         lastPurchaseDate: client.last_purchase_date || undefined
       }));
       setSearchResults(mappedResults.slice(0, 10));

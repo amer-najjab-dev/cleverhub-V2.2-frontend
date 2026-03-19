@@ -361,7 +361,7 @@ const ClientsPage = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm text-gray-900">{client.loyaltyPoints || 0} puntos</span>
+                          <span className="text-sm text-gray-900">{client.loyalty_points || 0} puntos</span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">

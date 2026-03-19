@@ -522,7 +522,7 @@ export const SalesPage = () => {
                 <LoyaltyCheckoutButton
                   clientId={currentCustomer.id}
                   clientName={getCustomerFullName(currentCustomer)}
-                  clientPoints={currentCustomer.loyaltyPoints || 0}
+                  clientPoints={currentCustomer.loyalty_points || 0}
                   onAddToCart={handleAddLoyaltyItems}
                 />
               </div>

@@ -422,7 +422,7 @@ export const SalesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* STICKY 1: Barra de búsqueda (debajo del header principal) */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <div className="sticky top-[60px] z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div className="px-6 py-3">
           {/* Barra de búsqueda superior - Compacta */}
           <div className="flex flex-col gap-3">

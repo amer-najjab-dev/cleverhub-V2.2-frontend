@@ -308,12 +308,12 @@ const ClientDetailPage = () => {
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 bg-blue-100 rounded-xl flex items-center justify-center">
                 <span className="text-blue-600 text-2xl font-bold">
-                  {client.firstName?.charAt(0)}{client.lastName?.charAt(0)}
+                  {client.first_name?.charAt(0)}{client.last_name?.charAt(0)}
                 </span>
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {client.firstName} {client.lastName}
+                  {client.first_name} {client.last_name}
                 </h1>
                 <p className="text-gray-600">{client.email}</p>
               </div>
@@ -325,7 +325,7 @@ const ClientDetailPage = () => {
               Editar
             </button>
             <button 
-              onClick={() => navigate(`/sales?clientId=${client.id}&clientName=${client.firstName}+${client.lastName}`)}
+              onClick={() => navigate(`/sales?clientId=${client.id}&clientName=${client.first_name}+${client.last_name}`)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Nueva Venta

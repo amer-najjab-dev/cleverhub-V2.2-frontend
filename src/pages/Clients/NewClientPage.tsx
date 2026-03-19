@@ -7,8 +7,8 @@ import { clientsService } from '../../services/clients.service';
 const NewClientPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     phone: '',
     email: '',
     dni: '',
@@ -21,7 +21,7 @@ const NewClientPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.phone) {
+    if (!formData.first_name || !formData.phone) {
       toast.error('Nombre y teléfono son obligatorios');
       return;
     }
@@ -59,8 +59,8 @@ const NewClientPage = () => {
             </label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
+              name="first_name"
+              value={formData.first_name}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
@@ -73,8 +73,8 @@ const NewClientPage = () => {
             </label>
             <input
               type="text"
-              name="lastName"
-              value={formData.lastName}
+              name="last_name"
+              value={formData.last_name}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />

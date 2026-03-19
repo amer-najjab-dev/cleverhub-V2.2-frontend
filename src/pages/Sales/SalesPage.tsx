@@ -269,7 +269,7 @@ export const SalesPage = () => {
       setClient(newClient.id);
       console.log('Nuevo cliente creado:', newClient);
       
-      alert(`Cliente ${newClient.firstName} ${newClient.lastName || ''} creado exitosamente`);
+      alert(`Cliente ${newClient.first_name} ${newClient.last_name || ''} creado exitosamente`);
       
       // Devolver foco al input de productos
       if (productSearchRef.current) {
@@ -409,10 +409,9 @@ export const SalesPage = () => {
   };
 
   const getCustomerFullName = (client: any) => {
-  // Intentar con camelCase (frontend) y snake_case (backend)
-  const firstName = client.firstName || client.first_name || '';
-  const lastName = client.lastName || client.last_name || '';
-  
+    const firstName = client.first_name || '';
+    const lastName = client.last_name || '';
+    
     if (firstName || lastName) {
       return `${firstName} ${lastName}`.trim();
     }

@@ -42,8 +42,8 @@ export interface Sale {
   // Relaciones (opcionales, vienen del backend)
   client?: {
     id: number;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
     phone: string;
   };
@@ -250,8 +250,8 @@ const mapSaleFromBackend = (item: any): Sale => ({
   updatedAt: item.updated_at,
   client: item.client ? {
     id: item.client.id,
-    firstName: item.client.first_name,
-    lastName: item.client.last_name,
+    first_name: item.client.first_name,
+    last_name: item.client.last_name,
     email: item.client.email,
     phone: item.client.phone
   } : undefined,

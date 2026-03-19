@@ -90,7 +90,7 @@ const ClientsPage = () => {
     if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(client => 
-        (client.firstName?.toLowerCase() + ' ' + client.lastName?.toLowerCase()).includes(query) ||
+        (client.first_name?.toLowerCase() + ' ' + client.last_name?.toLowerCase()).includes(query) ||
         client.phone?.toLowerCase().includes(query) ||
         client.email?.toLowerCase().includes(query) ||
         client.dni?.toLowerCase().includes(query)
@@ -323,12 +323,12 @@ const ClientsPage = () => {
                           <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
                               <span className="text-blue-600 font-bold">
-                                {client.firstName?.charAt(0)}{client.lastName?.charAt(0)}
+                                {client.first_name?.charAt(0)}{client.last_name?.charAt(0)}
                               </span>
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
-                                {client.firstName} {client.lastName}
+                                {client.first_name} {client.last_name}
                               </div>
                               <div className="text-sm text-gray-500">{client.dni || 'Sin DNI'}</div>
                             </div>
@@ -444,7 +444,7 @@ const ClientsPage = () => {
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
             <p className="text-gray-600 mb-4">
-              ¿Estás seguro de que quieres eliminar a {clientToDelete.firstName} {clientToDelete.lastName}?
+              ¿Estás seguro de que quieres eliminar a {clientToDelete.first_name} {clientToDelete.last_name}?
               Esta acción no se puede deshacer.
             </p>
             <div className="flex justify-end gap-3">

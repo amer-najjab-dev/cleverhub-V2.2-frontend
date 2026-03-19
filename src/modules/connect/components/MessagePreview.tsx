@@ -11,8 +11,8 @@ interface MessagePreviewProps {
   };
   clients: Array<{
     id: number;
-    firstName?: string;
-    lastName?: string;
+    first_name?: string;
+    last_name?: string;
     phone: string;
     loyaltyPoints?: number;
     lastPurchaseDate?: string;
@@ -38,7 +38,7 @@ export const MessagePreview: React.FC<MessagePreviewProps> = ({
 
       // Reemplazar variables con datos reales del cliente
       const variables = {
-        '{{nombre_cliente}}': `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'client',
+        '{{nombre_cliente}}': `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'client',
         '{{puntos_actuales}}': client.loyaltyPoints?.toString() || '0',
         '{{fecha_vencimiento_lote}}': new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
         '{{producto_sugerido}}': 'Protecteur solaire'
@@ -50,7 +50,7 @@ export const MessagePreview: React.FC<MessagePreviewProps> = ({
 
       return {
         clientId: client.id,
-        clientName: `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Client',
+        clientName: `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Client',
         phone: client.phone,
         message,
         selected: true

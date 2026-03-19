@@ -3,8 +3,8 @@ import { api } from './api';
 export interface Client {
   id: number;
   name: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email?: string;
   phone: string;
   address?: string | null;
@@ -80,8 +80,8 @@ export interface HealthStats {
 }
 
 export interface CreateClientDto {
-  firstName: string;        // Obligatorio
-  lastName?: string;         // Opcional
+  first_name: string;        // Obligatorio
+  last_name?: string;         // Opcional
   phone: string;             // Obligatorio
   email?: string;
   address?: string;

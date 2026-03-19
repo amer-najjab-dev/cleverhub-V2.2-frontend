@@ -121,7 +121,7 @@ export const SalesHistory = ({ limit: initialLimit = 10, showPagination = false,
 
   const getClientName = (sale: Sale): string => {
     if (sale.client) {
-      return `${sale.client.firstName || ''} ${sale.client.lastName || ''}`.trim() || 'Cliente';
+      return `${sale.client.first_name || ''} ${sale.client.last_name || ''}`.trim() || 'Cliente';
     }
     return sale.clientId ? `Cliente #${sale.clientId}` : 'Cliente no registrado';
   };

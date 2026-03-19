@@ -5,8 +5,8 @@ import { clientsService } from '../../../services/clients.service';
 
 interface Client {
   id: number;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   phone: string;
   email?: string;
   loyaltyPoints?: number;
@@ -46,8 +46,8 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
       // Mapear para asegurar el tipo correcto
       const mappedResults: Client[] = filtered.map(client => ({
         id: client.id,
-        firstName: client.firstName || '',
-        lastName: client.lastName || '',
+        first_name: client.first_name || '',
+        last_name: client.last_name || '',
         phone: client.phone || '',
         email: client.email,
         loyaltyPoints: client.loyaltyPoints,
@@ -81,7 +81,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
   };
 
   const getClientDisplayName = (client: Client) => {
-    return `${client.firstName || ''} ${client.lastName || ''}`.trim() || 'Sans nom';
+    return `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Sans nom';
   };
 
   return (

@@ -41,7 +41,7 @@ export const SalesCart = ({ customer, onClearCustomer }: SalesCartProps) => {
             <div>
               <span className="text-sm font-medium text-blue-800">Cliente:</span>
               <span className="ml-2 text-sm text-gray-700">
-                {customer.name} {customer.lastName ? ` ${customer.lastName}` : ''}
+                {customer.name} {customer.last_name ? ` ${customer.last_name}` : ''}
                 {customer.phone && ` - ${customer.phone}`}
               </span>
             </div>

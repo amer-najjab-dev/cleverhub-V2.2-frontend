@@ -51,7 +51,7 @@ export const ClientSelector: React.FC<ClientSelectorProps> = ({
         phone: client.phone || '',
         email: client.email,
         loyaltyPoints: client.loyaltyPoints,
-        lastPurchaseDate: client.lastPurchaseDate || undefined
+        lastPurchaseDate: client.last_purchase_date || undefined
       }));
       setSearchResults(mappedResults.slice(0, 10));
     } catch (error) {

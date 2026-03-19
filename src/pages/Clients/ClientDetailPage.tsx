@@ -432,8 +432,8 @@ const ClientDetailPage = () => {
                 <div>
                   <label className="text-sm text-gray-500">Última Compra</label>
                   <p className="text-gray-900">
-                    {client.lastPurchaseDate 
-                      ? new Date(client.lastPurchaseDate).toLocaleDateString('es-ES')
+                    {client.last_purchase_date 
+                      ? new Date(client.last_purchase_date).toLocaleDateString('es-ES')
                       : 'Nunca'}
                   </p>
                 </div>

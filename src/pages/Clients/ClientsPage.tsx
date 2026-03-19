@@ -339,13 +339,18 @@ const ClientsPage = () => {
                           <div className="text-sm text-gray-500">{client.phone || 'Sin teléfono'}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">
-                            {client.lastPurchaseDate 
-                              ? new Date(client.lastPurchaseDate).toLocaleDateString('es-ES')
-                              : 'Nunca'}
-                          </div>
+                          <span className={`text-sm font-medium ${(client.total_debt || 0) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                            {(client.total_debt || 0).toFixed(2)} MAD
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                           <div className="text-sm text-gray-900">
+                              {client.last_purchase_date 
+                                ? new Date(client.last_purchase_date).toLocaleDateString('es-ES')
+                                : 'Nunca'}
+                            </div>
                           <div className="text-sm text-gray-500">
-                            {client.totalPurchases ? `Total: ${formatCurrency(Number(client.totalPurchases))}` : 'Sin compras'}
+                            {client.last_purchase_date ? 'Con compras' : 'Sin compras'}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -356,9 +361,7 @@ const ClientsPage = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            {client.loyaltyPoints || 0} puntos
-                          </span>
+                          <span className="text-sm text-gray-900">{client.loyaltyPoints || 0} puntos</span>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">

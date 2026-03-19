@@ -319,6 +319,7 @@ const ClientsPage = () => {
                     const debt = debtMap.get(client.id) || 0;
                     return (
                       <tr key={client.id} className="hover:bg-gray-50">
+                        {/* 1. CLIENTE - Avatar + Nombre + DNI */}
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -334,35 +335,38 @@ const ClientsPage = () => {
                             </div>
                           </div>
                         </td>
+
+                        {/* 2. CONTACTO - Email + Teléfono */}
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">{client.email || 'Sin email'}</div>
                           <div className="text-sm text-gray-500">{client.phone || 'Sin teléfono'}</div>
                         </td>
+
+                        {/* 3. ÚLTIMA COMPRA - Fecha + Estado */}
                         <td className="px-6 py-4">
-                          <span className={`text-sm font-medium ${(client.total_debt || 0) > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                            {(client.total_debt || 0).toFixed(2)} MAD
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                           <div className="text-sm text-gray-900">
-                              {client.last_purchase_date 
-                                ? new Date(client.last_purchase_date).toLocaleDateString('es-ES')
-                                : 'Nunca'}
-                            </div>
+                          <div className="text-sm text-gray-900">
+                            {client.last_purchase_date 
+                              ? new Date(client.last_purchase_date).toLocaleDateString('es-ES')
+                              : 'Nunca'}
+                          </div>
                           <div className="text-sm text-gray-500">
                             {client.last_purchase_date ? 'Con compras' : 'Sin compras'}
                           </div>
                         </td>
+
+                        {/* 4. DEUDA - Monto con color */}
                         <td className="px-6 py-4">
-                          <span className={`px-3 py-1 inline-flex text-sm font-semibold rounded-full ${
-                            debt > 0 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                          }`}>
-                            {formatCurrency(debt)}
+                          <span className={`text-sm font-medium ${debt > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                            {debt.toFixed(2)} MAD
                           </span>
                         </td>
+
+                        {/* 5. PUNTOS - Número */}
                         <td className="px-6 py-4">
                           <span className="text-sm text-gray-900">{client.loyalty_points || 0} puntos</span>
                         </td>
+
+                        {/* 6. ACCIONES - Iconos */}
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             <Link

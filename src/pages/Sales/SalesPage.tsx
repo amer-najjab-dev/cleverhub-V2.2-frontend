@@ -421,7 +421,7 @@ export const SalesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER STICKY con backdrop blur - SIN TÍTULO */}
+      {/* STICKY 1: Barra de búsqueda (debajo del header principal) */}
       <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div className="px-6 py-3">
           {/* Barra de búsqueda superior - Compacta */}
@@ -434,8 +434,8 @@ export const SalesPage = () => {
                   ref={productSearchRef}
                   onSearch={handleProductSearch}
                   onFilterChange={handleFilterChange}
-                  onSelectProduct={handleAddProductToCart}  // ← AÑADIR
-                  searchResults={productSearchResults}       // ← AÑADIR
+                  onSelectProduct={handleAddProductToCart}
+                  searchResults={productSearchResults}
                   isSearching={isSearching} 
                   placeholder="Buscar productos... (mínimo 3 caracteres)"
                 />
@@ -608,8 +608,8 @@ export const SalesPage = () => {
               <CleverHubPanel />
             </div>
             
-            {/* Resumen - 5 columnas */}
-            <div className="col-span-12 lg:col-span-5 sticky top-32 self-start">
+            {/* STICKY 2: Resumen financiero */}
+            <div className="col-span-12 lg:col-span-5 sticky top-[152px] self-start">
               <FinancialSummary />
               <button
                 onClick={handleCheckout}

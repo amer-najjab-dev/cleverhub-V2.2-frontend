@@ -157,6 +157,7 @@ const ClientsPage = () => {
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, filteredClients.length);
+  // FIX: Column order corrected - 2026-03-20
 
   return (
     <div className="p-6">

@@ -80,6 +80,8 @@ const ClientDetailPage = () => {
         console.log('📦 Purchase history response:', purchaseResponse);
         console.log('📦 Purchase data:', purchaseResponse.data); // ← solo data, no data.data
         setPurchaseHistory(purchaseResponse.data || []); 
+        console.log('📦 PURCHASE DATA RAW:', purchaseResponse.data);
+        console.log('📦 FIRST PURCHASE:', purchaseResponse.data?.[0]);
       } catch (error) {
         console.log('No purchase history found for client');
       }

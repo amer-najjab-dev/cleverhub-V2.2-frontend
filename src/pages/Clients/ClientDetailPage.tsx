@@ -463,7 +463,13 @@ const ClientDetailPage = () => {
                   <div className="bg-red-50 p-4 rounded-lg">
                     <label className="text-sm text-gray-500">Pendiente</label>
                     <p className="text-2xl font-bold text-red-600">
-                      {formatCurrency(Number(debt.total_debt || 0))}
+                      {(() => {
+                        console.log('📊 DEBT OBJECT:', debt);
+                        console.log('📊 total_debt:', debt.total_debt);
+                        console.log('📊 pending_amount:', debt.pending_amount);
+                        console.log('📊 status:', debt.status);
+                        return formatCurrency(Number(debt.total_debt || 0));
+                      })()}
                     </p>
                   </div>
                 </div>

@@ -56,6 +56,8 @@ const ClientDetailPage = () => {
       // Fetch client debt
       try {
         const debtResponse = await clientsService.getDebt(clientId);
+         console.log('💰 DEBT RESPONSE:', debtResponse);
+         console.log('💰 DEBT DATA:', debtResponse.data);
         setDebt(debtResponse.data);
       } catch (error) {
         console.log('No debt found for client');

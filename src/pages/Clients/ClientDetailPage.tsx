@@ -4,7 +4,6 @@ import { ArrowLeft, DollarSign, Heart, Bell, ShoppingBag, CheckCircle, Clock, Al
 import { toast } from 'react-hot-toast';
 import { clientsService } from '../../services/clients.service';
 import { Client, ClientDebt, ClientHealthRecord, HealthStats } from '../../services/clients.service';
-import { SaleHelper } from '../../services/sales.service';
 import HealthCharts from '../../components/HealthCharts';
 
 const ClientDetailPage = () => {
@@ -812,20 +811,21 @@ const ClientDetailPage = () => {
                 <tbody className="divide-y divide-gray-200">
                   {purchaseHistory.map((purchase: any) => {
                     const total = safeNumber(purchase.total);
-                    const applied = SaleHelper.getEffectiveApplied(purchase);
-                    const pending = SaleHelper.getEffectivePending(purchase);
-                    const paymentStatus = purchase.paymentStatus || 'pending';
+                    const applied = safeNumber(purchase.amount_applied || 0);
+                    const pending = safeNumber(purchase.amount_pending || total - applied);
+                    const paymentStatus = purchase.payment_status || 'pending';
+                    const saleStatus = purchase.sale_status || 'pending';
                     
                     const paymentConfig = getPaymentStatusConfig(paymentStatus);
-                    const saleConfig = getSaleStatusConfig(purchase.saleStatus);
+                    const saleConfig = getSaleStatusConfig(saleStatus);
                     
                     return (
                       <tr key={purchase.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
-                          {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString('es-ES') : 'Fecha no disponible'}
+                          {purchase.created_at ? new Date(purchase.created_at).toLocaleDateString('es-ES') : 'Fecha no disponible'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                          {purchase.saleNumber || `V-${purchase.id || 'N/A'}`}
+                          {purchase.sale_number || `V-${purchase.id || 'N/A'}`}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 font-semibold">
                           {formatCurrency(total)}€
@@ -850,7 +850,7 @@ const ClientDetailPage = () => {
                             <span className="mr-1.5">{paymentConfig.icon}</span>
                             <span>
                               {paymentConfig.text}
-                              {purchase.paymentMethod === 'credit' && pending > 0 && (
+                              {purchase.payment_method === 'credit' && pending > 0 && (
                                 <span className="ml-1 text-xs opacity-75">
                                   ({formatCurrency(pending)}€)
                                 </span>
@@ -860,15 +860,15 @@ const ClientDetailPage = () => {
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-sm font-medium ${
-                            purchase.paymentMethod === 'credit' ? 'text-yellow-600' :
-                            purchase.paymentMethod === 'cash' ? 'text-green-600' :
-                            purchase.paymentMethod === 'Credit Card' ? 'text-blue-600' :
-                            purchase.paymentMethod === 'Bank Transfer' ? 'text-purple-600' :
-                            purchase.paymentMethod === 'Bank Cheque' ? 'text-indigo-600' :
-                            purchase.paymentMethod === 'mixed' ? 'text-orange-600' :
+                            purchase.payment_method === 'credit' ? 'text-yellow-600' :
+                            purchase.payment_method === 'cash' ? 'text-green-600' :
+                            purchase.payment_method === 'Credit Card' ? 'text-blue-600' :
+                            purchase.payment_method === 'Bank Transfer' ? 'text-purple-600' :
+                            purchase.payment_method === 'Bank Cheque' ? 'text-indigo-600' :
+                            purchase.payment_method === 'mixed' ? 'text-orange-600' :
                             'text-gray-600'
                           }`}>
-                            {getPaymentMethodText(purchase.paymentMethod)}
+                            {getPaymentMethodText(purchase.payment_method)}
                           </span>
                         </td>
                         <td className="px-4 py-3">

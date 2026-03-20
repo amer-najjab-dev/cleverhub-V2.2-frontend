@@ -98,7 +98,7 @@ const ClientDetailPage = () => {
 
   const handleFullPayment = async () => {
     if (!client) return;
-    const montoPendiente = Number(debt?.totalDebt || 0);
+    const montoPendiente = Number(debt?.total_debt || 0);
     if (!debt || montoPendiente <= 0) {
       toast.error('No hay importe pendiente para pagar');
       return;
@@ -130,9 +130,9 @@ const ClientDetailPage = () => {
     }
 
     if (debt) {
-      const pending = debt.pendingAmount !== undefined && !isNaN(Number(debt.pendingAmount))
-        ? Number(debt.pendingAmount)
-        : Number(debt.totalDebt) - Number(debt.paidAmount);
+      const pending = debt.pending_amount !== undefined && !isNaN(Number(debt.pending_amount))
+        ? Number(debt.pending_amount)
+        : Number(debt.total_debt) - Number(debt.paid_amount);
       if (amount > pending) {
         toast.error('El monto excede el importe pendiente');
         return;
@@ -463,7 +463,7 @@ const ClientDetailPage = () => {
                   <div className="bg-red-50 p-4 rounded-lg">
                     <label className="text-sm text-gray-500">Pendiente</label>
                     <p className="text-2xl font-bold text-red-600">
-                      {formatCurrency(Number(debt.totalDebt || 0))}
+                      {formatCurrency(Number(debt.total_debt || 0))}
                     </p>
                   </div>
                 </div>
@@ -478,11 +478,11 @@ const ClientDetailPage = () => {
                   </span>
                 </div>
                 
-                {debt.lastPaymentDate && (
+                {debt.last_payment_date && (
                   <div>
                     <label className="text-sm text-gray-500">Último Pago</label>
                     <p className="text-gray-900">
-                      {new Date(debt.lastPaymentDate).toLocaleDateString('es-ES')}
+                      {new Date(debt.last_payment_date).toLocaleDateString('es-ES')}
                     </p>
                   </div>
                 )}
@@ -512,10 +512,10 @@ const ClientDetailPage = () => {
               </p>
             <button
               onClick={handleFullPayment}
-              disabled={!debt || Number(debt.totalDebt || 0) <= 0}
+              disabled={!debt || Number(debt.total_debt || 0) <= 0}
               className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Pagar {debt ? formatCurrency(Number(debt.totalDebt || 0)) : '0€'}
+              Pagar {debt ? formatCurrency(Number(debt.total_debt || 0)) : '0€'}
             </button>
             </div>
 

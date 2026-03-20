@@ -26,15 +26,15 @@ export interface Client {
 
 export interface ClientDebt {
   id: number;
-  clientId: number;
-  totalDebt: number;
-  paidAmount: number;
-  pendingAmount: number;
-  lastPaymentDate?: string | null;
+  client_id: number;
+  total_debt: number;
+  paid_amount: number;
+  pending_amount: number;
+  last_payment_date?: string | null;
   status: 'pending' | 'partial' | 'paid' | 'overdue';
   notes?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   client?: Client;
 }
 

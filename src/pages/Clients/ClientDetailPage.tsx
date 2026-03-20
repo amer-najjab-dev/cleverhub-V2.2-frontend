@@ -56,9 +56,18 @@ const ClientDetailPage = () => {
       // Fetch client debt
       try {
         const debtResponse = await clientsService.getDebt(clientId);
-         console.log('💰 DEBT RESPONSE:', debtResponse);
-         console.log('💰 DEBT DATA:', debtResponse.data);
-        setDebt(debtResponse.data);
+        const debtData = debtResponse.data;
+        
+        // Si es array, tomar la deuda activa (pending_amount > 0)
+        if (Array.isArray(debtData) && debtData.length > 0) {
+          const activeDebt = debtData.find((d: any) => Number(d.pending_amount) > 0) || debtData[0];
+          console.log('💰 ACTIVE DEBT:', activeDebt);
+          setDebt(activeDebt);
+        } else if (debtData && !Array.isArray(debtData)) {
+          setDebt(debtData);
+        } else {
+          setDebt(null);
+        }
       } catch (error) {
         console.log('No debt found for client');
       }

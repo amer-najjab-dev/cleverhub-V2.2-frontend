@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Wallet, TrendingUp, DollarSign, Percent, Tag, AlertCircle } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
-import { salesService } from '../../services/sales.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
 
 export const FinancialSummary = () => {
   const [paidAmount, setPaidAmount] = useState<string>('');
   const [discountInput, setDiscountInput] = useState<string>('');
   const [discountTypeInput, setDiscountTypeInput] = useState<'percentage' | 'amount'>('percentage');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [region, setRegion] = useState(() => {
     return localStorage.getItem('cleverhub_region') || 'MA';
   });
@@ -50,7 +48,6 @@ export const FinancialSummary = () => {
     hasProductDiscounts,
     items,
     clientId,
-    clearCart,
   } = useCartStore();
 
   const subtotal = getSubtotal();
@@ -63,38 +60,6 @@ export const FinancialSummary = () => {
   const productDiscountsAmount = subtotal - subtotalWithProductDiscounts;
 
   // ============ FUNCIONES DE VALIDACIÓN ============
-  const canCompleteSale = (): boolean => {
-    if (items.length === 0) return false;
-    if (!paymentMethod) return false;
-    
-    switch (paymentMethod) {
-      case 'credito':
-        return !!clientId;
-          
-      case 'tarjeta':
-      case 'transferencia':
-      case 'cheque':
-        return true;
-          
-      case 'efectivo':
-        return parseFloat(paidAmount || '0') >= total;
-          
-      case 'mixto':
-        if (!mixedPayments || mixedPayments.step !== 'completed') {
-          return false;
-        }
-        const firstAmount = mixedPayments.firstAmount || 0;
-        const secondAmount = mixedPayments.secondAmount || 0;
-        if (firstAmount <= 0 || secondAmount <= 0) {
-          return false;
-        }
-        const sum = firstAmount + secondAmount;
-        return Math.abs(sum - total) < 0.01;
-          
-      default:
-        return false;
-    }
-  };
 
   const showAmountField = (): boolean => {
     if (!paymentMethod) return false;
@@ -116,61 +81,6 @@ export const FinancialSummary = () => {
     }
     return 0;
   };
-  
-  const getPaidAmountToSend = (): number => {
-    if (!paymentMethod) return 0;
-    
-    if (['credito'].includes(paymentMethod)) {
-      return 0;
-    }
-    // Para tarjeta, transferencia, cheque, devolver el total
-    if (['tarjeta', 'transferencia', 'cheque'].includes(paymentMethod)) {
-      return total;
-    }
-    
-    if (paymentMethod === 'efectivo') {
-      return parseFloat(paidAmount || '0');
-    }
-    
-    if (paymentMethod === 'mixto' && mixedPayments && mixedPayments.step === 'completed') {
-      return (mixedPayments.firstAmount || 0) + (mixedPayments.secondAmount || 0);
-    }
-    
-    return 0;
-  };
-  
-  // ============ FUNCIÓN MEJORADA PARA TEXTO DEL BOTÓN ============
-  const getButtonText = (): string => {
-    if (isProcessing) return 'Procesando...';
-    if (items.length === 0) return 'Carrito vacío';
-    
-    if (paymentMethod === 'credito' && !clientId) {
-      return '⚠️ Selecciona cliente para habilitar crédito';
-    }
-    
-    if (!canCompleteSale()) {
-      if (paymentMethod === 'efectivo' && parseFloat(paidAmount || '0') < total) {
-        const falta = total - parseFloat(paidAmount || '0');
-        return `Monto insuficiente (falta ${formatCurrency(falta)})`;
-      }
-        
-      if (paymentMethod === 'mixto') {
-        if (!mixedPayments || mixedPayments.step !== 'completed') {
-          return 'Selecciona dos métodos de pago';
-        }
-        const firstAmount = mixedPayments.firstAmount || 0;
-        const secondAmount = mixedPayments.secondAmount || 0;
-        const sum = firstAmount + secondAmount;
-        if (Math.abs(sum - total) >= 0.01) {
-          return `La suma (${formatCurrency(sum)}) no coincide con el total (${formatCurrency(total)})`;
-        }
-      }
-        
-      return 'Configuración de pago incompleta';
-    }
-    
-    return `✅ Finalizar venta - ${formatCurrency(total)}`;
-  };
 
   const handleApplyDiscount = () => {
     if (discountInput && !hasProductLevelDiscounts) {
@@ -184,38 +94,6 @@ export const FinancialSummary = () => {
 
   const handleRemoveDiscount = () => {
     updateCartDiscount('none', 0);
-  };
-
-  const getBackendPaymentMethod = (method: string): 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' => {
-  switch (method) {
-    case 'efectivo': return 'cash';
-    case 'tarjeta': return 'Credit Card';
-    case 'credito': return 'credit';
-    case 'transferencia': return 'Bank Transfer';
-    case 'cheque': return 'Bank Cheque';
-    case 'mixto': return 'mixed';
-    default: return 'cash';
-  }
-};
-
-  const getBackendDiscountType = (type: string): 'percentage' | 'fixed' | 'product' | 'cart' | 'none' | undefined => {
-    if (type === 'none') return undefined;
-    if (type === 'percentage') return 'percentage';
-    if (type === 'amount') return 'fixed';
-    return undefined;
-  };
-
-  const getPaymentStatus = (): 'paid' | 'partial' | 'pending' => {
-    if (paymentMethod === 'credito') {
-      return 'partial';
-    }
-    
-    if (paymentMethod === 'mixto') {
-      const amountPaid = getPaidAmountToSend();
-      return amountPaid >= total ? 'paid' : 'partial';
-    }
-    
-    return 'paid';
   };
 
   const handleMixedPaymentMethodClick = (methodId: string) => {
@@ -286,131 +164,6 @@ export const FinancialSummary = () => {
       if (methodId !== 'efectivo') {
         setPaidAmount('');
       }
-    }
-  };
-
-  const handleFinalizeSale = async () => {
-    try {
-      setIsProcessing(true);
-      
-      if (!paymentMethod) {
-        alert('Por favor selecciona un método de pago');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (items.length === 0) {
-        alert('El carrito está vacío');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (paymentMethod === 'credito' && !clientId) {
-        alert('Para crédito es necesario seleccionar un cliente');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (paymentMethod === 'efectivo' && parseFloat(paidAmount || '0') < total) {
-        alert('El monto pagado es menor al total');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (paymentMethod === 'mixto') {
-        if (!mixedPayments || mixedPayments.step !== 'completed') {
-          alert('Para pago mixto debe seleccionar dos métodos de pago');
-          setIsProcessing(false);
-          return;
-        }
-        
-        const firstAmount = mixedPayments.firstAmount || 0;
-        const secondAmount = mixedPayments.secondAmount || 0;
-        const sum = firstAmount + secondAmount;
-        
-        if (Math.abs(sum - total) >= 0.01) {
-          alert(`La suma de los pagos (${formatCurrency(sum)}) no coincide con el total (${formatCurrency(total)})`);
-          setIsProcessing(false);
-          return;
-        }
-      }
-      
-      const paymentStatus = getPaymentStatus();
-      
-      let payments = [];
-
-      if (paymentMethod === 'mixto' && mixedPayments && mixedPayments.step === 'completed') {
-        payments = [
-          {
-            method: getBackendPaymentMethod(mixedPayments.firstMethod!),
-            amount: mixedPayments.firstAmount!
-          },
-          {
-            method: getBackendPaymentMethod(mixedPayments.secondMethod!),
-            amount: mixedPayments.secondAmount!
-          }
-        ];
-      } else {
-        payments = [{
-          method: getBackendPaymentMethod(paymentMethod),
-          amount: getPaidAmountToSend()
-        }];
-      }
-      
-      const saleData = {
-        userId: 1,
-        clientId: clientId || undefined,
-        items: items.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          unit_price_ppv: item.pricePPV,
-          unit_price_pph: item.pricePPH,
-          discountPercentage: item.discountPercentage || 0,
-          discountAmount: (item.pricePPV * item.quantity * (item.discountPercentage || 0)) / 100
-        })),
-        discountType: getBackendDiscountType(discountType),
-        discountAmount: discountAmount > 0 ? discountAmount : undefined,
-        discountPercentage: discountType === 'percentage' ? discountValue : undefined,
-        paymentMethod: getBackendPaymentMethod(paymentMethod),
-        paidAmount: getPaidAmountToSend(),
-        payments: payments,
-        paymentStatus: paymentStatus,
-        notes: 'Venta desde CleverHub POS',
-        adultFlag: true,
-        pregnantFlag: false,
-        lactatingFlag: false,
-        chronicConditionFlag: false,
-        usualMedicationFlag: false
-      };
-      
-      console.log('Enviando venta al backend:', JSON.stringify(saleData, null, 2));
-      
-      const response = await salesService.create(saleData);
-      
-      console.log('Venta creada exitosamente:', response.data);
-      
-      clearCart();
-      setPaidAmount('');
-      
-      const result = response.data || response;
-      const saleNumber = result.saleNumber || result.id || 'N/A';
-      alert(`✅ Venta #${saleNumber} completada exitosamente\nTotal: ${formatCurrency(total)}`);
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error('Error finalizando venta:', error);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error ||
-                          error.message || 
-                          'Error al finalizar la venta';
-      
-      alert(`❌ Error: ${errorMessage}\n\nRevisa la consola para más detalles.`);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -612,29 +365,6 @@ export const FinancialSummary = () => {
     <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-sm h-fit">
       {/* Título con menos margen inferior */}
       <h3 className="text-lg font-bold text-gray-900 mb-2">Resumen Financiero</h3>
-      
-     {/* Botón Finalizar Venta */}
-      <button
-        onClick={handleFinalizeSale}
-        disabled={!canCompleteSale() || isProcessing}
-        className={`w-full mb-3 py-2 rounded-lg font-semibold transition-colors text-sm ${
-          canCompleteSale() && !isProcessing
-            ? 'bg-green-600 hover:bg-green-700 text-white'
-            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-        }`}
-      >
-        {isProcessing ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Procesando...
-          </span>
-        ) : (
-          getButtonText()
-        )}
-      </button>
       
       {/* Método de pago - sin margen superior adicional */}
       <div className="mb-3">

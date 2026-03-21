@@ -683,16 +683,16 @@ export const SalesPage = () => {
             {/* STICKY 2: Resumen financiero */}
             <div className="col-span-12 lg:col-span-5 sticky top-[152px] self-start">
               <FinancialSummary />
-              <button
+            </div>
+          </div>
+        </div>
+      </div>
+      <button
                 onClick={handleCheckout}
                 className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
               >
                 Finalizar Venta
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Modal para nuevo cliente */}
       {showNewCustomerModal && (

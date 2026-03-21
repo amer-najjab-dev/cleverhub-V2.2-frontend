@@ -353,7 +353,79 @@ export const SalesPage = () => {
   const handleCheckout = async () => {
     try {
       const cartState = useCartStore.getState();
-      const total = cartState.items.reduce((sum, item) => sum + item.pricePPV * item.quantity, 0);
+      const total = cartState.getTotal();
+      const paymentMethod = cartState.paymentMethod;
+      const mixedPayments = cartState.mixedPayments;
+      
+      // Calcular paidAmount según el método de pago
+      let paidAmount = 0;
+      let paymentItems: any[] = [];
+      
+      if (paymentMethod === 'efectivo') {
+        paidAmount = total;
+        paymentItems = [{
+          amount: total,
+          method: 'cash'
+        }];
+      } else if (paymentMethod === 'credito') {
+        paidAmount = 0;
+        paymentItems = [{
+          amount: total,
+          method: 'credit'
+        }];
+      } else if (paymentMethod === 'mixto' && mixedPayments) {
+        paidAmount = (mixedPayments.firstAmount || 0) + (mixedPayments.secondAmount || 0);
+        paymentItems = [];
+        if (mixedPayments.firstMethod && mixedPayments.firstAmount) {
+          paymentItems.push({
+            amount: mixedPayments.firstAmount,
+            method: mixedPayments.firstMethod === 'efectivo' ? 'cash' : 
+                    mixedPayments.firstMethod === 'tarjeta' ? 'Credit Card' :
+                    mixedPayments.firstMethod === 'credito' ? 'credit' :
+                    mixedPayments.firstMethod === 'transferencia' ? 'Bank Transfer' :
+                    'Bank Cheque'
+          });
+        }
+        if (mixedPayments.secondMethod && mixedPayments.secondAmount) {
+          paymentItems.push({
+            amount: mixedPayments.secondAmount,
+            method: mixedPayments.secondMethod === 'efectivo' ? 'cash' : 
+                    mixedPayments.secondMethod === 'tarjeta' ? 'Credit Card' :
+                    mixedPayments.secondMethod === 'credito' ? 'credit' :
+                    mixedPayments.secondMethod === 'transferencia' ? 'Bank Transfer' :
+                    'Bank Cheque'
+          });
+        }
+      } else {
+        // Otros métodos (tarjeta, transferencia, cheque) → pago completo
+        paidAmount = total;
+        const methodMap: Record<string, string> = {
+          'tarjeta': 'Credit Card',
+          'transferencia': 'Bank Transfer',
+          'cheque': 'Bank Cheque'
+        };
+        paymentItems = [{
+          amount: total,
+          method: methodMap[paymentMethod || ''] || 'cash'
+        }];
+      }
+      
+      // Definir el tipo de paymentMethod para el backend
+      let backendPaymentMethod: 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' = 'cash';
+      
+      if (paymentMethod === 'credito') {
+        backendPaymentMethod = 'credit';
+      } else if (paymentMethod === 'tarjeta') {
+        backendPaymentMethod = 'Credit Card';
+      } else if (paymentMethod === 'transferencia') {
+        backendPaymentMethod = 'Bank Transfer';
+      } else if (paymentMethod === 'cheque') {
+        backendPaymentMethod = 'Bank Cheque';
+      } else if (paymentMethod === 'efectivo') {
+        backendPaymentMethod = 'cash';
+      } else if (paymentMethod === 'mixto') {
+        backendPaymentMethod = 'mixed';
+      }
       
       const saleData = {
         userId: 1,
@@ -364,9 +436,10 @@ export const SalesPage = () => {
           price: item.isLoyalty ? 0 : item.pricePPV,
           isLoyalty: item.isLoyalty || false
         })),
-        paymentMethod: 'mixed' as const,
-        paidAmount: total,
-        total: total
+        paymentMethod: backendPaymentMethod,
+        paidAmount,
+        total,
+        paymentItems
       };
       
       const response = await salesService.create(saleData);

@@ -439,7 +439,7 @@ export const SalesPage = () => {
         paymentMethod: backendPaymentMethod,
         paidAmount,
         total,
-        paymentItems
+         payments: paymentItems
       };
       
       const response = await salesService.create(saleData);

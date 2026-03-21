@@ -600,6 +600,12 @@ export const SalesPage = () => {
                 />
               </div>
             )}
+            <button
+              onClick={handleCheckout}
+              className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+            >
+              Finalizar Venta
+            </button>
           </div>
         </div>
       </div>

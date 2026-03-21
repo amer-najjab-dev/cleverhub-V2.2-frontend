@@ -183,7 +183,8 @@ export const clientsService = {
   },
 
   registerPayment: async (clientId: number, data: PaymentDto) => {
-    const response = await api.post<ApiResponse<ClientDebt>>(`/clients/${clientId}/pagos`, data);
+    // Cambiar de /pagos a /debt/payments
+    const response = await api.post<ApiResponse<ClientDebt>>(`/clients/${clientId}/debt/payments`, data);
     return response.data;
   },
 

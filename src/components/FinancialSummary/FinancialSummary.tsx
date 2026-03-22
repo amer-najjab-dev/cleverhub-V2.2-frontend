@@ -124,8 +124,12 @@ export const FinancialSummary = () => {
   const getPaidAmountToSend = (): number => {
     if (!paymentMethod) return 0;
     
-    if (['tarjeta', 'transferencia', 'cheque', 'credito', 'puntos'].includes(paymentMethod)) {
+    if (['tarjeta', 'transferencia', 'cheque'].includes(paymentMethod)) {
       return 0;
+    }
+    
+    if (paymentMethod === 'credito' || paymentMethod === 'puntos') {
+      return total; // ← DEVOLVER TOTAL PARA CRÉDITO
     }
     
     if (paymentMethod === 'efectivo') {
@@ -366,7 +370,7 @@ export const FinancialSummary = () => {
           amount: getPaidAmountToSend()
         }];
       }
-      
+      console.log('💰 TOTAL A ENVIAR:', total);
       const saleData = {
         userId: 1,
         clientId: clientId || undefined,

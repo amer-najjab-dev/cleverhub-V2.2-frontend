@@ -377,6 +377,8 @@ export const FinancialSummary = () => {
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity,
+          unit_price_ppv: item.pricePPV,
+          unit_price_pph: item.pricePPH,
           discountPercentage: item.discountPercentage || 0,
           discountAmount: (item.pricePPV * item.quantity * (item.discountPercentage || 0)) / 100
         })),

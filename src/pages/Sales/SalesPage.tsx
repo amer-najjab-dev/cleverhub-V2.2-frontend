@@ -604,16 +604,6 @@ export const SalesPage = () => {
         </div>
       </div>
 
-      {/* BOTÓN FINALIZAR VENTA - UBICADO ARRIBA */}
-      <div className="px-6 py-3 bg-white border-b border-gray-200 shadow-sm">
-        <button
-          onClick={handleCheckout}
-          className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-lg"
-        >
-          Finalizar Venta
-        </button>
-      </div>
-
       {/* Mostrar resultados de búsqueda de productos (fuera del sticky) */}
       {(productSearchResults.length > 0 || isSearching || searchError) && (
         <div className="px-6 py-4 border-b border-gray-200">
@@ -692,6 +682,12 @@ export const SalesPage = () => {
             
             {/* STICKY 2: Resumen financiero */}
             <div className="col-span-12 lg:col-span-5 sticky top-[152px] self-start">
+               <button
+                  onClick={handleCheckout}
+                  className="w-full mb-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                >
+                  Finalizar Venta
+                </button>
               <FinancialSummary />
             </div>
           </div>

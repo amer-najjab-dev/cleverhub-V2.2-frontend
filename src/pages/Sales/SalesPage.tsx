@@ -42,6 +42,7 @@ export const SalesPage = () => {
   // Refs para control de foco
   const productSearchRef = useRef<HTMLInputElement>(null);
   const customerSearchRef = useRef<HTMLInputElement>(null);
+  const customerDropdownRef = useRef<HTMLDivElement>(null);
   
   const { addItem } = useCartStore();
   const { formatCurrency } = useCurrencyFormatter();
@@ -186,6 +187,19 @@ export const SalesPage = () => {
         e.returnValue = '';
       }
     };
+     useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (customerDropdownRef.current && !customerDropdownRef.current.contains(event.target as Node)) {
+          setShowCustomerResults(false);
+          // Devolver foco al buscador de productos
+          if (productSearchRef.current) {
+            productSearchRef.current.focus();
+          }
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     
@@ -300,13 +314,9 @@ export const SalesPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header fijo en la parte superior */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="mb-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">Punto de Venta CleverHub</h1>
-              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                Modo asesor activo
-              </span>
             </div>
             <p className="text-gray-600 mt-1">
               Venta en curso • 
@@ -348,7 +358,7 @@ export const SalesPage = () => {
 
               {/* PARTE DERECHA: Buscar cliente + Nuevo cliente */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto relative">
-                <div className="relative w-full sm:w-64">
+                <div ref={customerDropdownRef} className="relative w-full sm:w-64">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -477,11 +487,11 @@ export const SalesPage = () => {
       </div>
 
       {/* Contenido principal - Debajo del header fijo */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="grid grid-cols-12 gap-4">
           {/* Columna izquierda - Carrito (8/12) */}
           <div className="col-span-12 lg:col-span-8">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
               <CleverHubPanel />
             </div>
@@ -497,7 +507,7 @@ export const SalesPage = () => {
       {/* Modal para nuevo cliente */}
       {showNewCustomerModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="bg-white rounded-lg p-5 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Nuevo Cliente</h3>
               <button 
@@ -572,7 +582,7 @@ export const SalesPage = () => {
               </div>
             </div>
             
-            <div className="mt-6 pt-4 border-t flex justify-end gap-3">
+            <div className="mt-4 pt-4 border-t flex justify-end gap-3">
               <button
                 onClick={() => setShowNewCustomerModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

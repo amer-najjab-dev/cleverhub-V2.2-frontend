@@ -215,16 +215,15 @@ export const FinancialSummary = () => {
   };
 
   const getPaymentStatus = (): 'paid' | 'partial' | 'pending' => {
-    if (paymentMethod === 'credito' || paymentMethod === 'puntos') {
+    const amountPaid = getPaidAmountToSend();
+    
+    if (amountPaid >= total) {
+      return 'paid';
+    } else if (amountPaid > 0 && amountPaid < total) {
       return 'partial';
+    } else {
+      return 'pending';
     }
-    
-    if (paymentMethod === 'mixto') {
-      const amountPaid = getPaidAmountToSend();
-      return amountPaid >= total ? 'paid' : 'partial';
-    }
-    
-    return 'paid';
   };
 
   const handleMixedPaymentMethodClick = (methodId: string) => {

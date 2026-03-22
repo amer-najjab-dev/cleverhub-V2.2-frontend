@@ -1,6 +1,6 @@
 import { CartProductCard } from './CartProductCard';
 import { useCartStore } from '../../store/cart.store';
-import { ShoppingCart, User, X } from 'lucide-react';
+import { ShoppingCart, X } from 'lucide-react';
 import { Client } from '../../services/clients.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
 
@@ -36,23 +36,32 @@ export const SalesCart = ({ customer, onClearCustomer }: SalesCartProps) => {
       {/* Mostrar cliente si existe */}
       {customer && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-blue-600" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+              {customer.first_name?.charAt(0).toUpperCase()}
+              {customer.last_name?.charAt(0).toUpperCase()}
+            </div>
             <div>
-              <span className="text-sm font-medium text-blue-800">Cliente:</span>
-              <span className="ml-2 text-sm text-gray-700">
-                {customer.name} {customer.last_name ? ` ${customer.last_name}` : ''}
-                {customer.phone && ` - ${customer.phone}`}
-              </span>
+              <div className="text-sm font-medium text-blue-900">
+                {customer.first_name} {customer.last_name}
+              </div>
+              {customer.phone && (
+                <div className="flex items-center gap-1 text-xs text-blue-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  {customer.phone}
+                </div>
+              )}
             </div>
           </div>
           {onClearCustomer && (
             <button
               onClick={onClearCustomer}
-              className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+              className="p-1.5 hover:bg-blue-100 rounded-full transition-colors"
               title="Quitar cliente"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5 text-blue-600" />
             </button>
           )}
         </div>

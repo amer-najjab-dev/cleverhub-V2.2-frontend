@@ -830,23 +830,6 @@ export const FinancialSummary = () => {
           getButtonText()
         )}
       </button>
-      
-      {items.length > 0 && (
-        <div className="mt-3 text-xs text-gray-500 text-center">
-          {items.length} producto(s) en carrito • {paymentMethod ? `Pago: ${paymentMethod}` : 'Sin método de pago'}
-          {(paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId && (
-            <div className="mt-1 text-red-600 text-xs font-medium">
-              ⚠️ Selecciona un cliente para habilitar {paymentMethod === 'credito' ? 'crédito' : 'pago con puntos'}
-            </div>
-          )}
-          <div className="mt-1 text-blue-600 text-xs">
-            Usuario ID: 1 • {clientId ? `Cliente ID: ${clientId}` : 'Venta sin cliente registrado'}
-          </div>
-          <div className="mt-1 text-gray-400 text-xs">
-            Al refrescar/navegar fuera, se guardará automáticamente en borradores
-          </div>
-        </div>
-      )}
     </div>
   );
 };

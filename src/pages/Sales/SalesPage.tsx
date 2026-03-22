@@ -323,26 +323,40 @@ export const SalesPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header fijo en la parte superior */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-2">
+        <div className="px-4 py-2">
           <div className="mb-4">
             <div className="flex items-center gap-3">
             </div>
             <p className="text-gray-600 mt-1">
               Venta en curso • 
               {currentCustomer ? (
-                <>
-                  <span className="inline-flex items-center gap-1">
-                    {getCustomerFullName(currentCustomer)}
-                    <button 
-                      onClick={handleClearCustomer}
-                      className="ml-1 text-red-500 hover:text-red-700 text-xs p-0.5 hover:bg-red-50 rounded"
-                      title="Quitar cliente"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                  {currentCustomer.phone && ` • Tel: ${currentCustomer.phone}`}
-                </>
+                <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5">
+                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                    {getCustomerFullName(currentCustomer).charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <span className="font-medium text-blue-900 text-sm">
+                      {getCustomerFullName(currentCustomer)}
+                    </span>
+                    {currentCustomer.phone && (
+                      <div className="flex items-center gap-1 text-xs text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        {currentCustomer.phone}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleClearCustomer}
+                    className="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                    title="Quitar cliente"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               ) : 'Sin cliente asignado'}
             </p>
           </div>
@@ -380,7 +394,7 @@ export const SalesPage = () => {
                     value={customerSearchQuery}
                     onChange={(e) => handleCustomerSearch(e.target.value)}
                     onFocus={() => customerSearchQuery && setShowCustomerResults(true)}
-                    className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-1.5 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                   
                   {/* Resultados de búsqueda de clientes */}
@@ -432,7 +446,7 @@ export const SalesPage = () => {
       </div>
 
       {/* Contenido principal - Debajo del header fijo */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="px-4 py-4">
         <div className="grid grid-cols-12 gap-4">
           {/* Columna izquierda - Carrito (8/12) */}
           <div className="col-span-12 lg:col-span-8">

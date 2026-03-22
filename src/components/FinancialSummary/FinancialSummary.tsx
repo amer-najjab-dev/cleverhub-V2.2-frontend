@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Wallet, TrendingUp, DollarSign, Percent, Tag, AlertCircle } from 'lucide-react';
+import { CreditCard, Wallet, TrendingUp, DollarSign, Percent, Tag, AlertCircle, Star } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
 import { salesService } from '../../services/sales.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
+
+type PaymentMethod = 'efectivo' | 'tarjeta' | 'transferencia' | 'cheque' | 'mixto' | 'credito' | 'puntos';
 
 export const FinancialSummary = () => {
   const [paidAmount, setPaidAmount] = useState<string>('');
@@ -36,8 +38,6 @@ export const FinancialSummary = () => {
   const {
     getSubtotal,
     getSubtotalWithProductDiscounts,
-    getTotalCost,
-    getTotalMargin,
     getDiscountAmount,
     getTaxAmount,
     getTotal,
@@ -57,13 +57,10 @@ export const FinancialSummary = () => {
 
   const subtotal = getSubtotal();
   const subtotalWithProductDiscounts = getSubtotalWithProductDiscounts();
-  const totalCost = getTotalCost();
-  const totalMargin = getTotalMargin();
   const discountAmount = getDiscountAmount();
   const taxAmount = getTaxAmount(region);
   const total = getTotal(region);
   const changeAmount = paidAmount ? parseFloat(paidAmount) - total : 0;
-  const marginPercentage = subtotalWithProductDiscounts > 0 ? (totalMargin / subtotalWithProductDiscounts) * 100 : 0;
   
   const hasProductLevelDiscounts = hasProductDiscounts();
   const productDiscountsAmount = subtotal - subtotalWithProductDiscounts;
@@ -75,6 +72,7 @@ export const FinancialSummary = () => {
     
     switch (paymentMethod) {
       case 'credito':
+      case 'puntos':
         return !!clientId;
           
       case 'tarjeta':
@@ -104,7 +102,7 @@ export const FinancialSummary = () => {
 
   const showAmountField = (): boolean => {
     if (!paymentMethod) return false;
-    if (['tarjeta', 'transferencia', 'cheque', 'credito'].includes(paymentMethod)) {
+    if (['tarjeta', 'transferencia', 'cheque', 'credito', 'puntos'].includes(paymentMethod)) {
       return false;
     }
     if (paymentMethod === 'efectivo') {
@@ -126,7 +124,7 @@ export const FinancialSummary = () => {
   const getPaidAmountToSend = (): number => {
     if (!paymentMethod) return 0;
     
-    if (['tarjeta', 'transferencia', 'cheque', 'credito'].includes(paymentMethod)) {
+    if (['tarjeta', 'transferencia', 'cheque', 'credito', 'puntos'].includes(paymentMethod)) {
       return 0;
     }
     
@@ -148,6 +146,10 @@ export const FinancialSummary = () => {
     
     if (paymentMethod === 'credito' && !clientId) {
       return '⚠️ Selecciona cliente para habilitar crédito';
+    }
+    
+    if (paymentMethod === 'puntos' && !clientId) {
+      return '⚠️ Selecciona cliente para habilitar pago con puntos';
     }
     
     if (!canCompleteSale()) {
@@ -188,11 +190,12 @@ export const FinancialSummary = () => {
     updateCartDiscount('none', 0);
   };
 
-  const getBackendPaymentMethod = (method: string): 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' => {
+  const getBackendPaymentMethod = (method: PaymentMethod): 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' => {
     switch (method) {
       case 'efectivo': return 'cash';
       case 'tarjeta': return 'Credit Card';
       case 'credito': return 'credit';
+      case 'puntos': return 'credit';
       case 'transferencia': return 'Bank Transfer';
       case 'cheque': return 'Bank Cheque';
       case 'mixto': return 'mixed';
@@ -208,7 +211,7 @@ export const FinancialSummary = () => {
   };
 
   const getPaymentStatus = (): 'paid' | 'partial' | 'pending' => {
-    if (paymentMethod === 'credito') {
+    if (paymentMethod === 'credito' || paymentMethod === 'puntos') {
       return 'partial';
     }
     
@@ -280,6 +283,11 @@ export const FinancialSummary = () => {
       }
       return;
     }
+    
+    if (methodId === 'puntos') {
+      setPaymentMethod('puntos');
+      return;
+    }
 
     if (paymentMethod === 'mixto' && mixedPayments) {
       handleMixedPaymentMethodClick(methodId);
@@ -307,8 +315,8 @@ export const FinancialSummary = () => {
         return;
       }
       
-      if (paymentMethod === 'credito' && !clientId) {
-        alert('Para crédito es necesario seleccionar un cliente');
+      if ((paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId) {
+        alert('Para crédito o pago con puntos es necesario seleccionar un cliente');
         setIsProcessing(false);
         return;
       }
@@ -421,6 +429,7 @@ export const FinancialSummary = () => {
     { id: 'credito', label: 'Crédito', icon: CreditCard },
     { id: 'cheque', label: 'Cheque', icon: DollarSign },
     { id: 'mixto', label: 'Mixto', icon: Wallet },
+    { id: 'puntos', label: 'Pago con Puntos', icon: Star },
   ];
 
   const renderMixedPaymentUI = () => {
@@ -544,7 +553,7 @@ export const FinancialSummary = () => {
 
   const getButtonStyle = (methodId: string) => {
     const Icon = paymentMethods.find(m => m.id === methodId)?.icon || Wallet;
-    const isDisabled = methodId === 'credito' && !clientId;
+    const isDisabled = (methodId === 'credito' && !clientId) || (methodId === 'puntos' && !clientId);
     
     if (paymentMethod === methodId && methodId !== 'mixto') {
       return {
@@ -623,7 +632,7 @@ export const FinancialSummary = () => {
                 onClick={() => handlePaymentMethodClick(method.id, disabled)}
                 className={`flex items-center px-2.5 py-1.5 rounded-lg border transition-colors text-xs ${style}`}
                 disabled={disabled}
-                title={disabled ? 'Selecciona un cliente para usar crédito' : ''}
+                title={disabled ? 'Selecciona un cliente para usar crédito o puntos' : ''}
               >
                 <Icon className="w-3.5 h-3.5 mr-1.5" />
                 {method.label}
@@ -633,9 +642,9 @@ export const FinancialSummary = () => {
           })}
         </div>
         
-        {paymentMethod === 'credito' && !clientId && (
+        {(paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId && (
           <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
-            ⚠️ El método "Crédito" solo está disponible cuando seleccionas un cliente.
+            ⚠️ El método "{paymentMethod === 'credito' ? 'Crédito' : 'Pago con Puntos'}" solo está disponible cuando seleccionas un cliente.
           </div>
         )}
       </div>
@@ -731,27 +740,7 @@ export const FinancialSummary = () => {
         )}
       </div>
 
-      <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <div className="text-xs text-gray-600">Costo total (PPH)</div>
-            <div className="font-bold text-md">{formatCurrency(totalCost)}</div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-600">Margen bruto</div>
-            <div className="font-bold text-md text-green-600">
-              {formatCurrency(totalMargin)}
-              <div className="text-xs font-normal">({marginPercentage.toFixed(1)}%)</div>
-            </div>
-          </div>
-        </div>
-        {productDiscountsAmount > 0 && (
-          <div className="mt-1.5 text-xs text-green-700">
-            Descuentos por producto: -{formatCurrency(productDiscountsAmount)}
-          </div>
-        )}
-      </div>
-
+      {/* Sección de Totales - Costo y Margen eliminados */}
       <div className="mb-4 border border-gray-200 rounded-lg p-3">
         <div className="space-y-2">
           <div className="flex justify-between">
@@ -820,19 +809,6 @@ export const FinancialSummary = () => {
         </div>
       )}
 
-      <div className="border-t border-gray-200 pt-3 mb-4">
-        <div className="grid grid-cols-2 gap-2">
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{items.length}</div>
-            <div className="text-xs text-gray-600">Productos</div>
-          </div>
-          <div className="text-center p-2 bg-blue-50 rounded-lg">
-            <div className="text-lg font-bold text-blue-700">{marginPercentage.toFixed(1)}%</div>
-            <div className="text-xs text-blue-600">Margen %</div>
-          </div>
-        </div>
-      </div>
-
       <button
         onClick={handleFinalizeSale}
         disabled={!canCompleteSale() || isProcessing}
@@ -858,9 +834,9 @@ export const FinancialSummary = () => {
       {items.length > 0 && (
         <div className="mt-3 text-xs text-gray-500 text-center">
           {items.length} producto(s) en carrito • {paymentMethod ? `Pago: ${paymentMethod}` : 'Sin método de pago'}
-          {paymentMethod === 'credito' && !clientId && (
+          {(paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId && (
             <div className="mt-1 text-red-600 text-xs font-medium">
-              ⚠️ Selecciona un cliente para habilitar crédito
+              ⚠️ Selecciona un cliente para habilitar {paymentMethod === 'credito' ? 'crédito' : 'pago con puntos'}
             </div>
           )}
           <div className="mt-1 text-blue-600 text-xs">

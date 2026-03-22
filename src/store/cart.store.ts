@@ -25,13 +25,13 @@ interface CartStore {
   clientId?: number;  // CAMBIADO: Ahora es opcional
   discountType: 'none' | 'percentage' | 'amount';  // Descuento por carrito
   discountValue: number;  // Valor del descuento por carrito
-  paymentMethod?: 'efectivo' | 'tarjeta' | 'credito' | 'transferencia' | 'cheque' | 'mixto';
+  paymentMethod?: 'efectivo' | 'tarjeta' | 'credito' | 'transferencia' | 'cheque' | 'mixto' | 'puntos';
   
   // NUEVO: Estado para pago mixto
   mixedPayments?: {
-    firstMethod?: 'efectivo' | 'tarjeta' | 'transferencia' | 'credito' | 'cheque';
+    firstMethod?: 'efectivo' | 'tarjeta' | 'transferencia' | 'credito' | 'cheque' | 'puntos';
     firstAmount?: number;
-    secondMethod?: 'efectivo' | 'tarjeta' | 'transferencia' | 'credito' | 'cheque';
+    secondMethod?: 'efectivo' | 'tarjeta' | 'transferencia' | 'credito' | 'cheque' | 'puntos';
     secondAmount?: number;
     step?: 'selecting_first' | 'selecting_second' | 'completed';
   };
@@ -41,7 +41,7 @@ interface CartStore {
   updateQuantity: (id: number, quantity: number) => void;
   updateProductDiscount: (id: number, percentage: number) => void;
   updateCartDiscount: (type: 'none' | 'percentage' | 'amount', value: number) => void;
-  setPaymentMethod: (method: 'efectivo' | 'tarjeta' | 'credito' | 'transferencia' | 'cheque' | 'mixto') => void;
+  setPaymentMethod: (method: 'efectivo' | 'tarjeta' | 'credito' | 'transferencia' | 'cheque' | 'mixto'| 'puntos') => void;
   
   // NUEVO: Funciones para manejar pago mixto
   setMixedPayment: (data: Partial<CartStore['mixedPayments']>) => void;

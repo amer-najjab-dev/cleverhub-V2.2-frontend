@@ -5,12 +5,8 @@ import { CleverHubPanel } from '../../components/CleverHubPanel/CleverHubPanel';
 import ProductSearchDropdown from '../../components/ProductSearchDropdown/ProductSearchDropdown';
 import { productsService, Product } from '../../services/products.service';
 import { clientsService, Client } from '../../services/clients.service';
-import { salesService } from '../../services/sales.service';
 import { useCartStore } from '../../store/cart.store';
 import { useCurrencyFormatter } from '../../utils/formatters';
-import { LoyaltyCheckoutButton } from '../../modules/sales/components/LoyaltyCheckoutButton';
-import { loyaltyCheckoutService } from '../../modules/sales/services/loyaltyCheckout.service';
-import { Search, X, User, Plus } from 'lucide-react';
 
 // Debouncer para búsquedas
 const useDebounce = (value: string, delay: number) => {
@@ -47,10 +43,7 @@ export const SalesPage = () => {
   const productSearchRef = useRef<HTMLInputElement>(null);
   const customerSearchRef = useRef<HTMLInputElement>(null);
   
-  // Estado para items de fidelidad
-  const [loyaltyMetadata, setLoyaltyMetadata] = useState<any[]>([]);
-  
-  const { addItem, clearCart, setClient, clearClient } = useCartStore();
+  const { addItem } = useCartStore();
   const { formatCurrency } = useCurrencyFormatter();
   
   // AUTO-FOCUS INICIAL: al cargar la página, el foco va al buscador de productos
@@ -111,11 +104,11 @@ export const SalesPage = () => {
     searchProducts();
   }, [debouncedProductSearch, productFilter]);
   
-  // Búsqueda de clientes con filtrado local (mínimo 3 caracteres)
+  // Búsqueda de clientes con filtrado local
   useEffect(() => {
     const searchCustomers = async () => {
       const query = customerSearchQuery.trim();
-      if (!query || query.length < 3) {
+      if (!query) {
         setCustomerSearchResults([]);
         setShowCustomerResults(false);
         return;
@@ -149,42 +142,6 @@ export const SalesPage = () => {
     return () => clearTimeout(timer);
   }, [customerSearchQuery]);
   
-  // Manejar blur del campo de cliente para volver al producto
-  const handleCustomerBlur = () => {
-    setTimeout(() => {
-      if (productSearchRef.current) {
-        productSearchRef.current.focus();
-      }
-    }, 200);
-  };
-  
-  // Función para manejar la adición de items de fidelidad
-  const handleAddLoyaltyItems = (items: any[]) => {
-    const metadata = items.filter(item => item.isPackMetadata);
-    const products = items.filter(item => !item.isPackMetadata);
-    
-    products.forEach(item => {
-      addItem({
-        id: item.productId,
-        name: item.productName,
-        category: 'Récompense',
-        stock: 999,
-        pricePPV: 0,
-        pricePPH: 0,
-        hasInteraction: false,
-        lowStock: false,
-        interactionWarning: undefined,
-        isLoyalty: true,
-        loyaltyType: item.type,
-        loyaltyId: item.id,
-        packId: item.packId,
-        points: item.points
-      });
-    });
-    
-    setLoyaltyMetadata(prev => [...prev, ...metadata]);
-  };
-  
   const saveDraft = () => {
     const cartState = useCartStore.getState();
     if (cartState.items.length > 0) {
@@ -193,8 +150,7 @@ export const SalesPage = () => {
         clientId: cartState.clientId,
         paymentMethod: cartState.paymentMethod,
         timestamp: new Date().toISOString(),
-        customer: currentCustomer,
-        loyaltyMetadata
+        customer: currentCustomer
       };
       localStorage.setItem('sales_draft', JSON.stringify(draft));
       console.log('📝 Borrador guardado automáticamente');
@@ -248,7 +204,7 @@ export const SalesPage = () => {
   
   const handleCustomerSearch = (query: string) => {
     setCustomerSearchQuery(query);
-    setShowCustomerResults(query.length >= 3);
+    setShowCustomerResults(query.length > 0);
   };
   
   const handleNewCustomer = () => {
@@ -266,15 +222,10 @@ export const SalesPage = () => {
       setCustomerSearchResults([]);
       setShowCustomerResults(false);
       
-      setClient(newClient.id);
+      useCartStore.getState().setClient(newClient.id);
       console.log('Nuevo cliente creado:', newClient);
       
       alert(`Cliente ${newClient.first_name} ${newClient.last_name || ''} creado exitosamente`);
-      
-      // Devolver foco al input de productos
-      if (productSearchRef.current) {
-        productSearchRef.current.focus();
-      }
     } catch (error: any) {
       console.error('Error creando cliente:', error);
       alert(error.response?.data?.message || 'Error al crear cliente');
@@ -283,31 +234,20 @@ export const SalesPage = () => {
   
   const handleClearCustomer = () => {
     setCurrentCustomer(null);
-    clearClient();
+    useCartStore.getState().clearClient();
     setCustomerSearchQuery('');
     setCustomerSearchResults([]);
     setShowCustomerResults(false);
-    setLoyaltyMetadata([]);
     console.log('🗑️ Cliente limpiado, carrito sin cliente asignado');
-    
-    // Devolver foco al input de productos
-    if (productSearchRef.current) {
-      productSearchRef.current.focus();
-    }
   };
   
   const handleSelectCustomer = (client: Client) => {
     setCurrentCustomer(client);
-    setClient(client.id);
+    useCartStore.getState().setClient(client.id);
     setCustomerSearchQuery('');
     setCustomerSearchResults([]);
     setShowCustomerResults(false);
     console.log('✅ Cliente seleccionado:', client.name);
-    
-    // Devolver foco al input de productos
-    if (productSearchRef.current) {
-      productSearchRef.current.focus();
-    }
   };
   
   const handleAddProductToCart = async (product: Product, event?: React.MouseEvent) => {
@@ -338,8 +278,7 @@ export const SalesPage = () => {
         )
       );
       
-      // Limpiar búsqueda y devolver foco
-      setProductSearchQuery('');
+      // Devolver foco al input de productos
       if (productSearchRef.current) {
         productSearchRef.current.focus();
       }
@@ -350,208 +289,79 @@ export const SalesPage = () => {
     }
   };
 
-  const handleCheckout = async () => {
-    try {
-      const cartState = useCartStore.getState();
-      const total = cartState.getTotal();
-      const paymentMethod = cartState.paymentMethod;
-      const mixedPayments = cartState.mixedPayments;
-      
-      // Calcular paidAmount según el método de pago
-      let paidAmount = 0;
-      let paymentItems: any[] = [];
-      
-      if (paymentMethod === 'efectivo') {
-        paidAmount = total;
-        paymentItems = [{
-          amount: total,
-          method: 'cash'
-        }];
-      } else if (paymentMethod === 'credito') {
-        paidAmount = 0;
-        paymentItems = [{
-          amount: total,
-          method: 'credit'
-        }];
-      } else if (paymentMethod === 'mixto' && mixedPayments) {
-        paidAmount = (mixedPayments.firstAmount || 0) + (mixedPayments.secondAmount || 0);
-        paymentItems = [];
-        if (mixedPayments.firstMethod && mixedPayments.firstAmount) {
-          paymentItems.push({
-            amount: mixedPayments.firstAmount,
-            method: mixedPayments.firstMethod === 'efectivo' ? 'cash' : 
-                    mixedPayments.firstMethod === 'tarjeta' ? 'Credit Card' :
-                    mixedPayments.firstMethod === 'credito' ? 'credit' :
-                    mixedPayments.firstMethod === 'transferencia' ? 'Bank Transfer' :
-                    'Bank Cheque'
-          });
-        }
-        if (mixedPayments.secondMethod && mixedPayments.secondAmount) {
-          paymentItems.push({
-            amount: mixedPayments.secondAmount,
-            method: mixedPayments.secondMethod === 'efectivo' ? 'cash' : 
-                    mixedPayments.secondMethod === 'tarjeta' ? 'Credit Card' :
-                    mixedPayments.secondMethod === 'credito' ? 'credit' :
-                    mixedPayments.secondMethod === 'transferencia' ? 'Bank Transfer' :
-                    'Bank Cheque'
-          });
-        }
-      } else {
-        // Otros métodos (tarjeta, transferencia, cheque) → pago completo
-        paidAmount = total;
-        const methodMap: Record<string, string> = {
-          'tarjeta': 'Credit Card',
-          'transferencia': 'Bank Transfer',
-          'cheque': 'Bank Cheque'
-        };
-        paymentItems = [{
-          amount: total,
-          method: methodMap[paymentMethod || ''] || 'cash'
-        }];
-      }
-      
-      // Definir el tipo de paymentMethod para el backend
-      let backendPaymentMethod: 'cash' | 'Credit Card' | 'credit' | 'Bank Transfer' | 'Bank Cheque' | 'mixed' = 'cash';
-      
-      if (paymentMethod === 'credito') {
-        backendPaymentMethod = 'credit';
-      } else if (paymentMethod === 'tarjeta') {
-        backendPaymentMethod = 'Credit Card';
-      } else if (paymentMethod === 'transferencia') {
-        backendPaymentMethod = 'Bank Transfer';
-      } else if (paymentMethod === 'cheque') {
-        backendPaymentMethod = 'Bank Cheque';
-      } else if (paymentMethod === 'efectivo') {
-        backendPaymentMethod = 'cash';
-      } else if (paymentMethod === 'mixto') {
-        backendPaymentMethod = 'mixed';
-      }
-      
-      const saleData = {
-        userId: 1,
-        clientId: currentCustomer?.id,
-        items: cartState.items.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.isLoyalty ? 0 : item.pricePPV,
-          isLoyalty: item.isLoyalty || false
-        })),
-        paymentMethod: backendPaymentMethod,
-        paidAmount,
-        total,
-        payments: paymentItems
-      };
-      
-      const response = await salesService.create(saleData);
-      const saleId = response.data.id;
-      
-      const itemsToRedeem: Array<{ id: number; type: string }> = [];
-      
-      const redeemed = new Set();
-      cartState.items.forEach(item => {
-        if (item.isLoyalty && item.loyaltyId && !redeemed.has(item.loyaltyId)) {
-          itemsToRedeem.push({
-            id: item.loyaltyId,
-            type: item.loyaltyType || 'reward'
-          });
-          redeemed.add(item.loyaltyId);
-        }
-      });
-      
-      if (itemsToRedeem.length > 0 && currentCustomer) {
-        await loyaltyCheckoutService.redeemItems(
-          currentCustomer.id,
-          itemsToRedeem,
-          saleId
-        );
-      }
-      
-      clearCart();
-      setLoyaltyMetadata([]);
-      alert('Venta completada con éxito');
-      
-      // Devolver foco al input de productos
-      if (productSearchRef.current) {
-        productSearchRef.current.focus();
-      }
-      
-    } catch (error) {
-      console.error('Error processing sale:', error);
-      alert('Error al procesar la venta');
-    }
-  };
-
-  const getCustomerFullName = (client: any) => {
-    const firstName = client.first_name || '';
-    const lastName = client.last_name || '';
-    
-    if (firstName || lastName) {
-      return `${firstName} ${lastName}`.trim();
+  const getCustomerFullName = (client: Client) => {
+    if (client.first_name || client.last_name) {
+      return `${client.first_name || ''} ${client.last_name || ''}`.trim();
     }
     return client.name || 'Cliente';
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* STICKY 1: Barra de búsqueda (debajo del header principal) */}
-      <div className="sticky top-[60px] z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-        <div className="px-6 py-3">
-          {/* Barra de búsqueda superior - Compacta */}
-          <div className="flex flex-col gap-3">
-            {/* Fila principal: Productos (ancho completo) + Cliente + Nuevo */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              {/* Buscador de productos (ancho principal) */}
-              <div className="flex-1 w-full">
-                <ProductSearchDropdown
-                  ref={productSearchRef}
-                  onSearch={handleProductSearch}
-                  onFilterChange={handleFilterChange}
-                  onSelectProduct={handleAddProductToCart}
-                  searchResults={productSearchResults}
-                  isSearching={isSearching} 
-                  placeholder="Buscar productos... (mínimo 3 caracteres)"
-                />
+      {/* Header fijo en la parte superior */}
+      <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="mb-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">Punto de Venta CleverHub</h1>
+              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                Modo asesor activo
+              </span>
+            </div>
+            <p className="text-gray-600 mt-1">
+              Venta en curso • 
+              {currentCustomer ? (
+                <>
+                  <span className="inline-flex items-center gap-1">
+                    {getCustomerFullName(currentCustomer)}
+                    <button 
+                      onClick={handleClearCustomer}
+                      className="ml-1 text-red-500 hover:text-red-700 text-xs p-0.5 hover:bg-red-50 rounded"
+                      title="Quitar cliente"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                  {currentCustomer.phone && ` • Tel: ${currentCustomer.phone}`}
+                </>
+              ) : 'Sin cliente asignado'}
+            </p>
+          </div>
+
+          {/* Barra de búsqueda superior */}
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* PARTE IZQUIERDA: Buscar producto + Filtros */}
+              <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                <div className="w-full sm:w-auto flex-1">
+                  <ProductSearchDropdown
+                    ref={productSearchRef}
+                    onSearch={handleProductSearch}
+                    onFilterChange={handleFilterChange}
+                    onSelectProduct={handleAddProductToCart}
+                    searchResults={productSearchResults}
+                    isSearching={isSearching}
+                    placeholder="Buscar productos... (mínimo 3 caracteres)"
+                  />
+                </div>
               </div>
 
-              {/* Cliente actual (si existe) - formato compacto */}
-              {currentCustomer && (
-                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 whitespace-nowrap">
-                  <User className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <div className="text-sm">
-                    <span className="font-medium text-blue-900">
-                      {getCustomerFullName(currentCustomer)}
-                    </span>
-                    {currentCustomer.phone && (
-                      <span className="text-blue-600 ml-2">
-                        • {currentCustomer.phone}
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleClearCustomer}
-                    className="ml-1 p-1 hover:bg-blue-100 rounded-full transition-colors"
-                    title="Quitar cliente"
-                  >
-                    <X className="w-4 h-4 text-blue-600" />
-                  </button>
-                </div>
-              )}
-
-              {/* Buscador de clientes + Botón nuevo cliente */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none sm:w-64">
+              {/* PARTE DERECHA: Buscar cliente + Nuevo cliente */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto relative">
+                <div className="relative w-full sm:w-64">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <Search className="h-4 w-4" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                   </div>
                   <input
                     ref={customerSearchRef}
                     type="text"
-                    placeholder="Buscar cliente... (3+ letras)"
+                    placeholder="Buscar cliente..."
                     value={customerSearchQuery}
                     onChange={(e) => handleCustomerSearch(e.target.value)}
-                    onFocus={() => customerSearchQuery.length >= 3 && setShowCustomerResults(true)}
-                    onBlur={handleCustomerBlur}
-                    className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    onFocus={() => customerSearchQuery && setShowCustomerResults(true)}
+                    className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   
                   {/* Resultados de búsqueda de clientes */}
@@ -564,11 +374,20 @@ export const SalesPage = () => {
                           <button
                             key={client.id}
                             onClick={() => handleSelectCustomer(client)}
-                            onMouseDown={(e) => e.preventDefault()}
-                            className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                            className="w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex justify-between items-center"
                           >
-                            <div className="font-medium text-gray-900">{getCustomerFullName(client)}</div>
-                            <div className="text-xs text-gray-600">{client.phone}</div>
+                            <div>
+                              <div className="font-medium text-gray-900">{getCustomerFullName(client)}</div>
+                              <div className="text-sm text-gray-600">{client.phone}</div>
+                              {client.email && (
+                                <div className="text-xs text-gray-500">{client.email}</div>
+                              )}
+                            </div>
+                            {client.loyalty_points && client.loyalty_points > 0 && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                {client.loyalty_points} pts
+                              </span>
+                            )}
                           </button>
                         ))
                       ) : (
@@ -580,116 +399,97 @@ export const SalesPage = () => {
                 
                 <button
                   onClick={handleNewCustomer}
-                  className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap"
-                  title="Nuevo cliente"
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Nuevo</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Nuevo Cliente
                 </button>
               </div>
             </div>
             
-            {/* Botón de Pago con Puntos (si hay cliente) */}
-            {currentCustomer && (
-              <div className="mt-2">
-                <LoyaltyCheckoutButton
-                  clientId={currentCustomer.id}
-                  clientName={getCustomerFullName(currentCustomer)}
-                  clientPoints={currentCustomer.loyalty_points || 0}
-                  onAddToCart={handleAddLoyaltyItems}
-                />
+            {/* Mostrar resultados de búsqueda de productos */}
+            {(productSearchResults.length > 0 || isSearching || searchError) && (
+              <div className="mt-4 border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  {isSearching ? 'Buscando productos...' : searchError ? 'Error' : `Resultados: ${productSearchResults.length} encontrados`}
+                </h4>
+                
+                {isSearching ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : searchError ? (
+                  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+                    {searchError}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {productSearchResults.map(product => {
+                      const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
+                      const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
+                      
+                      return (
+                        <div 
+                          key={product.id} 
+                          className="p-3 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 cursor-pointer transition-colors"
+                          onClick={(e) => handleAddProductToCart(product, e)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium text-blue-800">{product.name}</h5>
+                              <p className="text-sm text-blue-600">{product.category}</p>
+                              {product.sku && (
+                                <p className="text-xs text-blue-500">SKU: {product.sku}</p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <span className="text-blue-700 font-semibold">{formatCurrency(pricePPV)}</span>
+                              <div className="text-xs text-gray-500">PPH: {formatCurrency(pricePPH)}</div>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex justify-between items-center">
+                            <div className={`text-xs ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-blue-500'}`}>
+                              Stock: {product.stock} {product.stock < 10 && ' (¡Bajo stock!)'}
+                            </div>
+                            <button
+                              onClick={(e) => handleAddProductToCart(product, e)}
+                              disabled={product.stock <= 0}
+                              className={`px-3 py-1 text-xs rounded ${
+                                product.stock <= 0
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                              }`}
+                            >
+                              {product.stock <= 0 ? 'Sin stock' : 'Añadir'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Mostrar resultados de búsqueda de productos (fuera del sticky) */}
-      {(productSearchResults.length > 0 || isSearching || searchError) && (
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              {isSearching ? 'Buscando productos...' : searchError ? 'Error' : `Resultados: ${productSearchResults.length} encontrados`}
-            </h4>
-            
-            {isSearching ? (
-              <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : searchError ? (
-              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-                {searchError}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {productSearchResults.map(product => {
-                  const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
-                  const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
-                  
-                  return (
-                    <div 
-                      key={product.id} 
-                      className="p-3 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 cursor-pointer transition-colors"
-                      onClick={(e) => handleAddProductToCart(product, e)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h5 className="font-medium text-blue-800">{product.name}</h5>
-                          <p className="text-sm text-blue-600">{product.category}</p>
-                          {product.sku && (
-                            <p className="text-xs text-blue-500">SKU: {product.sku}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <span className="text-blue-700 font-semibold">{formatCurrency(pricePPV)}</span>
-                          <div className="text-xs text-gray-500">PPH: {formatCurrency(pricePPH)}</div>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex justify-between items-center">
-                        <div className={`text-xs ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-blue-500'}`}>
-                          Stock: {product.stock} {product.stock < 10 && ' (¡Bajo stock!)'}
-                        </div>
-                        <button
-                          onClick={(e) => handleAddProductToCart(product, e)}
-                          disabled={product.stock <= 0}
-                          className={`px-3 py-1 text-xs rounded ${
-                            product.stock <= 0
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
-                          }`}
-                        >
-                          {product.stock <= 0 ? 'Sin stock' : 'Añadir'}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Contenido principal - Debajo del header sticky */}
-      <div className="px-6 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-12 gap-6">
-            {/* Carrito - 7 columnas */}
-            <div className="col-span-12 lg:col-span-7">
+      {/* Contenido principal - Debajo del header fijo */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Columna izquierda - Carrito (8/12) */}
+          <div className="col-span-12 lg:col-span-8">
+            <div className="space-y-6">
               <SalesCart customer={currentCustomer} onClearCustomer={handleClearCustomer} />
               <CleverHubPanel />
             </div>
-            
-            {/* STICKY 2: Resumen financiero */}
-            <div className="col-span-12 lg:col-span-5 sticky top-[152px] self-start">
-               <button
-                  onClick={handleCheckout}
-                  className="w-full mb-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                >
-                  Finalizar Venta
-                </button>
-              <FinancialSummary />
-            </div>
+          </div>
+          
+          {/* Columna derecha - Resumen financiero (4/12) - STICKY */}
+          <div className="col-span-12 lg:col-span-4 sticky top-32 self-start">
+            <FinancialSummary />
           </div>
         </div>
       </div>

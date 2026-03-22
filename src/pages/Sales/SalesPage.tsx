@@ -172,6 +172,20 @@ export const SalesPage = () => {
     localStorage.removeItem('sales_draft');
   }, []);
 
+    useEffect(() => {
+    const savedDraft = localStorage.getItem('sales_draft');
+    if (savedDraft && window.confirm('¿Recuperar venta en borrador?')) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        console.log('📂 Borrador recuperado:', draft);
+      } catch (error) {
+        console.error('Error cargando borrador:', error);
+      }
+    }
+    
+    localStorage.removeItem('sales_draft');
+  }, []);
+
   useEffect(() => {
     return () => {
       saveDraft();
@@ -187,25 +201,26 @@ export const SalesPage = () => {
         e.returnValue = '';
       }
     };
-     useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (customerDropdownRef.current && !customerDropdownRef.current.contains(event.target as Node)) {
-          setShowCustomerResults(false);
-          // Devolver foco al buscador de productos
-          if (productSearchRef.current) {
-            productSearchRef.current.focus();
-          }
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
+  }, []);
+
+  // Cerrar dropdown de clientes al hacer clic fuera y devolver foco a productos
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (customerDropdownRef.current && !customerDropdownRef.current.contains(event.target as Node)) {
+        setShowCustomerResults(false);
+        if (productSearchRef.current) {
+          productSearchRef.current.focus();
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
   const handleProductSearch = (query: string) => {

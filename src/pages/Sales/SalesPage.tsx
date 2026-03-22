@@ -6,7 +6,6 @@ import ProductSearchDropdown from '../../components/ProductSearchDropdown/Produc
 import { productsService, Product } from '../../services/products.service';
 import { clientsService, Client } from '../../services/clients.service';
 import { useCartStore } from '../../store/cart.store';
-import { useCurrencyFormatter } from '../../utils/formatters';
 
 // Debouncer para búsquedas
 const useDebounce = (value: string, delay: number) => {
@@ -36,7 +35,6 @@ export const SalesPage = () => {
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [productFilter, setProductFilter] = useState('Todos');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const [isSearchingCustomers, setIsSearchingCustomers] = useState(false);
   
   // Refs para control de foco
@@ -45,7 +43,6 @@ export const SalesPage = () => {
   const customerDropdownRef = useRef<HTMLDivElement>(null);
   
   const { addItem } = useCartStore();
-  const { formatCurrency } = useCurrencyFormatter();
   
   // AUTO-FOCUS INICIAL: al cargar la página, el foco va al buscador de productos
   useEffect(() => {
@@ -62,12 +59,10 @@ export const SalesPage = () => {
     const searchProducts = async () => {
       if (!debouncedProductSearch.trim() && productFilter === 'Todos') {
         setProductSearchResults([]);
-        setSearchError(null);
         return;
       }
       
       setIsSearching(true);
-      setSearchError(null);
       
       try {
         const response = await productsService.search(debouncedProductSearch);
@@ -95,7 +90,6 @@ export const SalesPage = () => {
         setProductSearchResults(results);
       } catch (error) {
         console.error('Error en búsqueda de productos:', error);
-        setSearchError('No se pudieron cargar los productos. Intenta de nuevo más tarde.');
         setProductSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -433,70 +427,6 @@ export const SalesPage = () => {
                 </button>
               </div>
             </div>
-            
-            {/* Mostrar resultados de búsqueda de productos */}
-            {(productSearchResults.length > 0 || isSearching || searchError) && (
-              <div className="mt-4 border-t pt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  {isSearching ? 'Buscando productos...' : searchError ? 'Error' : `Resultados: ${productSearchResults.length} encontrados`}
-                </h4>
-                
-                {isSearching ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : searchError ? (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-                    {searchError}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {productSearchResults.map(product => {
-                      const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
-                      const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
-                      
-                      return (
-                        <div 
-                          key={product.id} 
-                          className="p-3 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 hover:border-blue-200 cursor-pointer transition-colors"
-                          onClick={(e) => handleAddProductToCart(product, e)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h5 className="font-medium text-blue-800">{product.name}</h5>
-                              <p className="text-sm text-blue-600">{product.category}</p>
-                              {product.sku && (
-                                <p className="text-xs text-blue-500">SKU: {product.sku}</p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <span className="text-blue-700 font-semibold">{formatCurrency(pricePPV)}</span>
-                              <div className="text-xs text-gray-500">PPH: {formatCurrency(pricePPH)}</div>
-                            </div>
-                          </div>
-                          <div className="mt-2 flex justify-between items-center">
-                            <div className={`text-xs ${product.stock < 10 ? 'text-red-600 font-medium' : 'text-blue-500'}`}>
-                              Stock: {product.stock} {product.stock < 10 && ' (¡Bajo stock!)'}
-                            </div>
-                            <button
-                              onClick={(e) => handleAddProductToCart(product, e)}
-                              disabled={product.stock <= 0}
-                              className={`px-3 py-1 text-xs rounded ${
-                                product.stock <= 0
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : 'bg-blue-500 text-white hover:bg-blue-600'
-                              }`}
-                            >
-                              {product.stock <= 0 ? 'Sin stock' : 'Añadir'}
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>

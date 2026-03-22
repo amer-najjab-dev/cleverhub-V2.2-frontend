@@ -125,7 +125,7 @@ export const FinancialSummary = () => {
     if (!paymentMethod) return 0;
     
     if (['tarjeta', 'transferencia', 'cheque'].includes(paymentMethod)) {
-      return 0;
+      return total;
     }
     
     if (paymentMethod === 'credito' || paymentMethod === 'puntos') {

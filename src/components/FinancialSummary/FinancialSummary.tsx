@@ -383,6 +383,7 @@ export const FinancialSummary = () => {
         paidAmount: getPaidAmountToSend(),
         payments: payments,
         paymentStatus: paymentStatus,
+        total, // ← AGREGAR ESTA LÍNEA
         notes: 'Venta desde CleverHub POS',
         adultFlag: true,
         pregnantFlag: false,

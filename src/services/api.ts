@@ -24,7 +24,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,kjdkazhdkjhqkdhkqsjb
+  withCredentials: true,
 });
 
 // INTERCEPTOR PARA AÑADIR LA REGIÓN A TODAS LAS PETICIONES

@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://cleverhub-v2-backend-staging.up.railway.app/api/$1"
-    }
-  ]
-}

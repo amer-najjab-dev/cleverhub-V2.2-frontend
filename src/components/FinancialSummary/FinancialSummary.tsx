@@ -411,7 +411,7 @@ export const FinancialSummary = () => {
       alert(`✅ Venta #${saleNumber} completada exitosamente\nTotal: ${formatCurrency(total)}`);
       
       setTimeout(() => {
-        window.location.reload();
+        window.location.href = '/sales';
       }, 1500);
       
     } catch (error: any) {

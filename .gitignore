@@ -31,3 +31,5 @@ build/
 .env.local
 .env.production
 *.log
+.vercel
+.env*.local

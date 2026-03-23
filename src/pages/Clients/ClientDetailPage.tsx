@@ -53,24 +53,33 @@ const ClientDetailPage = () => {
       const clientResponse = await clientsService.getById(clientId);
       setClient(clientResponse.data);
       
-      // Fetch client debt
-      try {
-        const debtResponse = await clientsService.getDebt(clientId);
-        const debtData = debtResponse.data;
-        
-        // Si es array, tomar la deuda activa (pending_amount > 0)
-        if (Array.isArray(debtData) && debtData.length > 0) {
-          const activeDebt = debtData.find((d: any) => Number(d.pending_amount) > 0) || debtData[0];
-          console.log('💰 ACTIVE DEBT:', activeDebt);
-          setDebt(activeDebt);
-        } else if (debtData && !Array.isArray(debtData)) {
-          setDebt(debtData);
-        } else {
-          setDebt(null);
-        }
-      } catch (error) {
-        console.log('No debt found for client');
+     // Fetch client debt
+    try {
+      console.log('📊 Obteniendo deuda para cliente:', clientId);
+      
+      const debtResponse = await clientsService.getDebt(clientId);
+      const debtData = debtResponse.data;
+      
+      console.log('📊 Respuesta deuda:', debtData);
+      
+      // Si es array, tomar la deuda activa (pending_amount > 0)
+      if (Array.isArray(debtData) && debtData.length > 0) {
+        const activeDebt = debtData.find((d: any) => Number(d.pending_amount) > 0) || debtData[0];
+        console.log('💰 ACTIVE DEBT encontrada:', activeDebt);
+        console.log('💰 pending_amount:', activeDebt.pending_amount);
+        setDebt(activeDebt);
+        console.log('📊 Estado debt actualizado');
+      } else if (debtData && !Array.isArray(debtData)) {
+        console.log('💰 DEBT (objeto):', debtData);
+        setDebt(debtData);
+      } else {
+        console.log('💰 No hay deuda');
+        setDebt(null);
       }
+    } catch (error) {
+      console.log('No debt found for client', error);
+    }
+
       
       // Fetch health records
       const healthResponse = await clientsService.getHealthRecords(clientId);
@@ -149,6 +158,8 @@ const ClientDetailPage = () => {
     }
 
     try {
+      console.log('📤 Enviando pago:', { amount, clientId: client.id });
+      
       await clientsService.registerPayment(client.id, {
         amount,
         paymentMethod: 'cash',
@@ -158,7 +169,10 @@ const ClientDetailPage = () => {
       toast.success('Pago registrado exitosamente');
       setPaymentAmount('');
       setPaymentNotes('');
-      fetchClientData(client.id);
+      
+      console.log('🔄 Recargando datos del cliente...');
+      await fetchClientData(client.id);
+      console.log('✅ Datos del cliente recargados');
       
     } catch (error: any) {
       console.error('Error processing partial payment:', error);

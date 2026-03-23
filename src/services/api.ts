@@ -1,12 +1,11 @@
 import axios from 'axios';
 
 const getBaseUrl = (): string => {
-  // Detectar si estamos en Vercel Preview
-  const isVercelPreview = typeof window !== 'undefined' && 
-    window.location.hostname.includes('vercel.app') && 
-    window.location.hostname.includes('git-feature');
-
-  if (isVercelPreview) {
+  // Detectar Vercel Preview por el hostname
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  
+  // Para cualquier preview de Vercel (contiene 'vercel.app' y 'git-feature' o 'git-nuev')
+  if (hostname.includes('vercel.app') && (hostname.includes('git-feature') || hostname.includes('git-nuev'))) {
     return 'https://cleverhub-v2-backend-staging.up.railway.app/api';
   }
 
@@ -18,8 +17,7 @@ const getBaseUrl = (): string => {
   }
 
   // 2. Si estamos en local, usar localhost
-  if (typeof window !== 'undefined' && 
-     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5001/api';
   }
 

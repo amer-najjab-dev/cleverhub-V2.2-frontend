@@ -1,28 +1,19 @@
 import axios from 'axios';
 
 const getBaseUrl = (): string => {
-  // Detectar Vercel Preview por el hostname
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  
-  // Para cualquier preview de Vercel (contiene 'vercel.app' y 'git-feature' o 'git-nuev')
-  if (hostname.includes('vercel.app') && (hostname.includes('git-feature') || hostname.includes('git-nuev'))) {
-    return 'https://cleverhub-v2-backend-staging.up.railway.app/api';
-  }
-
-  // 1. Intentar leer la variable de Vite (Vercel)
-  const envUrl = import.meta.env.VITE_API_URL;
-  
-  if (envUrl) {
-    return envUrl;
-  }
-
-  // 2. Si estamos en local, usar localhost
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+  // Si estamos en local
+  if (typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     return 'http://localhost:5001/api';
   }
-
-  // 3. Producción
-  return 'https://cleverhub-v2-backend-production.up.railway.app/api';
+  
+  // Para producción en Vercel (no preview)
+  if (typeof window !== 'undefined' && window.location.hostname === 'cleverhub-v2-frontend.vercel.app') {
+    return 'https://cleverhub-v2-backend-production.up.railway.app/api';
+  }
+  
+  // Para cualquier otro caso (incluyendo previews) → usar staging
+  return 'https://cleverhub-v2-backend-staging.up.railway.app/api';
 };
 
 export const API_URL = getBaseUrl();

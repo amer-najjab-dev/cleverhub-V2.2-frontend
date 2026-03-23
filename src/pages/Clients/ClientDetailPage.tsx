@@ -491,7 +491,7 @@ const ClientDetailPage = () => {
                         console.log('📊 total_debt:', debt.total_debt);
                         console.log('📊 pending_amount:', debt.pending_amount);
                         console.log('📊 status:', debt.status);
-                        return formatCurrency(Number(debt.total_debt || 0));
+                        return formatCurrency(Number(debt.pending_amount || 0));
                       })()}
                     </p>
                   </div>

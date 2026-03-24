@@ -69,7 +69,7 @@ const ClientsPage = () => {
       const newDebtMap = new Map<number, number>();
       clientsData.forEach((client, index) => {
         const debtData = debtsResults[index]?.data;
-        const debtAmount = debtData?.total_debt ? Number(debtData.total_debt) : 0;
+        const debtAmount = debtData?.pending_amount ? Number(debtData.pending_amount) : 0;
         newDebtMap.set(client.id, debtAmount);
       });
       

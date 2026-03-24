@@ -116,7 +116,7 @@ const ClientDetailPage = () => {
 
   const handleFullPayment = async () => {
     if (!client) return;
-    const montoPendiente = Number(debt?.total_debt || 0);
+    const montoPendiente = Number(debt?.pending_amount || 0);
     if (!debt || montoPendiente <= 0) {
       toast.error('No hay importe pendiente para pagar');
       return;
@@ -541,10 +541,10 @@ const ClientDetailPage = () => {
               </p>
             <button
               onClick={handleFullPayment}
-              disabled={!debt || Number(debt.total_debt || 0) <= 0}
+              disabled={!debt || Number(debt.pending_amount || 0) <= 0}
               className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Pagar {debt ? formatCurrency(Number(debt.total_debt || 0)) : '0€'}
+              Pagar {debt ? formatCurrency(Number(debt.pending_amount || 0)) : '0€'}
             </button>
             </div>
 

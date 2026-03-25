@@ -197,7 +197,7 @@ export const clientsService = {
 
   checkCanDelete: async (clientId: number) => {
     const response = await api.get<ApiResponse<{ clientId: number; canDelete: boolean }>>(
-      `/clients/${clientId}/debt/can-delete`
+      `/clients/${clientId}/can-delete`
     );
     return response.data;
   },

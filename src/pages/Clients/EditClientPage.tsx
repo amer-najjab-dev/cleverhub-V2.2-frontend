@@ -79,7 +79,14 @@ const EditClientPage = () => {
     
     try {
       const clientId = parseInt(id!);
-      await clientsService.update(clientId, formData);
+      
+      // Preparar datos para enviar al backend
+      const dataToSend = {
+        ...formData,
+        birth_date: formData.birth_date ? new Date(formData.birth_date).toISOString() : null
+      };
+      
+      await clientsService.update(clientId, dataToSend);
       toast.success('Cliente actualizado correctamente');
       navigate(`/clients/${clientId}`);
     } catch (error: any) {

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Edit, Trash2, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { clientsService } from '../../services/clients.service';
 import { Client } from '../../services/clients.service';
-import { useCurrencyFormatter } from '../../utils/formatters';
 
 const ClientsPage = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -25,8 +24,6 @@ const ClientsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
-  
-  const { formatCurrency } = useCurrencyFormatter();
 
   // Fetch clients on component mount
   useEffect(() => {
@@ -141,11 +138,6 @@ const ClientsPage = () => {
     }
   };
 
-  const clearDebtFilter = () => {
-    setDebtFilterActive(false);
-    setDebtRange([0, 5000]);
-  };
-
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setCurrentPage(1);
@@ -157,7 +149,6 @@ const ClientsPage = () => {
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, filteredClients.length);
-  // FIX: Column order corrected - 2026-03-20
 
   return (
     <div className="p-6">
@@ -178,7 +169,7 @@ const ClientsPage = () => {
 
       {/* Search and Filters */}
       <div className="bg-white rounded-xl shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 relative">
           <div className="flex-1 min-w-[200px]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -201,81 +192,87 @@ const ClientsPage = () => {
           </button>
           <button
             onClick={() => setShowDebtFilter(!showDebtFilter)}
-            className={`bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 ${debtFilterActive ? 'bg-blue-100 text-blue-700' : ''}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+              debtFilterActive 
+                ? 'bg-blue-50 border-blue-300 text-blue-700' 
+                : 'bg-white border-gray-300 text-gray-600 hover:border-blue-400'
+            }`}
           >
-            <Filter size={20} />
-            Filtro deuda
+            <Filter size={16} />
+            <span className="text-sm font-medium">Filtro</span>
             {debtFilterActive && (
-              <span className="ml-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              <span className="ml-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center">
                 !
               </span>
             )}
           </button>
-          {debtFilterActive && (
-            <button
-              onClick={clearDebtFilter}
-              className="text-red-600 hover:text-red-800 px-2"
-              title="Limpiar filtro de deuda"
-            >
-              <X size={20} />
-            </button>
-          )}
-        </div>
 
-        {/* Debt filter slider */}
-        {showDebtFilter && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-gray-700">Filtrar por deuda pendiente</h3>
-              <div className="text-sm text-gray-600">
-                {formatCurrency(debtRange[0])} - {formatCurrency(debtRange[1])}
+          {showDebtFilter && (
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-semibold text-gray-900">Deuda pendiente</h3>
+                  <button
+                    onClick={() => {
+                      setDebtFilterActive(false);
+                      setShowDebtFilter(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Mínimo</span>
+                    <span>Máximo</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={debtRange[0]}
+                      onChange={(e) => setDebtRange([Number(e.target.value), debtRange[1]])}
+                      className="w-1/2 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Mín"
+                    />
+                    <input
+                      type="number"
+                      value={debtRange[1]}
+                      onChange={(e) => setDebtRange([debtRange[0], Number(e.target.value)])}
+                      className="w-1/2 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Máx"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => {
+                      setDebtFilterActive(true);
+                      filterClients();
+                      setShowDebtFilter(false);
+                    }}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm py-1.5 rounded-lg transition"
+                  >
+                    Aplicar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDebtRange([0, 5000]);
+                      setDebtFilterActive(false);
+                      filterClients();
+                      setShowDebtFilter(false);
+                    }}
+                    className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    Limpiar
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="px-2">
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                step="10"
-                value={debtRange[0]}
-                onChange={(e) => {
-                  const newMin = Number(e.target.value);
-                  setDebtRange([newMin, debtRange[1]]);
-                }}
-                className="w-full accent-blue-600"
-              />
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                step="10"
-                value={debtRange[1]}
-                onChange={(e) => {
-                  const newMax = Number(e.target.value);
-                  setDebtRange([debtRange[0], newMax]);
-                }}
-                className="w-full accent-blue-600 mt-2"
-              />
-            </div>
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => {
-                  setDebtFilterActive(true);
-                  filterClients();
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Aplicar filtro
-              </button>
-              <button
-                onClick={clearDebtFilter}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Limpiar
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Clients Table */}

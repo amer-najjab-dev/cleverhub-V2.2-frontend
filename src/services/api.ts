@@ -1,19 +1,20 @@
 import axios from 'axios';
 
 const getBaseUrl = (): string => {
-  // Si estamos en local
-  if (typeof window !== 'undefined' && 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  
+  // Localhost
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5001/api';
   }
   
-  // Para producción en Vercel (no preview)
-  if (typeof window !== 'undefined' && window.location.hostname === 'cleverhub-v2-frontend.vercel.app') {
+  // Vercel (producción o preview)
+  if (hostname.includes('vercel.app')) {
     return 'https://cleverhub-v2-backend-production.up.railway.app/api';
   }
   
-  // Para cualquier otro caso (incluyendo previews) → usar staging
-  return 'https://cleverhub-v2-backend-staging.up.railway.app/api';
+  // Fallback
+  return 'https://cleverhub-v2-backend-production.up.railway.app/api';
 };
 
 export const API_URL = getBaseUrl();

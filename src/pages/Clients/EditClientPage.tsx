@@ -38,8 +38,8 @@ const EditClientPage = () => {
           dni: client.dni || '',
           address: client.address || '',
           birth_date: client.birth_date ? new Date(client.birth_date).toISOString().split('T')[0] : '',
-          allergies: client.allergies ? (Array.isArray(client.allergies) ? client.allergies : [client.allergies]) : [],
-          chronic_conditions: client.chronic_conditions ? (Array.isArray(client.chronic_conditions) ? client.chronic_conditions : [client.chronic_conditions]) : [],
+          allergies: client.allergies ? client.allergies.split(',').map((s: string) => s.trim()) : [],
+          chronic_conditions: client.chronic_conditions ? client.chronic_conditions.split(',').map((s: string) => s.trim()) : [],
           is_pregnant: client.is_pregnant || false,
           is_lactating: client.is_lactating || false
         });
@@ -82,8 +82,17 @@ const EditClientPage = () => {
       
       // Preparar datos para enviar al backend
       const dataToSend = {
-        ...formData,
-        birth_date: formData.birth_date ? new Date(formData.birth_date).toISOString() : null
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: formData.phone,
+        dni: formData.dni,
+        address: formData.address,
+        birth_date: formData.birth_date ? new Date(formData.birth_date).toISOString() : null,
+        allergies: formData.allergies.length > 0 ? formData.allergies.join(', ') : null,
+        chronic_conditions: formData.chronic_conditions.length > 0 ? formData.chronic_conditions.join(', ') : null,
+        is_pregnant: formData.is_pregnant,
+        is_lactating: formData.is_lactating
       };
       
       await clientsService.update(clientId, dataToSend);

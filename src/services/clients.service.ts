@@ -88,7 +88,7 @@ export interface CreateClientDto {
   address?: string;
   dni?: string;
   birthDate?: string;
-  allergies?: string[];
+  allergies?: string | null;
   regularMedications?: string[];
   notes?: string;
 }

@@ -347,7 +347,10 @@ const ClientDetailPage = () => {
           </div>
           
           <div className="flex gap-3">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button
+              onClick={() => navigate(`/clients/${client.id}/edit`)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
               Editar
             </button>
             <button 

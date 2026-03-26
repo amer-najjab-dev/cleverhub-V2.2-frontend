@@ -15,7 +15,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
-  // Funciones de gestión de usuarios (solo admin)
   getUsers: () => Promise<User[]>;
   createUser: (userData: any) => Promise<User>;
   updateUser: (id: number, userData: any) => Promise<User>;
@@ -35,12 +34,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuth = async () => {
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      
       const response = await api.get('/auth/me');
       if (response.data.success) {
         setUser(response.data.data);
+      } else {
+        localStorage.removeItem('auth_token');
       }
     } catch (error) {
       console.log('No hay sesión activa');
+      localStorage.removeItem('auth_token');
     } finally {
       setIsLoading(false);
     }
@@ -50,15 +58,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const response = await api.post('/auth/login', { email, password });
     if (response.data.success) {
       setUser(response.data.data);
+      // Guardar token JWT
+      if (response.data.token) {
+        localStorage.setItem('auth_token', response.data.token);
+      }
     }
   };
 
   const logout = async () => {
-    await api.post('/auth/logout');
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Error en logout:', error);
+    }
+    localStorage.removeItem('auth_token');
     setUser(null);
   };
 
-  // Funciones de gestión de usuarios
   const getUsers = async (): Promise<User[]> => {
     const response = await api.get('/users');
     return response.data.data;

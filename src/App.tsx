@@ -25,6 +25,7 @@ import { LoyaltyPage } from './modules/reports/pages/LoyaltyPage';
 import { ConnectPage } from './modules/connect/pages/ConnectPage';
 import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 import EditClientPage from './pages/Clients/EditClientPage';
+import { HRDashboard } from './pages/HR/HRDashboard';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
                 <Route path="/clients/:id" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
                 <Route path="/clients/:id/edit" element={<ProtectedRoute><EditClientPage /></ProtectedRoute>} />
                 <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
+                <Route path="/hr" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
                 
                 {/* Rutas de proveedores */}
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />

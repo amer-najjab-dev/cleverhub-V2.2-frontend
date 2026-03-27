@@ -42,7 +42,7 @@ export const Header = () => {
     item.roles.includes(user.role)
   );
 
-  // Array con los 7 items de navegación
+  // Array con los 8 items de navegación (añadido RRHH)
   const navItems = [
     { path: '/', label: 'Dashboard', icon: 'Home', description: 'Panel principal' },
     { path: '/sales', label: 'Ventas', icon: 'ShoppingCart', description: 'Punto de venta' },
@@ -50,7 +50,9 @@ export const Header = () => {
     { path: '/products', label: 'Productos', icon: 'Package', description: 'Catálogo de productos' },
     { path: '/stock', label: 'Stock', icon: 'ClipboardCheck', description: 'Inventario' },
     { path: '/providers', label: 'Proveedores', icon: 'Truck', description: 'Gestión de proveedores' },
-    { path: '/reports', label: 'Reportes', icon: 'BarChart3', description: 'Informes y estadísticas' }
+    { path: '/reports', label: 'Reportes', icon: 'BarChart3', description: 'Informes y estadísticas' },
+    // ✅ NUEVO ITEM RRHH
+    { path: '/hr', label: 'RRHH', icon: 'Users', description: 'Gestión de personal y turnos' }
   ].filter(item => {
     const exists = filteredNav.some(nav => {
       const navPath = nav.path.replace(/^\//, '');
@@ -62,6 +64,11 @@ export const Header = () => {
     
     // Forzar inclusión de Proveedores
     if (item.path === '/providers' && !exists) {
+      return true;
+    }
+    
+    // ✅ Forzar inclusión de RRHH
+    if (item.path === '/hr' && !exists) {
       return true;
     }
     
@@ -86,7 +93,7 @@ export const Header = () => {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-screen-2xl mx-auto px-6">
-        <div className="flex justify-between items-center h-15"> {/* Altura intermedia */}
+        <div className="flex justify-between items-center h-15">
           {/* 1. CH CleverHub - tamaño intermedio */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
@@ -95,7 +102,7 @@ export const Header = () => {
             <span className="font-bold text-gray-900 text-lg hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* 2-8. Items de navegación - tamaño intermedio */}
+          {/* 2-9. Items de navegación - tamaño intermedio (ahora con 8 items) */}
           <nav className="hidden md:flex items-center justify-center flex-1 mx-4">
             <div className="flex items-center space-x-1">
               {navItems.map((item) => {
@@ -121,9 +128,9 @@ export const Header = () => {
             </div>
           </nav>
 
-          {/* 9-11. Menú derecho - tamaño intermedio */}
+          {/* Menú derecho */}
           <div className="flex items-center space-x-2 shrink-0">
-            {/* 9. Campana */}
+            {/* Notificaciones */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -153,7 +160,7 @@ export const Header = () => {
               )}
             </div>
 
-            {/* 10. Avatar */}
+            {/* Avatar y menú usuario */}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -212,7 +219,7 @@ export const Header = () => {
               )}
             </div>
 
-            {/* 11. Maroc MAD */}
+            {/* Selector de región */}
             <div className="hidden sm:block">
               <RegionSelector />
             </div>

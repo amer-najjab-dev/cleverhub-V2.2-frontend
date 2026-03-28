@@ -27,7 +27,12 @@ export const TimeOffRequests = () => {
       return;
     }
     try {
-      await employeeService.createTimeOffRequest(formData);
+      await employeeService.createTimeOffRequest({
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        type: formData.type,
+        notes: formData.notes
+      });
       toast.success('Solicitud enviada');
       setShowForm(false);
       setFormData({ startDate: '', endDate: '', type: 'vacation', notes: '' });

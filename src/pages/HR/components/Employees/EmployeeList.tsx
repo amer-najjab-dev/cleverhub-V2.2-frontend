@@ -87,7 +87,6 @@ export const EmployeeList = () => {
               <div>
                 <div className="font-medium text-gray-900">{emp.fullName}</div>
                 <div className="text-sm text-gray-500">{emp.email}</div>
-                {emp.phone && <div className="text-xs text-gray-400">{emp.phone}</div>}
               </div>
             </div>
             <div className="flex items-center gap-4">

@@ -1,9 +1,8 @@
 // src/pages/HR/components/SettingsPanel.tsx
 import { useState, useEffect } from 'react';
 import { employeeService, Shift, Holiday } from '../../../services/hr/employee.service';
-import { Trash2, Calendar, Clock, Shield } from 'lucide-react';
+import { Trash2, Calendar } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { GuardSchedulePanel } from './GuardSchedulePanel';
 
 export const SettingsPanel = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -98,69 +97,63 @@ export const SettingsPanel = () => {
     <div className="space-y-6">
       {/* Turnos */}
       <div className="bg-white rounded-xl shadow-sm p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-blue-600" />
-          Configuración de turnos
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Turnos de trabajo</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Define los horarios de trabajo. Los turnos marcados como "Guardia" son especiales y se configuran por periodos.
+        </p>
+        
         <div className="space-y-3 mb-4">
           {shifts.map((shift) => (
-            <div key={shift.id} className="border border-gray-100 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <div className="font-medium text-gray-900 flex items-center gap-2">
-                    {shift.name}
-                    {shift.is_guard && (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        Guardia
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-500">{shift.start_time} - {shift.end_time}</div>
-                  <div className="text-xs text-gray-400">Mínimo: {shift.min_employees_required} empleados</div>
+            <div key={shift.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900">{shift.name}</span>
+                  {shift.is_guard && (
+                    <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">Guardia</span>
+                  )}
                 </div>
-                <button
-                  onClick={() => handleDeleteShift(shift.id)}
-                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="text-sm text-gray-500 mt-1">
+                  {shift.start_time} - {shift.end_time}
+                </div>
+                <div className="text-xs text-gray-400">
+                  Mínimo: {shift.min_employees_required} empleado{shift.min_employees_required !== 1 ? 's' : ''}
+                </div>
               </div>
-              
-              {/* Panel de semanas de guardia solo para turnos de guardia */}
-              {shift.is_guard && (
-                <GuardSchedulePanel
-                  shiftId={shift.id}
-                  shiftName={shift.name}
-                  onSave={loadData}
-                />
-              )}
+              <button
+                onClick={() => handleDeleteShift(shift.id)}
+                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           ))}
         </div>
-        
+
+        {/* Formulario nuevo turno */}
         <div className="border-t border-gray-200 pt-4">
           <h3 className="text-sm font-medium text-gray-700 mb-3">Nuevo turno</h3>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <input
               type="text"
-              placeholder="Nombre"
+              placeholder="Nombre (ej: Mañana)"
               value={newShift.name}
               onChange={(e) => setNewShift({ ...newShift, name: e.target.value })}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             />
-            <input
-              type="time"
-              value={newShift.startTime}
-              onChange={(e) => setNewShift({ ...newShift, startTime: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            />
-            <input
-              type="time"
-              value={newShift.endTime}
-              onChange={(e) => setNewShift({ ...newShift, endTime: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            />
+            <div className="flex gap-2">
+              <input
+                type="time"
+                value={newShift.startTime}
+                onChange={(e) => setNewShift({ ...newShift, startTime: e.target.value })}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+              <input
+                type="time"
+                value={newShift.endTime}
+                onChange={(e) => setNewShift({ ...newShift, endTime: e.target.value })}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
             <input
               type="number"
               placeholder="Mínimo empleados"
@@ -176,10 +169,7 @@ export const SettingsPanel = () => {
               onChange={(e) => setNewShift({ ...newShift, isGuard: e.target.checked })}
               className="w-4 h-4"
             />
-            <span className="text-sm text-gray-700 flex items-center gap-1">
-              <Shield className="w-4 h-4" />
-              Es guardia
-            </span>
+            <span className="text-sm text-gray-700">Es guardia (se configura por periodos)</span>
           </label>
           <button
             onClick={handleAddShift}

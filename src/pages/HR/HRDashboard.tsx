@@ -1,56 +1,120 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { EmployeeList } from './components/Employees/EmployeeList';
-import { TimeOffRequests } from './components/TimeOff/TimeOffRequests';
-import { GuardPeriods } from './components/Guard/GuardPeriods';
-import { Users, Calendar, Shield } from 'lucide-react';
+import { CalendarView } from './components/Calendar/CalendarView';
+import { AlertsPanel } from './components/Alerts/AlertsPanel';
+import { RequestsPanel } from './components/Requests/RequestsPanel';
+import { GuardSchedule } from './components/Guard/GuardSchedule';
+import { CoverageChart } from './components/Coverage/CoverageChart';
+import { useHRData } from './hooks/useHRData';
+import { Loader2 } from 'lucide-react';
 
-type TabType = 'employees' | 'timeoff' | 'guard';
+type TabType = 'calendar' | 'coverage';
 
 export const HRDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('employees');
+  const [activeTab, setActiveTab] = useState<TabType>('calendar');
+  const [calendarView, setCalendarView] = useState<'week' | 'month'>('month');
+  
+  const {
+    shifts,
+    requests,
+    guardPeriods,
+    alerts,
+    coverage,
+    calendarEvents,
+    loading,
+    approveRequest,
+    rejectRequest,
+    createGuardPeriod,
+    deleteGuardPeriod
+  } = useHRData();
+  
   const isAdmin = user?.role === 'admin';
 
-  const tabs = [
-    { id: 'employees', label: 'Equipo', icon: Users },
-    { id: 'timeoff', label: 'Ausencias', icon: Calendar },
-    { id: 'guard', label: 'Guardias', icon: Shield, adminOnly: true }
-  ];
-
-  const visibleTabs = tabs.filter(tab => !tab.adminOnly || isAdmin);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">RRHH</h1>
-          <div className="flex gap-6 mt-4">
-            {visibleTabs.map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center gap-2 pb-2 text-sm font-medium transition-all ${
-                    activeTab === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <Icon size={18} />
-                  {tab.label}
-                </button>
-              );
-            })}
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">RRHH</h1>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('calendar')}
+                className={`px-3 py-1.5 text-sm rounded-lg ${
+                  activeTab === 'calendar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                Calendario
+              </button>
+              <button
+                onClick={() => setActiveTab('coverage')}
+                className={`px-3 py-1.5 text-sm rounded-lg ${
+                  activeTab === 'coverage' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                Cobertura
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="p-6">
-        {activeTab === 'employees' && <EmployeeList />}
-        {activeTab === 'timeoff' && <TimeOffRequests />}
-        {activeTab === 'guard' && isAdmin && <GuardPeriods />}
+        {activeTab === 'calendar' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+             <CalendarView
+                events={calendarEvents}
+                view={calendarView}
+                onViewChange={setCalendarView}
+                onDateChange={() => {}}
+              />
+
+            </div>
+            <div className="space-y-6">
+              <AlertsPanel alerts={alerts} />
+              {isAdmin && (
+                <RequestsPanel
+                  requests={requests}
+                  onApprove={approveRequest}
+                  onReject={rejectRequest}
+                />
+              )}
+              <GuardSchedule
+                shifts={shifts}
+                guardPeriods={guardPeriods}
+                onCreate={createGuardPeriod}
+                onDelete={deleteGuardPeriod}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'coverage' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CoverageChart coverage={coverage} />
+            </div>
+            <div className="space-y-6">
+              <AlertsPanel alerts={alerts} />
+              {isAdmin && (
+                <RequestsPanel
+                  requests={requests}
+                  onApprove={approveRequest}
+                  onReject={rejectRequest}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

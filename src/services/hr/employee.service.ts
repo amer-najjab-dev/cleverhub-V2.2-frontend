@@ -59,6 +59,15 @@ export interface GuardPeriod {
   updated_at: string;
 }
 
+export interface Holiday {
+  id: number;
+  name: string;
+  date: string;
+  is_recurring: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // ==================== SERVICIO ====================
 
 export const employeeService = {
@@ -125,5 +134,28 @@ export const employeeService = {
   
   deleteGuardPeriod: async (id: number): Promise<void> => {
     await api.delete(`/hr/guard-periods/${id}`);
+  },
+
+  // ==================== FESTIVOS ====================
+  getHolidays: async (): Promise<Holiday[]> => {
+    const res = await api.get('/hr/holidays');
+    return res.data.data;
+  },
+
+  createHoliday: async (data: { name: string; date: string; isRecurring: boolean }): Promise<Holiday> => {
+    const res = await api.post('/hr/holidays', data);
+    return res.data.data;
+  },
+
+  deleteHoliday: async (id: number): Promise<void> => {
+    await api.delete(`/hr/holidays/${id}`);
+  },
+
+  // ==================== COBERTURA ====================
+  getCoverage: async (params: { startDate: string; endDate: string }): Promise<any[]> => {
+    const res = await api.get('/hr/coverage', { params });
+    return res.data.data;
   }
+
+
 };

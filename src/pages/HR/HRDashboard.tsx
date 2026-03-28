@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { CalendarView } from './components/Calendar/CalendarView';
 import { AlertsPanel } from './components/Alerts/AlertsPanel';
@@ -12,7 +12,11 @@ type TabType = 'calendar' | 'coverage';
 
 export const HRDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('calendar');
+  // Recuperar la pestaña activa de localStorage
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const saved = localStorage.getItem('hr_active_tab');
+    return (saved === 'calendar' || saved === 'coverage') ? saved : 'calendar';
+  });
   const [calendarView, setCalendarView] = useState<'week' | 'month'>('month');
   
   const {
@@ -25,10 +29,15 @@ export const HRDashboard = () => {
     approveRequest,
     rejectRequest,
     createGuardPeriod,
-    deleteGuardPeriod
+    deleteGuardPeriod,
   } = useHRData();
   
   const isAdmin = user?.role === 'admin';
+
+  // Guardar la pestaña activa en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem('hr_active_tab', activeTab);
+  }, [activeTab]);
 
   if (loading) {
     return (

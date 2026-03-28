@@ -8,7 +8,7 @@ import { UpcomingAbsences } from './UpcomingAbsences';
 import { Loader2 } from 'lucide-react';
 
 export const CoverageDashboard = () => {
-  const { coverage, employees, requests, loading } = useHRData();
+  const { coverage, employees, requests, loading, refresh } = useHRData();
   const { isDragging, handleDragStart, handleDrop, handleDragEnd } = useShiftAssignment();
   const [startDate, setStartDate] = useState(new Date());
   const [daysToShow, setDaysToShow] = useState(21);
@@ -38,6 +38,8 @@ export const CoverageDashboard = () => {
 
   const handleCellDrop = async (date: string, shiftId: number, employeeId: number) => {
     await handleDrop(date, shiftId, employeeId);
+    // Refrescar datos después de asignar turno
+    await refresh();
     handleDragEnd();
   };
 

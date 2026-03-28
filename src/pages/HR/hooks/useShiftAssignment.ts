@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { employeeService } from '../../../services/hr/employee.service';
 
 export interface DraggableEmployee {
   id: number;
@@ -15,14 +16,20 @@ export const useShiftAssignment = () => {
   };
 
   const handleDrop = async (
-    _targetDate: string,
+    targetDate: string,
     targetShiftId: number,
     employeeId: number
   ) => {
     try {
-      console.log('Asignando turno:', { employeeId, shiftId: targetShiftId });
-      toast.success('Turno actualizado correctamente');
+      // Llamada real al servicio para asignar turno
+      await employeeService.assignShift({
+        employeeId,
+        shiftId: targetShiftId,
+        date: targetDate
+      });
+      toast.success('Turno asignado correctamente');
     } catch (error) {
+      console.error('Error assigning shift:', error);
       toast.error('Error al asignar turno');
     } finally {
       setIsDragging(false);

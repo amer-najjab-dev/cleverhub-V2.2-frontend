@@ -155,7 +155,11 @@ export const employeeService = {
   getCoverage: async (params: { startDate: string; endDate: string }): Promise<any[]> => {
     const res = await api.get('/hr/coverage', { params });
     return res.data.data;
-  }
+  },
 
+  assignShift: async (data: { employeeId: number; shiftId: number; date?: string }): Promise<void> => {
+  const res = await api.post('/hr/shift-assignments', data);
+  return res.data.data;
+}
 
 };

@@ -1,4 +1,4 @@
-import { X, User, Mail, Phone, Trash2 } from 'lucide-react';
+import { X, User, Mail, Trash2 } from 'lucide-react';
 
 interface Employee {
   id: number;

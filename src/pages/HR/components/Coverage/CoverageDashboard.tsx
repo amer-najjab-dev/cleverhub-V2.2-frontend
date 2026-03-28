@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useHRData } from '../../hooks/useHRData';
 import { useShiftAssignment } from '../../hooks/useShiftAssignment';
+import { employeeService } from '../../../../services/hr/employee.service';
 import { RiskAlert } from './RiskAlert';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import { EmployeeSidebar } from './EmployeeSidebar';
 import { UpcomingAbsences } from './UpcomingAbsences';
 import { EmployeesModal } from './EmployeesModal';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export const CoverageDashboard = () => {
   const { coverage, employees, requests, loading, refresh } = useHRData();
@@ -16,6 +18,7 @@ export const CoverageDashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{
     date: string;
+    shiftId: number;
     shiftName: string;
     employees: any[];
   } | null>(null);
@@ -49,8 +52,9 @@ export const CoverageDashboard = () => {
     handleDragEnd();
   };
 
-  const handleCellClick = (date: string, _shiftId: number, shiftName: string, employeesList: any[]) => {
-    console.log('📊 Click en celda:', { date, shiftName, employeesList });
+  // ✅ CORREGIDO: handleCellClick ahora incluye shiftId
+  const handleCellClick = (date: string, shiftId: number, shiftName: string, employeesList: any[]) => {
+    console.log('📊 Click en celda:', { date, shiftName, shiftId, employeesList });
     console.log('📊 coverageByDay para esta fecha:', coverageByDay[date]);
     
     // Obtener nombres de empleados desde sus IDs si no vienen en el objeto
@@ -66,13 +70,30 @@ export const CoverageDashboard = () => {
       };
     });
   
-  setSelectedCell({
-    date,
-    shiftName,
-    employees: enrichedEmployees
-  });
-  setModalOpen(true);
-};
+    setSelectedCell({
+      date,
+      shiftId,           // ✅ AÑADIDO: shiftId ahora se guarda en el estado
+      shiftName,
+      employees: enrichedEmployees
+    });
+    setModalOpen(true);
+  };
+
+  // ✅ NUEVA FUNCIÓN: handleRemoveEmployee para eliminar asignaciones
+  const handleRemoveEmployee = async (employeeId: number, shiftId: number, date: string) => {
+    try {
+      console.log('🗑️ Eliminando asignación:', { employeeId, shiftId, date });
+      
+      // Llamar al endpoint para eliminar la asignación
+      await employeeService.removeShiftAssignment(employeeId, shiftId, date);
+      
+      toast.success('Empleado eliminado del turno correctamente');
+      await refresh(); // Recargar datos después de eliminar
+    } catch (error: any) {
+      console.error('Error removing employee:', error);
+      toast.error(error.response?.data?.message || 'Error al eliminar empleado del turno');
+    }
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
@@ -104,8 +125,10 @@ export const CoverageDashboard = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         date={selectedCell?.date || ''}
+        shiftId={selectedCell?.shiftId || 0}
         shiftName={selectedCell?.shiftName || ''}
         employees={selectedCell?.employees || []}
+        onRemoveEmployee={handleRemoveEmployee}
       />
     </div>
   );

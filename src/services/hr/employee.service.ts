@@ -158,8 +158,16 @@ export const employeeService = {
   },
 
   assignShift: async (data: { employeeId: number; shiftId: number; date?: string }): Promise<void> => {
-  const res = await api.post('/hr/shift-assignments', data);
-  return res.data.data;
-}
+    const res = await api.post('/hr/shift-assignments', data);
+    return res.data.data;
+  },
+
+  updateShiftConfig: async (shiftId: number, minEmployeesRequired: number): Promise<void> => {
+    await api.put(`/hr/shifts/${shiftId}/config`, { shiftId, minEmployeesRequired });
+  },
+
+  removeShiftAssignment: async (employeeId: number, shiftId: number, date: string): Promise<void> => {
+    await api.delete('/hr/shift-assignments', { data: { employeeId, shiftId, date } });
+  }
 
 };

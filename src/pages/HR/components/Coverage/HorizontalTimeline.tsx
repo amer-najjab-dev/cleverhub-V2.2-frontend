@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, Settings } from 'lucide-react';
 
 interface HorizontalTimelineProps {
   startDate: Date;
@@ -9,7 +9,9 @@ interface HorizontalTimelineProps {
   onDaysChange: (days: number) => void;
   onDrop?: (date: string, shiftId: number, employeeId: number) => void;
   onCellClick?: (date: string, shiftId: number, shiftName: string, employees: any[]) => void;
+  onConfigClick?: (shiftId: number, shiftName: string, currentMin: number) => void;
   isDragging?: boolean;
+  isAdmin?: boolean;
 }
 
 const getShiftColor = (current: number, required: number, isDraggingOver: boolean) => {
@@ -27,11 +29,14 @@ export const HorizontalTimeline = ({
   onDaysChange,
   onDrop,
   onCellClick,
-  isDragging = false
+  onConfigClick,
+  isDragging = false,
+  isAdmin = false
 }: HorizontalTimelineProps) => {
   const [draggingOver, setDraggingOver] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [cellWidth, setCellWidth] = useState(80);
+  const [showShiftTooltip, setShowShiftTooltip] = useState<number | null>(null);
 
   useEffect(() => {
     const updateCellWidth = () => {
@@ -72,7 +77,11 @@ export const HorizontalTimeline = ({
   };
 
   const firstDayCoverage = getDayCoverage(days[0]);
-  const shifts = firstDayCoverage.map((s: any) => ({ id: s.shiftId, name: s.shiftName }));
+  const shifts = firstDayCoverage.map((s: any) => ({ 
+    id: s.shiftId, 
+    name: s.shiftName,
+    minEmployeesRequired: s.requiredMin 
+  }));
 
   const handleDragOver = (e: React.DragEvent, dateStr: string, shiftId: number) => {
     e.preventDefault();
@@ -101,6 +110,10 @@ export const HorizontalTimeline = ({
     const shiftData = dayCoverage.find((s: any) => s.shiftId === shiftId);
     const employees = shiftData?.employees || [];
     onCellClick?.(dateStr, shiftId, shiftName, employees);
+  };
+
+  const handleConfigClick = (shiftId: number, shiftName: string, currentMin: number) => {
+    onConfigClick?.(shiftId, shiftName, currentMin);
   };
 
   return (
@@ -134,6 +147,7 @@ export const HorizontalTimeline = ({
 
       <div className="overflow-x-auto" ref={containerRef}>
         <div style={{ minWidth: `${days.length * cellWidth}px` }}>
+          {/* Cabecera de días */}
           <div className="flex border-b border-gray-200">
             {days.map((date, idx) => (
               <div
@@ -146,46 +160,99 @@ export const HorizontalTimeline = ({
             ))}
           </div>
 
-          {shifts.map((shift: { id: number; name: string }, shiftIdx: number) => (
-            <div key={shiftIdx} className="flex mt-1">
-              {days.map((date, dayIdx) => {
-                const dateStr = date.toISOString().split('T')[0];
-                const dayCoverage = getDayCoverage(date);
-                const shiftData = dayCoverage.find((s: any) => s.shiftId === shift.id);
-                const current = shiftData?.currentCount || 0;
-                const required = shiftData?.requiredMin || 1;
-                const isOver = draggingOver === `${dateStr}-${shift.id}`;
-                const colorClass = getShiftColor(current, required, isOver);
-
-                return (
-                  <div
-                    key={dayIdx}
-                    style={{ width: cellWidth }}
-                    onDragOver={isDragging ? (e) => handleDragOver(e, dateStr, shift.id) : undefined}
-                    onDragLeave={handleDragLeave}
-                    onDrop={isDragging ? (e) => handleDrop(e, dateStr, shift.id) : undefined}
-                    onClick={() => handleCellClick(dateStr, shift.id, shift.name)}
-                    className={`p-1 m-0.5 rounded text-center transition-all cursor-pointer flex-shrink-0 ${colorClass}`}
+          {/* Filas de turnos */}
+          {shifts.map((shift: { id: number; name: string; minEmployeesRequired: number }, shiftIdx: number) => (
+            <div key={shiftIdx} className="mt-1">
+              {/* Cabecera del turno con botón de configuración */}
+              <div className="flex items-center justify-between px-1 mb-1">
+                <div 
+                  className="relative"
+                  onMouseEnter={() => setShowShiftTooltip(shift.id)}
+                  onMouseLeave={() => setShowShiftTooltip(null)}
+                >
+                  <span className="text-xs font-medium text-gray-600">{shift.name}</span>
+                  {showShiftTooltip === shift.id && (
+                    <div className="absolute left-0 top-5 z-10 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                      Mínimo: {shift.minEmployeesRequired} empleados
+                    </div>
+                  )}
+                </div>
+                {isAdmin && onConfigClick && (
+                  <button
+                    onClick={() => handleConfigClick(shift.id, shift.name, shift.minEmployeesRequired)}
+                    className="p-0.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                    title="Configurar mínimo de empleados"
                   >
-                    <div className="text-xs font-medium">{shift.name.substring(0, 3)}</div>
-                    <div className="text-xs">{current}/{required}</div>
-                    {isDragging && isOver && (
-                      <div className="text-[10px] mt-0.5 text-blue-600 font-medium">Soltar aquí</div>
-                    )}
-                  </div>
-                );
-              })}
+                    <Settings size={12} />
+                  </button>
+                )}
+              </div>
+              
+              {/* Celdas del turno */}
+              <div className="flex">
+                {days.map((date, dayIdx) => {
+                  const dateStr = date.toISOString().split('T')[0];
+                  const dayCoverage = getDayCoverage(date);
+                  const shiftData = dayCoverage.find((s: any) => s.shiftId === shift.id);
+                  const current = shiftData?.currentCount || 0;
+                  const required = shiftData?.requiredMin || 1;
+                  const isOver = draggingOver === `${dateStr}-${shift.id}`;
+                  const colorClass = getShiftColor(current, required, isOver);
+
+                  return (
+                    <div
+                      key={dayIdx}
+                      style={{ width: cellWidth }}
+                      onDragOver={isDragging ? (e) => handleDragOver(e, dateStr, shift.id) : undefined}
+                      onDragLeave={handleDragLeave}
+                      onDrop={isDragging ? (e) => handleDrop(e, dateStr, shift.id) : undefined}
+                      onClick={() => handleCellClick(dateStr, shift.id, shift.name)}
+                      className={`p-1 m-0.5 rounded text-center transition-all cursor-pointer flex-shrink-0 ${colorClass}`}
+                    >
+                      <div className="text-xs font-medium">{shift.name.substring(0, 3)}</div>
+                      <div className="text-xs">{current}/{required}</div>
+                      {isDragging && isOver && (
+                        <div className="text-[10px] mt-0.5 text-blue-600 font-medium">Soltar aquí</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Leyenda */}
       <div className="flex justify-center gap-4 mt-4 pt-3 border-t border-gray-100 flex-wrap">
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500"></div><span className="text-xs text-gray-600">Cobertura OK</span></div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-yellow-500"></div><span className="text-xs text-gray-600">Cobertura baja (&gt;=70%)</span></div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Riesgo (&lt;70%)</span></div>
-        {isDragging && <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Arrastra a una celda</span></div>}
-        <div className="flex items-center gap-1"><Users size={12} className="text-gray-500" /><span className="text-xs text-gray-500">Click para ver empleados</span></div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span className="text-xs text-gray-600">Cobertura OK</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <span className="text-xs text-gray-600">Cobertura baja (&gt;=70%)</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span className="text-xs text-gray-600">Riesgo (&lt;70%)</span>
+        </div>
+        {isDragging && (
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <span className="text-xs text-gray-600">Arrastra a una celda</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <Users size={12} className="text-gray-500" />
+          <span className="text-xs text-gray-500">Click para ver empleados</span>
+        </div>
+        {isAdmin && onConfigClick && (
+          <div className="flex items-center gap-1">
+            <Settings size={12} className="text-gray-500" />
+            <span className="text-xs text-gray-500">Click en ⚙️ para configurar mínimo</span>
+          </div>
+        )}
       </div>
     </div>
   );

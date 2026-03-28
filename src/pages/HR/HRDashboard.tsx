@@ -4,9 +4,9 @@ import { CalendarView } from './components/Calendar/CalendarView';
 import { AlertsPanel } from './components/Alerts/AlertsPanel';
 import { RequestsPanel } from './components/Requests/RequestsPanel';
 import { GuardSchedule } from './components/Guard/GuardSchedule';
-import { CoverageChart } from './components/Coverage/CoverageChart';
 import { useHRData } from './hooks/useHRData';
 import { Loader2 } from 'lucide-react';
+import { CoverageDashboard } from './components/Coverage/CoverageDashboard';
 
 type TabType = 'calendar' | 'coverage';
 
@@ -20,7 +20,6 @@ export const HRDashboard = () => {
     requests,
     guardPeriods,
     alerts,
-    coverage,
     calendarEvents,
     loading,
     approveRequest,
@@ -99,21 +98,7 @@ export const HRDashboard = () => {
         )}
 
         {activeTab === 'coverage' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <CoverageChart coverage={coverage} />
-            </div>
-            <div className="space-y-6">
-              <AlertsPanel alerts={alerts} />
-              {isAdmin && (
-                <RequestsPanel
-                  requests={requests}
-                  onApprove={approveRequest}
-                  onReject={rejectRequest}
-                />
-              )}
-            </div>
-          </div>
+          <CoverageDashboard />
         )}
       </div>
     </div>

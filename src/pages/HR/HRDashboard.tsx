@@ -47,17 +47,13 @@ export const HRDashboard = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => setActiveTab('calendar')}
-                className={`px-3 py-1.5 text-sm rounded-lg ${
-                  activeTab === 'calendar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
+                className={`px-3 py-1.5 text-sm rounded-lg ${activeTab === 'calendar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
               >
                 Calendario
               </button>
               <button
                 onClick={() => setActiveTab('coverage')}
-                className={`px-3 py-1.5 text-sm rounded-lg ${
-                  activeTab === 'coverage' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
+                className={`px-3 py-1.5 text-sm rounded-lg ${activeTab === 'coverage' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
               >
                 Cobertura
               </button>
@@ -70,36 +66,17 @@ export const HRDashboard = () => {
         {activeTab === 'calendar' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-             <CalendarView
-                events={calendarEvents}
-                view={calendarView}
-                onViewChange={setCalendarView}
-                onDateChange={() => {}}
-              />
-
+              <CalendarView events={calendarEvents} view={calendarView} onViewChange={setCalendarView} onDateChange={() => {}} />
             </div>
             <div className="space-y-6">
               <AlertsPanel alerts={alerts} />
-              {isAdmin && (
-                <RequestsPanel
-                  requests={requests}
-                  onApprove={approveRequest}
-                  onReject={rejectRequest}
-                />
-              )}
-              <GuardSchedule
-                shifts={shifts}
-                guardPeriods={guardPeriods}
-                onCreate={createGuardPeriod}
-                onDelete={deleteGuardPeriod}
-              />
+              {isAdmin && <RequestsPanel requests={requests} onApprove={approveRequest} onReject={rejectRequest} />}
+              <GuardSchedule shifts={shifts} guardPeriods={guardPeriods} onCreate={createGuardPeriod} onDelete={deleteGuardPeriod} />
             </div>
           </div>
         )}
 
-        {activeTab === 'coverage' && (
-          <CoverageDashboard />
-        )}
+        {activeTab === 'coverage' && <CoverageDashboard />}
       </div>
     </div>
   );

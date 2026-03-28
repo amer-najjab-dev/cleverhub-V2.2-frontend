@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
 interface HorizontalTimelineProps {
   startDate: Date;
@@ -8,6 +8,7 @@ interface HorizontalTimelineProps {
   onDateChange: (date: Date) => void;
   onDaysChange: (days: number) => void;
   onDrop?: (date: string, shiftId: number, employeeId: number) => void;
+  onCellClick?: (date: string, shiftId: number, shiftName: string, employees: any[]) => void;
   isDragging?: boolean;
 }
 
@@ -25,13 +26,13 @@ export const HorizontalTimeline = ({
   onDateChange,
   onDaysChange,
   onDrop,
+  onCellClick,
   isDragging = false
 }: HorizontalTimelineProps) => {
   const [draggingOver, setDraggingOver] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [cellWidth, setCellWidth] = useState(80);
 
-  // Calcular ancho de celda basado en el contenedor
   useEffect(() => {
     const updateCellWidth = () => {
       if (containerRef.current) {
@@ -95,24 +96,24 @@ export const HorizontalTimeline = ({
     }
   };
 
+  const handleCellClick = (dateStr: string, shiftId: number, shiftName: string) => {
+    const dayCoverage = getDayCoverage(new Date(dateStr));
+    const shiftData = dayCoverage.find((s: any) => s.shiftId === shiftId);
+    const employees = shiftData?.employees || [];
+    onCellClick?.(dateStr, shiftId, shiftName, employees);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-4">
-      {/* Controles fijos */}
       <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10 pb-2">
         <div className="flex items-center gap-2">
-          <button
-            onClick={goPrevious}
-            className="p-1.5 hover:bg-gray-100 rounded-lg border border-gray-200"
-          >
+          <button onClick={goPrevious} className="p-1.5 hover:bg-gray-100 rounded-lg border border-gray-200">
             <ChevronLeft size={18} />
           </button>
           <span className="text-sm font-medium text-gray-700 min-w-[120px] text-center">
             {formatDay(days[0])} - {formatDay(days[days.length - 1])}
           </span>
-          <button
-            onClick={goNext}
-            className="p-1.5 hover:bg-gray-100 rounded-lg border border-gray-200"
-          >
+          <button onClick={goNext} className="p-1.5 hover:bg-gray-100 rounded-lg border border-gray-200">
             <ChevronRight size={18} />
           </button>
         </div>
@@ -122,9 +123,7 @@ export const HorizontalTimeline = ({
               key={days}
               onClick={() => onDaysChange(days)}
               className={`px-3 py-1 text-sm rounded-lg transition ${
-                daysToShow === days
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                daysToShow === days ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {days} días
@@ -133,10 +132,8 @@ export const HorizontalTimeline = ({
         </div>
       </div>
 
-      {/* Timeline con scroll horizontal */}
       <div className="overflow-x-auto" ref={containerRef}>
         <div style={{ minWidth: `${days.length * cellWidth}px` }}>
-          {/* Cabecera con días */}
           <div className="flex border-b border-gray-200">
             {days.map((date, idx) => (
               <div
@@ -149,7 +146,6 @@ export const HorizontalTimeline = ({
             ))}
           </div>
 
-          {/* Filas por turno */}
           {shifts.map((shift: { id: number; name: string }, shiftIdx: number) => (
             <div key={shiftIdx} className="flex mt-1">
               {days.map((date, dayIdx) => {
@@ -168,6 +164,7 @@ export const HorizontalTimeline = ({
                     onDragOver={isDragging ? (e) => handleDragOver(e, dateStr, shift.id) : undefined}
                     onDragLeave={handleDragLeave}
                     onDrop={isDragging ? (e) => handleDrop(e, dateStr, shift.id) : undefined}
+                    onClick={() => handleCellClick(dateStr, shift.id, shift.name)}
                     className={`p-1 m-0.5 rounded text-center transition-all cursor-pointer flex-shrink-0 ${colorClass}`}
                   >
                     <div className="text-xs font-medium">{shift.name.substring(0, 3)}</div>
@@ -183,12 +180,12 @@ export const HorizontalTimeline = ({
         </div>
       </div>
 
-      {/* Leyenda */}
       <div className="flex justify-center gap-4 mt-4 pt-3 border-t border-gray-100 flex-wrap">
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500"></div><span className="text-xs text-gray-600">Cobertura OK</span></div>
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-yellow-500"></div><span className="text-xs text-gray-600">Cobertura baja (&gt;=70%)</span></div>
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-xs text-gray-600">Riesgo (&lt;70%)</span></div>
         {isDragging && <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-gray-600">Arrastra a una celda</span></div>}
+        <div className="flex items-center gap-1"><Users size={12} className="text-gray-500" /><span className="text-xs text-gray-500">Click para ver empleados</span></div>
       </div>
     </div>
   );

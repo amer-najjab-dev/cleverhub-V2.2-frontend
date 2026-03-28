@@ -5,6 +5,7 @@ import { RiskAlert } from './RiskAlert';
 import { HorizontalTimeline } from './HorizontalTimeline';
 import { EmployeeSidebar } from './EmployeeSidebar';
 import { UpcomingAbsences } from './UpcomingAbsences';
+import { EmployeesModal } from './EmployeesModal';
 import { Loader2 } from 'lucide-react';
 
 export const CoverageDashboard = () => {
@@ -12,6 +13,12 @@ export const CoverageDashboard = () => {
   const { isDragging, handleDragStart, handleDrop, handleDragEnd } = useShiftAssignment();
   const [startDate, setStartDate] = useState(new Date());
   const [daysToShow, setDaysToShow] = useState(21);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<{
+    date: string;
+    shiftName: string;
+    employees: any[];
+  } | null>(null);
 
   const coverageByDay = coverage.reduce((acc, item) => {
     if (!acc[item.date]) acc[item.date] = [];
@@ -38,9 +45,28 @@ export const CoverageDashboard = () => {
 
   const handleCellDrop = async (date: string, shiftId: number, employeeId: number) => {
     await handleDrop(date, shiftId, employeeId);
-    // Refrescar datos después de asignar turno
     await refresh();
     handleDragEnd();
+  };
+
+  const handleCellClick = (date: string, _shiftId: number, shiftName: string, employeesList: any[]) => {
+    // Obtener nombres de empleados desde sus IDs si no vienen en el objeto
+    const enrichedEmployees = employeesList.map(emp => {
+      const fullEmployee = employees.find(e => e.id === emp.id || e.user_id === emp.id);
+      return {
+        id: emp.id || fullEmployee?.id,
+        name: emp.name || fullEmployee?.user?.full_name,
+        email: fullEmployee?.user?.email,
+        phone: undefined
+      };
+    });
+    
+    setSelectedCell({
+      date,
+      shiftName,
+      employees: enrichedEmployees
+    });
+    setModalOpen(true);
   };
 
   if (loading) {
@@ -57,6 +83,7 @@ export const CoverageDashboard = () => {
         onDateChange={setStartDate}
         onDaysChange={setDaysToShow}
         onDrop={handleCellDrop}
+        onCellClick={handleCellClick}
         isDragging={isDragging}
       />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -67,6 +94,14 @@ export const CoverageDashboard = () => {
           <UpcomingAbsences absences={upcomingAbsences} />
         </div>
       </div>
+
+      <EmployeesModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        date={selectedCell?.date || ''}
+        shiftName={selectedCell?.shiftName || ''}
+        employees={selectedCell?.employees || []}
+      />
     </div>
   );
 };

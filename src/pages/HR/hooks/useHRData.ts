@@ -165,6 +165,7 @@ await Promise.all([
         endDate: endDate.toISOString()
       });
       
+      console.log('📊 Coverage data sample:', coverageData[0]);
       setCoverage(coverageData);
       
       // Generar alertas

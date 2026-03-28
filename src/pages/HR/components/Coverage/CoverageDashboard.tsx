@@ -50,9 +50,14 @@ export const CoverageDashboard = () => {
   };
 
   const handleCellClick = (date: string, _shiftId: number, shiftName: string, employeesList: any[]) => {
+    console.log('📊 Click en celda:', { date, shiftName, employeesList });
+    console.log('📊 coverageByDay para esta fecha:', coverageByDay[date]);
+    
     // Obtener nombres de empleados desde sus IDs si no vienen en el objeto
     const enrichedEmployees = employeesList.map(emp => {
+      console.log('🔍 Empleado recibido:', emp);
       const fullEmployee = employees.find(e => e.id === emp.id || e.user_id === emp.id);
+      console.log('🔍 Empleado completo:', fullEmployee);
       return {
         id: emp.id || fullEmployee?.id,
         name: emp.name || fullEmployee?.user?.full_name,
@@ -60,14 +65,14 @@ export const CoverageDashboard = () => {
         phone: undefined
       };
     });
-    
-    setSelectedCell({
-      date,
-      shiftName,
-      employees: enrichedEmployees
-    });
-    setModalOpen(true);
-  };
+  
+  setSelectedCell({
+    date,
+    shiftName,
+    employees: enrichedEmployees
+  });
+  setModalOpen(true);
+};
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;

@@ -82,28 +82,28 @@ export const EmployeeList = () => {
           <div key={emp.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-medium">{emp.fullName.charAt(0)}</span>
+                <span className="text-blue-600 font-medium">{emp.user?.full_name?.charAt(0) || '?'}</span>
               </div>
               <div>
-                <div className="font-medium text-gray-900">{emp.fullName}</div>
-                <div className="text-sm text-gray-500">{emp.email}</div>
+                <div className="font-medium text-gray-900">{emp.user?.full_name || 'Sin nombre'}</div>
+                <div className="text-sm text-gray-500">{emp.user?.email || 'Sin email'}</div>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <select
-                value={emp.shiftId || ''}
+                value={emp.default_shift_id || ''}
                 onChange={(e) => handleShiftChange(emp.id, parseInt(e.target.value))}
                 className="px-2 py-1 border border-gray-200 rounded-lg text-sm bg-white"
               >
                 <option value="">Sin turno</option>
                 {shifts.map(shift => (
                   <option key={shift.id} value={shift.id}>
-                    {shift.name} ({shift.startTime}-{shift.endTime})
+                    {shift.name} ({shift.start_time}-{shift.end_time})
                   </option>
                 ))}
               </select>
               <div className="text-sm text-gray-500">
-                {emp.vacationDaysUsed}/{emp.vacationDays} días
+                {emp.vacation_days_used}/{emp.vacation_days} días
               </div>
             </div>
           </div>

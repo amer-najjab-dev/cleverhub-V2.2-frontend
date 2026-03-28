@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 export const TimeOffRequests = () => {
   const [requests, setRequests] = useState<TimeOffRequest[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ startDate: '', endDate: '', type: 'vacation', notes: '' });
+  const [formData, setFormData] = useState({ startDate: '', endDate: '', notes: '' });
 
   useEffect(() => {
     loadRequests();
@@ -30,12 +30,11 @@ export const TimeOffRequests = () => {
       await employeeService.createTimeOffRequest({
         startDate: formData.startDate,
         endDate: formData.endDate,
-        type: formData.type,
         notes: formData.notes
       });
       toast.success('Solicitud enviada');
       setShowForm(false);
-      setFormData({ startDate: '', endDate: '', type: 'vacation', notes: '' });
+      setFormData({ startDate: '', endDate: '', notes: '' });
       loadRequests();
     } catch (error) {
       toast.error('Error al enviar solicitud');
@@ -89,9 +88,9 @@ export const TimeOffRequests = () => {
                 <Calendar size={18} className="text-gray-600" />
               </div>
               <div>
-                <div className="font-medium text-gray-900">{req.employeeName}</div>
+                <div className="font-medium text-gray-900">{req.employeeName || `Empleado ${req.employee_id}`}</div>
                 <div className="text-sm text-gray-500">
-                  {new Date(req.startDate).toLocaleDateString('es-ES')} - {new Date(req.endDate).toLocaleDateString('es-ES')}
+                  {new Date(req.start_date).toLocaleDateString('es-ES')} - {new Date(req.end_date).toLocaleDateString('es-ES')}
                 </div>
                 <div className="text-xs text-gray-400 mt-1">
                   {getTypeLabel(req.type)} • {req.notes}
@@ -138,15 +137,6 @@ export const TimeOffRequests = () => {
                   placeholder="Fecha fin"
                 />
               </div>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-              >
-                <option value="vacation">Vacaciones</option>
-                <option value="sick">Enfermedad</option>
-                <option value="personal">Asuntos personales</option>
-              </select>
               <textarea
                 placeholder="Notas (opcional)"
                 value={formData.notes}

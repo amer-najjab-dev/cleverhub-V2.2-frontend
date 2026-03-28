@@ -127,6 +127,12 @@ export interface Holiday {
   updated_at: string;
 }
 
+export interface GuardSchedule {
+  shift_id: number;
+  week_number: number;
+  year: number;
+}
+
 // ==================== SERVICIO ====================
 
 export const employeeService = {
@@ -310,5 +316,64 @@ export const employeeService = {
 
   deleteHoliday: async (id: number): Promise<void> => {
     await api.delete(`/hr/holidays/${id}`);
+  },
+
+  // ==================== GUARDIAS ====================
+  /**
+   * Obtiene las semanas de guardia configuradas para cada turno
+   * @returns Array con los turnos de guardia y las semanas asignadas
+   */
+  getGuardSchedules: async (): Promise<{ shiftId: number; weeks: number[] }[]> => {
+    const response = await api.get('/hr/guard-schedules');
+    // Agrupar por shift
+    const grouped = (response.data.data || []).reduce((acc: any, item: any) => {
+      if (!acc[item.shift_id]) acc[item.shift_id] = [];
+      acc[item.shift_id].push(item.week_number);
+      return acc;
+    }, {});
+    return Object.entries(grouped).map(([shiftId, weeks]) => ({ 
+      shiftId: parseInt(shiftId), 
+      weeks: weeks as number[] 
+    }));
+  },
+
+  /**
+   * Actualiza las semanas de guardia para un turno específico
+   * @param shiftId ID del turno
+   * @param weeks Array de números de semana (1-52)
+   */
+  updateGuardSchedule: async (shiftId: number, weeks: number[]): Promise<void> => {
+    await api.put('/hr/guard-schedules', { shiftId, weeks });
+  },
+
+  /**
+   * Obtiene las semanas de guardia para un año específico
+   * @param year Año (opcional, por defecto año actual)
+   */
+  getGuardSchedulesByYear: async (year?: number): Promise<{ shiftId: number; weeks: number[] }[]> => {
+    const targetYear = year || new Date().getFullYear();
+    const response = await api.get('/hr/guard-schedules', { params: { year: targetYear } });
+    const grouped = (response.data.data || []).reduce((acc: any, item: any) => {
+      if (!acc[item.shift_id]) acc[item.shift_id] = [];
+      acc[item.shift_id].push(item.week_number);
+      return acc;
+    }, {});
+    return Object.entries(grouped).map(([shiftId, weeks]) => ({ 
+      shiftId: parseInt(shiftId), 
+      weeks: weeks as number[] 
+    }));
+  },
+
+  /**
+   * Obtiene los turnos de guardia disponibles para una semana específica
+   * @param weekNumber Número de semana (1-52)
+   * @param year Año (opcional, por defecto año actual)
+   */
+  getGuardShiftsByWeek: async (weekNumber: number, year?: number): Promise<Shift[]> => {
+    const targetYear = year || new Date().getFullYear();
+    const response = await api.get('/hr/guard-schedules/shifts', { 
+      params: { weekNumber, year: targetYear } 
+    });
+    return response.data.data;
   }
 };

@@ -162,8 +162,8 @@ export const HorizontalTimeline = ({
 
           {/* Filas de turnos */}
           {shifts.map((shift: { id: number; name: string; minEmployeesRequired: number }, shiftIdx: number) => (
-            <div key={shiftIdx} className="mt-1">
-              {/* Cabecera del turno con botón de configuración */}
+            <div key={shiftIdx} className="mt-2">
+              {/* ✅ Encabezado del turno con botón de configuración */}
               <div className="flex items-center justify-between px-1 mb-1">
                 <div 
                   className="relative"

@@ -52,7 +52,16 @@ export const CoverageDashboard = () => {
     handleDragEnd();
   };
 
-  // ✅ CORREGIDO: handleCellClick ahora incluye shiftId
+  // ✅ handleConfigClick - versión simplificada sin estado no utilizado
+  const handleConfigClick = (shiftId: number, shiftName: string, currentMin: number) => {
+    console.log('📊 Configuración de turno:', { shiftId, shiftName, currentMin });
+    toast(`Configuración de turno: ${shiftName} (mínimo: ${currentMin} empleados) - Funcionalidad en desarrollo`, {
+      icon: '⚙️',
+      duration: 3000
+    });
+  };
+
+  // ✅ handleCellClick con shiftId
   const handleCellClick = (date: string, shiftId: number, shiftName: string, employeesList: any[]) => {
     console.log('📊 Click en celda:', { date, shiftName, shiftId, employeesList });
     console.log('📊 coverageByDay para esta fecha:', coverageByDay[date]);
@@ -72,14 +81,14 @@ export const CoverageDashboard = () => {
   
     setSelectedCell({
       date,
-      shiftId,           // ✅ AÑADIDO: shiftId ahora se guarda en el estado
+      shiftId,
       shiftName,
       employees: enrichedEmployees
     });
     setModalOpen(true);
   };
 
-  // ✅ NUEVA FUNCIÓN: handleRemoveEmployee para eliminar asignaciones
+  // ✅ handleRemoveEmployee para eliminar asignaciones
   const handleRemoveEmployee = async (employeeId: number, shiftId: number, date: string) => {
     try {
       console.log('🗑️ Eliminando asignación:', { employeeId, shiftId, date });
@@ -94,6 +103,9 @@ export const CoverageDashboard = () => {
       toast.error(error.response?.data?.message || 'Error al eliminar empleado del turno');
     }
   };
+
+  // ✅ Obtener si el usuario es admin (esto debería venir del contexto de autenticación)
+  const isAdmin = true; // Temporalmente true, en producción usar useAuth
 
   if (loading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
@@ -111,6 +123,8 @@ export const CoverageDashboard = () => {
         onDrop={handleCellDrop}
         onCellClick={handleCellClick}
         isDragging={isDragging}
+        onConfigClick={handleConfigClick}
+        isAdmin={isAdmin}
       />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">

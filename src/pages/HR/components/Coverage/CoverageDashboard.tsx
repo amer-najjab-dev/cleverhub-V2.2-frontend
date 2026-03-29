@@ -7,6 +7,7 @@ import { HorizontalTimeline } from './HorizontalTimeline';
 import { EmployeeSidebar } from './EmployeeSidebar';
 import { UpcomingAbsences } from './UpcomingAbsences';
 import { EmployeesModal } from './EmployeesModal';
+import { ShiftConfigModal } from './ShiftConfigModal';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -21,6 +22,14 @@ export const CoverageDashboard = () => {
     shiftId: number;
     shiftName: string;
     employees: any[];
+  } | null>(null);
+  
+  // ✅ Estado para el modal de configuración de turnos
+  const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [selectedShiftConfig, setSelectedShiftConfig] = useState<{
+    shiftId: number;
+    shiftName: string;
+    currentMin: number;
   } | null>(null);
 
   const coverageByDay = coverage.reduce((acc, item) => {
@@ -52,13 +61,15 @@ export const CoverageDashboard = () => {
     handleDragEnd();
   };
 
-  // ✅ handleConfigClick - versión simplificada sin estado no utilizado
+  // ✅ handleConfigClick - abre el modal de configuración
   const handleConfigClick = (shiftId: number, shiftName: string, currentMin: number) => {
-    console.log('📊 Configuración de turno:', { shiftId, shiftName, currentMin });
-    toast(`Configuración de turno: ${shiftName} (mínimo: ${currentMin} empleados) - Funcionalidad en desarrollo`, {
-      icon: '⚙️',
-      duration: 3000
-    });
+    setSelectedShiftConfig({ shiftId, shiftName, currentMin });
+    setConfigModalOpen(true);
+  };
+
+  // ✅ handleConfigUpdate - recarga los datos después de actualizar
+  const handleConfigUpdate = async () => {
+    await refresh();
   };
 
   // ✅ handleCellClick con shiftId
@@ -114,6 +125,7 @@ export const CoverageDashboard = () => {
   return (
     <div className="space-y-4">
       {riskDays.length > 0 && <RiskAlert riskDays={riskDays} />}
+      
       <HorizontalTimeline
         startDate={startDate}
         daysToShow={daysToShow}
@@ -122,10 +134,11 @@ export const CoverageDashboard = () => {
         onDaysChange={setDaysToShow}
         onDrop={handleCellDrop}
         onCellClick={handleCellClick}
-        isDragging={isDragging}
         onConfigClick={handleConfigClick}
+        isDragging={isDragging}
         isAdmin={isAdmin}
       />
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <EmployeeSidebar employees={employees} requests={requests} onDragStart={handleDragStart} isDragging={isDragging} />
@@ -135,6 +148,7 @@ export const CoverageDashboard = () => {
         </div>
       </div>
 
+      {/* Modal de empleados para un turno específico */}
       <EmployeesModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -143,6 +157,16 @@ export const CoverageDashboard = () => {
         shiftName={selectedCell?.shiftName || ''}
         employees={selectedCell?.employees || []}
         onRemoveEmployee={handleRemoveEmployee}
+      />
+
+      {/* ✅ Modal de configuración de turno */}
+      <ShiftConfigModal
+        isOpen={configModalOpen}
+        onClose={() => setConfigModalOpen(false)}
+        shiftId={selectedShiftConfig?.shiftId || 0}
+        shiftName={selectedShiftConfig?.shiftName || ''}
+        currentMin={selectedShiftConfig?.currentMin || 1}
+        onUpdate={handleConfigUpdate}
       />
     </div>
   );

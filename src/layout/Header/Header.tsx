@@ -1,22 +1,28 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, ShoppingCart, Users, Package, ClipboardCheck, 
-  Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown
+  Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown, Store
 } from 'lucide-react';
-import { navigation } from './navigation.config';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegionSelector } from '../../components/RegionSelector';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { moduleService, Module } from '../../services/module.service';
 
+// Mapa de iconos
 const iconMap: Record<string, React.ComponentType<any>> = {
-  Home,           // Dashboard
-  ShoppingCart,   // Ventas
-  Users,          // Clientes
-  Package,        // Productos
-  ClipboardCheck, // Stock
-  Truck,          // Proveedores
-  BarChart3       // Reportes
+  Home: Home,
+  ShoppingCart: ShoppingCart,
+  Users: Users,
+  Package: Package,
+  ClipboardCheck: ClipboardCheck,
+  Truck: Truck,
+  BarChart3: BarChart3,
+  Store: Store,
+  LayoutDashboard: Home,
+  Settings: Settings,
+  FileText: BarChart3,
+  Box: Package
 };
 
 export const Header = () => {
@@ -24,8 +30,26 @@ export const Header = () => {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const { user, logout } = useAuth();
+
+  // Cargar módulos según el rol del usuario
+  useEffect(() => {
+    const loadModules = async () => {
+      if (!user) return;
+      try {
+        const data = await moduleService.getModules();
+        setModules(data);
+      } catch (error) {
+        console.error('Error loading modules:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadModules();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -37,43 +61,6 @@ export const Header = () => {
   };
 
   if (!user) return null;
-
-  const filteredNav = navigation.filter(item => 
-    item.roles.includes(user.role)
-  );
-
-  // Array con los 8 items de navegación (añadido RRHH)
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: 'Home', description: 'Panel principal' },
-    { path: '/sales', label: 'Ventas', icon: 'ShoppingCart', description: 'Punto de venta' },
-    { path: '/clients', label: 'Clientes', icon: 'Users', description: 'Gestión de clientes' },
-    { path: '/products', label: 'Productos', icon: 'Package', description: 'Catálogo de productos' },
-    { path: '/stock', label: 'Stock', icon: 'ClipboardCheck', description: 'Inventario' },
-    { path: '/providers', label: 'Proveedores', icon: 'Truck', description: 'Gestión de proveedores' },
-    { path: '/reports', label: 'Reportes', icon: 'BarChart3', description: 'Informes y estadísticas' },
-    // ✅ NUEVO ITEM RRHH
-    { path: '/hr', label: 'RRHH', icon: 'Users', description: 'Gestión de personal y turnos' }
-  ].filter(item => {
-    const exists = filteredNav.some(nav => {
-      const navPath = nav.path.replace(/^\//, '');
-      const itemPath = item.path.replace(/^\//, '');
-      return navPath === itemPath || 
-             (itemPath === '' && navPath === 'dashboard') ||
-             (itemPath === 'dashboard' && navPath === '');
-    });
-    
-    // Forzar inclusión de Proveedores
-    if (item.path === '/providers' && !exists) {
-      return true;
-    }
-    
-    // ✅ Forzar inclusión de RRHH
-    if (item.path === '/hr' && !exists) {
-      return true;
-    }
-    
-    return exists;
-  });
 
   const getInitials = () => {
     const nameParts = user.fullName.split(' ');
@@ -90,11 +77,28 @@ export const Header = () => {
     return location.pathname === path;
   };
 
+  // Mostrar loading mientras se cargan los módulos
+  if (loading) {
+    return (
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-screen-2xl mx-auto px-6 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl"></div>
+              <span className="font-bold text-gray-900">CleverHub</span>
+            </div>
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-screen-2xl mx-auto px-6">
         <div className="flex justify-between items-center h-15">
-          {/* 1. CH CleverHub - tamaño intermedio */}
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
               <span className="text-white font-bold text-sm">CH</span>
@@ -102,33 +106,32 @@ export const Header = () => {
             <span className="font-bold text-gray-900 text-lg hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* 2-9. Items de navegación - tamaño intermedio (ahora con 8 items) */}
+          {/* Navegación dinámica */}
           <nav className="hidden md:flex items-center justify-center flex-1 mx-4">
             <div className="flex items-center space-x-1">
-              {navItems.map((item) => {
-                const Icon = iconMap[item.icon as keyof typeof iconMap];
-                const isActive = isActiveRoute(item.path);
+              {modules.map((module) => {
+                const Icon = iconMap[module.icon] || Home;
+                const isActive = isActiveRoute(module.path);
                 
                 return (
                   <Link
-                    key={item.path}
-                    to={item.path}
+                    key={module.path}
+                    to={module.path}
                     className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap text-sm font-medium ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
-                    title={item.description}
                   >
                     <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                    <span>{item.label}</span>
+                    <span>{module.name}</span>
                   </Link>
                 );
               })}
             </div>
           </nav>
 
-          {/* Menú derecho */}
+          {/* Menú derecho (sin cambios) */}
           <div className="flex items-center space-x-2 shrink-0">
             {/* Notificaciones */}
             <div className="relative">
@@ -172,7 +175,9 @@ export const Header = () => {
                 </div>
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{user.fullName.split(' ')[0]}</p>
-                  <p className="text-xs text-gray-400">{user.role === 'admin' ? 'Admin' : 'Empleado'}</p>
+                  <p className="text-xs text-gray-400">
+                    {user.role === 'ADMIN' ? 'Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Empleado'}
+                  </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </button>
@@ -194,7 +199,7 @@ export const Header = () => {
                       <span>Mi perfil</span>
                     </Link>
                     
-                    {user.role === 'admin' && (
+                    {user.role === 'ADMIN' && (
                       <Link
                         to="/admin/users"
                         className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -229,14 +234,14 @@ export const Header = () => {
         {/* Navegación móvil */}
         <div className="md:hidden pb-3 overflow-x-auto">
           <div className="flex space-x-2">
-            {navItems.map((item) => {
-              const Icon = iconMap[item.icon as keyof typeof iconMap];
-              const isActive = isActiveRoute(item.path);
+            {modules.map((module) => {
+              const Icon = iconMap[module.icon] || Home;
+              const isActive = isActiveRoute(module.path);
               
               return (
                 <Link
-                  key={item.path}
-                  to={item.path}
+                  key={module.path}
+                  to={module.path}
                   className={`flex flex-col items-center px-3 py-2 rounded-xl min-w-16 ${
                     isActive 
                       ? 'bg-blue-50 text-blue-700 shadow-sm' 
@@ -244,7 +249,7 @@ export const Header = () => {
                   }`}
                 >
                   <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <span className="text-xs font-medium">{module.name}</span>
                 </Link>
               );
             })}

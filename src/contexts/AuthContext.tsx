@@ -5,7 +5,7 @@ interface User {
   id: number;
   email: string;
   fullName: string;
-  role: 'admin' | 'employee';
+  role: 'ADMIN' | 'SUPER_ADMIN' | 'EMPLOYEE';
   isActive?: boolean;
 }
 

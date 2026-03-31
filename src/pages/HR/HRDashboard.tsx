@@ -32,7 +32,7 @@ export const HRDashboard = () => {
     deleteGuardPeriod,
   } = useHRData();
   
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'ADMIN';
 
   // Guardar la pestaña activa en localStorage cuando cambie
   useEffect(() => {

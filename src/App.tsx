@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { RegionProvider } from './contexts/RegionContext';
@@ -26,21 +27,9 @@ import { ConnectPage } from './modules/connect/pages/ConnectPage';
 import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 import EditClientPage from './pages/Clients/EditClientPage';
 import { HRDashboard } from './pages/HR/HRDashboard';
-import { PharmaciesPage } from './pages/Admin/PharmaciesPage';
-import { GlobalUsersPage } from './pages/Admin/GlobalUsersPage';
-import { HealthPage } from './pages/Admin/HealthPage';
-
-
-
-// Imports para ADMIN (SUPER_ADMIN)
-import { AdminDashboard } from './pages/Admin/AdminDashboard';
-import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
-import { BroadcastPage } from './pages/Admin/BroadcastPage';
-import { useAuth } from './contexts/AuthContext';
+import { AdminRoutes } from './components/Admin/AdminRoutes';
 
 function App() {
-  const { user } = useAuth();
-
   return (
     <RegionProvider>
       <AuthProvider>
@@ -113,16 +102,7 @@ function App() {
                 </Route>
 
                 {/* RUTAS DE ADMINISTRACIÓN (SOLO SUPER_ADMIN) */}
-                {user?.role === 'SUPER_ADMIN' && (
-                  <>
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin/pharmacies" element={<PharmaciesPage />} />
-                    <Route path="/admin/users" element={<GlobalUsersPage />} />
-                    <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
-                    <Route path="/admin/broadcast" element={<BroadcastPage />} />
-                    <Route path="/admin/health" element={<HealthPage />} />
-                  </>
-                )}
+                <AdminRoutes />
               </Routes>
             </div>
           </main>

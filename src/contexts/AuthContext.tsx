@@ -64,6 +64,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('auth_token', response.data.token);
         
+        console.log('Login exitoso. Rol:', userData.role);
+        console.log('Redirigiendo a:', userData.role === 'SUPER_ADMIN' ? '/admin/dashboard' : '/');
+        
         // Forzar redirección con window.location
         if (userData.role === 'SUPER_ADMIN') {
           window.location.href = '/admin/dashboard';

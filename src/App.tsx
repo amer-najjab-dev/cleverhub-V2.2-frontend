@@ -27,7 +27,13 @@ import { ConnectPage } from './modules/connect/pages/ConnectPage';
 import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 import EditClientPage from './pages/Clients/EditClientPage';
 import { HRDashboard } from './pages/HR/HRDashboard';
-import { AdminRoutes } from './components/Admin/AdminRoutes';
+import { AdminDashboard } from './pages/Admin/AdminDashboard';
+import { PharmaciesPage } from './pages/Admin/PharmaciesPage';
+import { GlobalUsersPage } from './pages/Admin/GlobalUsersPage';
+import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
+import { BroadcastPage } from './pages/Admin/BroadcastPage';
+import { HealthPage } from './pages/Admin/HealthPage';
+import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
 
 function App() {
   return (
@@ -73,7 +79,7 @@ function App() {
                 {/* Ruta directa para Connect (opcional) */}
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />
                 
-                {/* RUTA DE REPORTS - UNA SOLA VEZ, CON TODAS LAS SUBRUTAS */}
+                {/* RUTA DE REPORTS */}
                 <Route path="/reports" element={<ProtectedRoute><ReportsLayout /></ProtectedRoute>}>
                   <Route index element={<CashClosurePage />} />
                   <Route path="cash-closure" element={<CashClosurePage />} />
@@ -102,7 +108,14 @@ function App() {
                 </Route>
 
                 {/* RUTAS DE ADMINISTRACIÓN (SOLO SUPER_ADMIN) */}
-                <AdminRoutes />
+                <Route element={<AdminRouteWrapper />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/pharmacies" element={<PharmaciesPage />} />
+                  <Route path="/admin/users" element={<GlobalUsersPage />} />
+                  <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
+                  <Route path="/admin/broadcast" element={<BroadcastPage />} />
+                  <Route path="/admin/health" element={<HealthPage />} />
+                </Route>
               </Routes>
             </div>
           </main>

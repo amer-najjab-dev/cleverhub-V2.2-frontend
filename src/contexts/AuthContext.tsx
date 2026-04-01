@@ -64,11 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('auth_token', response.data.token);
         
-        // Redirigir según el rol
+        // Redirigir según el rol con window.location.href
         if (userData.role === 'SUPER_ADMIN') {
-          navigate('/admin/dashboard');
+          window.location.href = '/admin/dashboard';
         } else {
-          navigate('/');
+          window.location.href = '/';
         }
       }
       return response.data;

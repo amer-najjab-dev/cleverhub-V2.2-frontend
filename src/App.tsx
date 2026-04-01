@@ -37,9 +37,9 @@ import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
 
 function App() {
   return (
-    <RegionProvider>
-      <AuthProvider>
-        <BrowserRouter>
+    <BrowserRouter>  {/* ⬅️ BrowserRouter debe estar afuera */}
+      <RegionProvider>
+        <AuthProvider>  {/* ⬅️ AuthProvider dentro de BrowserRouter */}
           <Toaster 
             position="top-right"
             toastOptions={{
@@ -119,9 +119,9 @@ function App() {
               </Routes>
             </div>
           </main>
-        </BrowserRouter>
-      </AuthProvider>
-    </RegionProvider>
+        </AuthProvider>
+      </RegionProvider>
+    </BrowserRouter>
   );
 }
 

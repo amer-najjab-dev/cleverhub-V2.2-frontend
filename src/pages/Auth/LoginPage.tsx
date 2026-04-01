@@ -15,18 +15,27 @@ export const LoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
+      console.log('1. Intentando login...');
       await login(email, password);
-      // Redirigir después del login exitoso
+      console.log('2. Login exitoso');
+      
       const token = localStorage.getItem('auth_token');
+      console.log('3. Token:', token ? 'Existe' : 'No existe');
+      
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('4. Rol:', payload.role);
+        
         if (payload.role === 'SUPER_ADMIN') {
+          console.log('5. Redirigiendo a /admin/dashboard');
           window.location.href = '/admin/dashboard';
         } else {
+          console.log('5. Redirigiendo a /');
           window.location.href = '/';
         }
       }
     } catch (error) {
+      console.error('Error en login:', error);
       setError('Credenciales inválidas');
     } finally {
       setIsLoading(false);

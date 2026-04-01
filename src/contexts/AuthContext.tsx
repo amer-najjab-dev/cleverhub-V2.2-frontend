@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -25,6 +26,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,13 +57,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    if (response.data.success) {
-      setUser(response.data.data);
-      // Guardar token JWT
-      if (response.data.token) {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      if (response.data.success) {
+        const userData = response.data.data;
+        setUser(userData);
         localStorage.setItem('auth_token', response.data.token);
+        
+        // Redirigir según el rol
+        if (userData.role === 'SUPER_ADMIN') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
       }
+      return response.data;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
@@ -73,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     localStorage.removeItem('auth_token');
     setUser(null);
+    navigate('/login'); // Redirigir al login después de logout
   };
 
   const getUsers = async (): Promise<User[]> => {

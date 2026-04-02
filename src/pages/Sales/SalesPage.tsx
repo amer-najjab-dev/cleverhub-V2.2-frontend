@@ -116,7 +116,9 @@ export const SalesPage = () => {
         
         const lowerQuery = query.toLowerCase();
         results = results.filter(client => 
-          client.name?.toLowerCase().includes(lowerQuery) ||
+          `${client.first_name} ${client.last_name}`.toLowerCase().includes(lowerQuery) ||
+          client.first_name?.toLowerCase().includes(lowerQuery) ||
+          client.last_name?.toLowerCase().includes(lowerQuery) ||
           client.phone?.toLowerCase().includes(lowerQuery) ||
           client.email?.toLowerCase().includes(lowerQuery) ||
           client.dni?.toLowerCase().includes(lowerQuery)

@@ -3,10 +3,12 @@ import { CreditCard, Wallet, TrendingUp, DollarSign, Percent, Tag, AlertCircle, 
 import { useCartStore } from '../../store/cart.store';
 import { salesService } from '../../services/sales.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
+import { useAuth } from '../../contexts/AuthContext';
 
 type PaymentMethod = 'efectivo' | 'tarjeta' | 'transferencia' | 'cheque' | 'mixto' | 'credito' | 'puntos';
 
 export const FinancialSummary = () => {
+  const { user } = useAuth();
   const [paidAmount, setPaidAmount] = useState<string>('');
   const [discountInput, setDiscountInput] = useState<string>('');
   const [discountTypeInput, setDiscountTypeInput] = useState<'percentage' | 'amount'>('percentage');
@@ -302,76 +304,40 @@ export const FinancialSummary = () => {
     }
   };
 
-  const handleFinalizeSale = async () => {
+  const handleFinalize = async () => {
+    if (isProcessing) return;
+    
+    if (items.length === 0) {
+      alert('No hay productos en el carrito');
+      return;
+    }
+
+    if (!user?.id) {
+      alert('Error: No se ha identificado al usuario. Por favor, cierra sesión y vuelve a iniciar.');
+      return;
+    }
+
+    setIsProcessing(true);
+    
     try {
-      setIsProcessing(true);
-      
-      if (!paymentMethod) {
-        alert('Por favor selecciona un método de pago');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (items.length === 0) {
-        alert('El carrito está vacío');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if ((paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId) {
-        alert('Para crédito o pago con puntos es necesario seleccionar un cliente');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (paymentMethod === 'efectivo' && parseFloat(paidAmount || '0') < total) {
-        alert('El monto pagado es menor al total');
-        setIsProcessing(false);
-        return;
-      }
-      
-      if (paymentMethod === 'mixto') {
-        if (!mixedPayments || mixedPayments.step !== 'completed') {
-          alert('Para pago mixto debe seleccionar dos métodos de pago');
-          setIsProcessing(false);
-          return;
-        }
-        
-        const firstAmount = mixedPayments.firstAmount || 0;
-        const secondAmount = mixedPayments.secondAmount || 0;
-        const sum = firstAmount + secondAmount;
-        
-        if (Math.abs(sum - total) >= 0.01) {
-          alert(`La suma de los pagos (${formatCurrency(sum)}) no coincide con el total (${formatCurrency(total)})`);
-          setIsProcessing(false);
-          return;
-        }
-      }
-      
+      const total = getTotal(region);
       const paymentStatus = getPaymentStatus();
       
       let payments = [];
-      
       if (paymentMethod === 'mixto' && mixedPayments && mixedPayments.step === 'completed') {
         payments = [
-          {
-            method: getBackendPaymentMethod(mixedPayments.firstMethod!),
-            amount: mixedPayments.firstAmount!
-          },
-          {
-            method: getBackendPaymentMethod(mixedPayments.secondMethod!),
-            amount: mixedPayments.secondAmount!
-          }
+          { method: getBackendPaymentMethod(mixedPayments.firstMethod!), amount: mixedPayments.firstAmount! },
+          { method: getBackendPaymentMethod(mixedPayments.secondMethod!), amount: mixedPayments.secondAmount! }
         ];
       } else {
-        payments = [{
-          method: getBackendPaymentMethod(paymentMethod),
-          amount: getPaidAmountToSend()
+        payments = [{ 
+          method: paymentMethod ? getBackendPaymentMethod(paymentMethod) : 'cash', 
+          amount: getPaidAmountToSend() 
         }];
       }
-      console.log('💰 TOTAL A ENVIAR:', total);
+
       const saleData = {
-        userId: 1,
+        userId: user.id,
         clientId: clientId || undefined,
         items: items.map(item => ({
           productId: item.id,
@@ -384,11 +350,11 @@ export const FinancialSummary = () => {
         discountType: getBackendDiscountType(discountType),
         discountAmount: discountAmount > 0 ? discountAmount : undefined,
         discountPercentage: discountType === 'percentage' ? discountValue : undefined,
-        paymentMethod: getBackendPaymentMethod(paymentMethod),
+        paymentMethod: paymentMethod ? getBackendPaymentMethod(paymentMethod) : 'cash',
         paidAmount: getPaidAmountToSend(),
         payments: payments,
         paymentStatus: paymentStatus,
-        total, // ← AGREGAR ESTA LÍNEA
+        total,
         notes: 'Venta desde CleverHub POS',
         adultFlag: true,
         pregnantFlag: false,
@@ -416,12 +382,10 @@ export const FinancialSummary = () => {
       
     } catch (error: any) {
       console.error('Error finalizando venta:', error);
-      
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error ||
                           error.message || 
                           'Error al finalizar la venta';
-      
       alert(`❌ Error: ${errorMessage}\n\nRevisa la consola para más detalles.`);
     } finally {
       setIsProcessing(false);
@@ -816,7 +780,7 @@ export const FinancialSummary = () => {
       )}
 
       <button
-        onClick={handleFinalizeSale}
+        onClick={handleFinalize}
         disabled={!canCompleteSale() || isProcessing}
         className={`w-full py-2.5 rounded-lg font-semibold transition-colors text-sm ${
           canCompleteSale() && !isProcessing

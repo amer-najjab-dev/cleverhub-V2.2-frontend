@@ -17,12 +17,15 @@ export const PharmaciesPage = () => {
   });
 
   useEffect(() => {
+    console.log('🟢 PharmaciesPage mounted');
     loadPharmacies();
   }, []);
 
   const loadPharmacies = async () => {
+    console.log('🔵 loadPharmacies called');
     try {
       const data = await adminService.getPharmacies();
+      console.log('🔵 Data received:', data);
       setPharmacies(data);
     } catch (error) {
       console.error('Error loading pharmacies:', error);

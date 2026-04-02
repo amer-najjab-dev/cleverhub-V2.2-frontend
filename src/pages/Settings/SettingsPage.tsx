@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { adminService } from '../../services/admin.service';
 
 export const SettingsPage = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

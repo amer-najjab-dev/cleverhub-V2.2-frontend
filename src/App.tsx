@@ -35,6 +35,7 @@ import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 import EditClientPage from './pages/Clients/EditClientPage';
 import { HRDashboard } from './pages/HR/HRDashboard';
 import { useAuth } from './contexts/AuthContext';
+import { SettingsPage } from './pages/Settings/SettingsPage';
 
 // Componente para la ruta raíz
 const RootRoute = () => {
@@ -81,6 +82,7 @@ function App() {
                   <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
                   <Route path="/admin/broadcast" element={<BroadcastPage />} />
                   <Route path="/admin/health" element={<HealthPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
                 </Route>
                 
                 {/* Resto de rutas */}

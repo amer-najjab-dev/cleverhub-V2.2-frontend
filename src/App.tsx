@@ -84,6 +84,9 @@ function App() {
                   <Route path="/admin/health" element={<HealthPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                 </Route>
+
+                 {/* Dashboard para ADMIN y EMPLOYEE */}
+                <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
                 
                 {/* Resto de rutas */}
                 <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />

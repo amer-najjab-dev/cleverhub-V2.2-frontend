@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, History, Search, Filter, Download, X, Check } from 'lucide-react';
+import { Plus, History, Search, Filter, Download, X, Check, Trash2 } from 'lucide-react';
 import { supplierService } from '../services/supplier.service';
 import { Supplier, SupplierAddress } from '../types/supplier.types';
 
@@ -110,7 +110,7 @@ export const SupplierListPage: React.FC = () => {
     setModalLoading(true);
     try {
       const newSupplier = {
-        name: formData.companyName,  // ← El backend espera "name", no "companyName"
+        name: formData.companyName,
         email: formData.email || undefined,
         phone: formData.phone,
         address: formData.address,
@@ -130,6 +130,18 @@ export const SupplierListPage: React.FC = () => {
       alert('Error al crear el proveedor');
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, companyName: string) => {
+    if (window.confirm(`¿Eliminar proveedor "${companyName}"? Esta acción no se puede deshacer.`)) {
+      try {
+        await supplierService.delete(id);
+        loadSuppliers(); // Recargar lista
+      } catch (error) {
+        console.error('Error deleting supplier:', error);
+        alert('Error al eliminar el proveedor');
+      }
     }
   };
 
@@ -256,6 +268,9 @@ export const SupplierListPage: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Solde (DHS)
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -266,16 +281,21 @@ export const SupplierListPage: React.FC = () => {
                     return (
                       <tr
                         key={supplier.id}
-                        onClick={() => navigate(`/providers/${supplier.id}`)}
                         className="hover:bg-gray-50 cursor-pointer transition-colors"
                       >
-                        <td className="px-6 py-4">
+                        <td 
+                          className="px-6 py-4"
+                          onClick={() => navigate(`/providers/${supplier.id}`)}
+                        >
                           <div className="font-medium text-gray-900">{supplier.companyName}</div>
                           {supplier.email && (
                             <div className="text-sm text-gray-500">{supplier.email}</div>
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td 
+                          className="px-6 py-4"
+                          onClick={() => navigate(`/providers/${supplier.id}`)}
+                        >
                           {primaryPhone && (
                             <div className="text-sm text-gray-900">{primaryPhone.number}</div>
                           )}
@@ -285,7 +305,10 @@ export const SupplierListPage: React.FC = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td 
+                          className="px-6 py-4"
+                          onClick={() => navigate(`/providers/${supplier.id}`)}
+                        >
                           {primaryAddress && (
                             <>
                               <div className="text-sm text-gray-900">{primaryAddress.city}</div>
@@ -295,12 +318,27 @@ export const SupplierListPage: React.FC = () => {
                             </>
                           )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td 
+                          className="px-6 py-4"
+                          onClick={() => navigate(`/providers/${supplier.id}`)}
+                        >
                           <span className={`text-sm font-semibold ${
                             supplier.balance > 0 ? 'text-red-600' : 'text-green-600'
                           }`}>
                             {formatCurrency(supplier.balance)}
                           </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(supplier.id, supplier.companyName);
+                            }}
+                            className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-50 rounded-lg"
+                            title="Eliminar proveedor"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     );

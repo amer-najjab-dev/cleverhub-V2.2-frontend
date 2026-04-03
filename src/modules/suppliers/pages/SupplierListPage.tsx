@@ -110,7 +110,7 @@ export const SupplierListPage: React.FC = () => {
     setModalLoading(true);
     try {
       const newSupplier = {
-        companyName: formData.companyName,  // ← Cambiar de company_name a companyName
+        name: formData.companyName,  // ← El backend espera "name", no "companyName"
         email: formData.email || undefined,
         phone: formData.phone,
         address: formData.address,

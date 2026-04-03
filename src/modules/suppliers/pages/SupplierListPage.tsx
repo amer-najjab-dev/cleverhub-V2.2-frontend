@@ -102,18 +102,22 @@ export const SupplierListPage: React.FC = () => {
   };
 
   const handleCreateSupplier = async () => {
-    if (!formData.companyName) {
-      alert('El nombre es obligatorio');
+    if (!formData.companyName || !formData.phone) {
+      alert('El nombre y teléfono son obligatorios');
       return;
     }
 
     setModalLoading(true);
     try {
       const newSupplier = {
-        name: formData.companyName,           // ← campo obligatorio
+        company_name: formData.companyName,  // ← Cambiar de name a company_name
         email: formData.email || undefined,
-        payment_terms: formData.paymentTerms || undefined,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        postal_code: formData.postalCode,
         tax_id: formData.taxId || undefined,
+        payment_terms: formData.paymentTerms || undefined,
         notes: `Teléfono: ${formData.phone}\nDirección: ${formData.address}, ${formData.city} ${formData.postalCode}`
       };
       

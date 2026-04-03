@@ -99,6 +99,8 @@ function App() {
                 <Route path="/clients/:id/edit" element={<ProtectedRoute><EditClientPage /></ProtectedRoute>} />
                 <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/hr" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
+                <Route path="/suppliers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
+                <Route path="/suppliers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />

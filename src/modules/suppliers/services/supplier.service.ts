@@ -85,10 +85,17 @@ export const supplierService = {
   },
 
   create: async (data: Partial<Supplier> & { name?: string }): Promise<Supplier> => {
+    console.log('📦 supplierService.create - data recibido:', JSON.stringify(data, null, 2));
+    
     const payload: any = {};
-    // Aceptar tanto 'name' como 'companyName'
-    if (data.name) payload.company_name = data.name;
-    if (data.companyName) payload.company_name = data.companyName;
+    
+    // Mapear 'name' a 'company_name' (prioridad)
+    if (data.name) {
+      payload.company_name = data.name;
+    } else if (data.companyName) {
+      payload.company_name = data.companyName;
+    }
+    
     if (data.email) payload.email = data.email;
     if (data.website) payload.website = data.website;
     if (data.fax) payload.fax = data.fax;
@@ -98,6 +105,8 @@ export const supplierService = {
     if (data.balance !== undefined) payload.balance = data.balance;
     if (data.isActive !== undefined) payload.is_active = data.isActive;
     if (data.notes) payload.notes = data.notes;
+    
+    console.log('📦 supplierService.create - payload a enviar:', JSON.stringify(payload, null, 2));
 
     const response = await api.post('/suppliers', payload);
     return supplierService.getById(response.data.data.id);

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, History, Search, Filter, Download } from 'lucide-react';
+import { Plus, History, Search, Filter, Download, X, Check } from 'lucide-react';
 import { supplierService } from '../services/supplier.service';
 import { Supplier, SupplierAddress } from '../types/supplier.types';
-
 
 export const SupplierListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +14,20 @@ export const SupplierListPage: React.FC = () => {
   const [balanceRange, setBalanceRange] = useState<[number, number]>([0, 1000000]);
   const [cities, setCities] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Estado para el modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    companyName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    taxId: '',
+    paymentTerms: ''
+  });
 
   useEffect(() => {
     loadSuppliers();
@@ -30,7 +43,6 @@ export const SupplierListPage: React.FC = () => {
       const data = await supplierService.getAll();
       setSuppliers(data);
       
-      // Extraer ciudades únicas para el filtro
       const uniqueCities = [...new Set(data.map((s: Supplier) => s.addresses?.[0]?.city).filter(Boolean))] as string[];
       setCities(uniqueCities);
     } catch (error) {
@@ -72,6 +84,51 @@ export const SupplierListPage: React.FC = () => {
     }).format(value);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      companyName: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      postalCode: '',
+      taxId: '',
+      paymentTerms: ''
+    });
+  };
+
+  const handleCreateSupplier = async () => {
+    if (!formData.companyName) {
+      alert('El nombre es obligatorio');
+      return;
+    }
+
+    setModalLoading(true);
+    try {
+      const newSupplier = {
+        name: formData.companyName,           // ← campo obligatorio
+        email: formData.email || undefined,
+        payment_terms: formData.paymentTerms || undefined,
+        tax_id: formData.taxId || undefined,
+        notes: `Teléfono: ${formData.phone}\nDirección: ${formData.address}, ${formData.city} ${formData.postalCode}`
+      };
+      
+      await supplierService.create(newSupplier);
+      setShowModal(false);
+      resetForm();
+      loadSuppliers();
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      alert('Error al crear el proveedor');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="">
@@ -79,7 +136,7 @@ export const SupplierListPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex gap-3">
             <button
-              onClick={() => navigate('/providers/new')}
+              onClick={() => setShowModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
@@ -95,7 +152,6 @@ export const SupplierListPage: React.FC = () => {
           </div>
 
           <div className="flex gap-3 w-full sm:w-auto">
-            {/* Barra de búsqueda */}
             <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -251,6 +307,136 @@ export const SupplierListPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de creación de proveedor */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Nuevo Proveedor</h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nombre del proveedor"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Teléfono"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Email"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Calle y número"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ciudad"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Código Postal"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">NIF</label>
+                <input
+                  type="text"
+                  name="taxId"
+                  value={formData.taxId}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Número de identificación fiscal"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
+                <input
+                  type="text"
+                  name="paymentTerms"
+                  value={formData.paymentTerms}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ej: 30 días"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateSupplier}
+                disabled={modalLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {modalLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Check className="w-4 h-4" />}
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

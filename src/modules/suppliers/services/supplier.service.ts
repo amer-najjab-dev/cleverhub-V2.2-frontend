@@ -19,27 +19,27 @@ export const supplierService = {
       notes: item.notes,
       createdAt: item.created_at,
       updatedAt: item.updated_at,
-      phones: item.phones?.map((p: any) => ({
-        id: p.id,
-        supplierId: p.supplier_id,
-        number: p.number,
-        type: p.type,
-        description: p.description,
-        isPrimary: p.is_primary,
-        createdAt: p.created_at
-      })),
-      addresses: item.addresses?.map((a: any) => ({
-        id: a.id,
-        supplierId: a.supplier_id,
-        streetNumber: a.street_number,
-        streetName: a.street_name,
-        city: a.city,
-        postalCode: a.postal_code,
-        country: a.country,
-        complement: a.complement,
-        isPrimary: a.is_primary,
-        createdAt: a.created_at
-      }))
+      phones: item.supplier_phones?.map((p: any) => ({
+      id: p.id,
+      supplierId: p.supplier_id,
+      number: p.number,
+      type: p.type,
+      description: p.description,
+      isPrimary: p.is_primary,
+      createdAt: p.created_at
+    })),
+    addresses: item.supplier_addresses?.map((a: any) => ({
+      id: a.id,
+      supplierId: a.supplier_id,
+      streetNumber: a.street_number,
+      streetName: a.street_name,
+      city: a.city,
+      postalCode: a.postal_code,
+      country: a.country,
+      complement: a.complement,
+      isPrimary: a.is_primary,
+      createdAt: a.created_at
+    }))
     }));
   },
 
@@ -60,7 +60,7 @@ export const supplierService = {
       notes: item.notes,
       createdAt: item.created_at,
       updatedAt: item.updated_at,
-      phones: item.phones?.map((p: any) => ({
+      phones: item.supplier_phones?.map((p: any) => ({
         id: p.id,
         supplierId: p.supplier_id,
         number: p.number,
@@ -69,7 +69,7 @@ export const supplierService = {
         isPrimary: p.is_primary,
         createdAt: p.created_at
       })),
-      addresses: item.addresses?.map((a: any) => ({
+      addresses: item.supplier_addresses.map((a: any) => ({
         id: a.id,
         supplierId: a.supplier_id,
         streetNumber: a.street_number,

@@ -92,8 +92,57 @@ export const inventoryService = {
    * Obtener todos los productos con stock
    * @param params - Filtros (categoría, laboratorio, zona, etc.)
    */
- getInventory: (params?: any): Promise<ApiResponse<InventoryProduct[]>> => 
-  api.get<ApiResponse<InventoryProduct[]>>('/inventory', { params }).then(extractData),
+  getInventory: async (params?: any): Promise<ApiResponse<InventoryProduct[]>> => {
+    const response = await api.get<ApiResponse<any[]>>('/inventory', { params });
+    
+    // Transformar los datos del backend al formato esperado por el frontend
+    const transformedData = response.data.data.map((item: any) => ({
+      id: item.product_id,
+      name: item.product?.name || '',
+      dosage: item.product?.dosageForm,
+      stock: item.quantity,
+      reserved: 0,
+      available: item.quantity,
+      ordered: 0,
+      pricePPH: parseFloat(item.product?.pricePPH || 0),
+      pricePPV: parseFloat(item.product?.pricePPV || 0),
+      zone: item.product?.zone,
+      expiryDate: item.expiry_date,
+      barcode1: item.product?.barcode || '',
+      barcode2: '',
+      laboratory: item.product?.laboratory,
+      category: item.product?.category
+    }));
+    
+    return {
+      success: response.data.success,
+      data: transformedData,
+      meta: response.data.meta
+    };
+  },
+
+  /**
+   * Obtener resumen del inventario
+   */
+  getSummary: async (): Promise<ApiResponse<InventorySummary>> => {
+    const response = await api.get<ApiResponse<any>>('/inventory/summary');
+    
+    // Transformar los datos del backend al formato esperado por el frontend
+    const transformedData: InventorySummary = {
+      totalProducts: response.data.data?.total_products || 0,
+      totalStockValue: response.data.data?.total_value || 0,
+      totalRetailValue: response.data.data?.total_retail_value || 0,
+      lowStockCount: response.data.data?.low_stock || 0,
+      expiringCount: response.data.data?.expiring_soon || 0,
+      expiredCount: response.data.data?.expired || 0
+    };
+    
+    return {
+      success: response.data.success,
+      data: transformedData,
+      meta: response.data.meta
+    };
+  },
 
   /**
    * Obtener un producto específico por ID
@@ -123,12 +172,6 @@ export const inventoryService = {
    */
   adjustStock: (data: StockAdjustment): Promise<ApiResponse<InventoryProduct>> => 
     api.post<ApiResponse<InventoryProduct>>('/inventory/adjust', data).then(extractData),
-
-  /**
-   * Obtener resumen del inventario
-   */
-  getSummary: (): Promise<ApiResponse<InventorySummary>> => 
-    api.get<ApiResponse<InventorySummary>>('/inventory/summary').then(extractData),
 
   /**
    * Buscar productos por código de barras

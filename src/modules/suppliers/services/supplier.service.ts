@@ -84,9 +84,10 @@ export const supplierService = {
     };
   },
 
-  create: async (data: Partial<Supplier>): Promise<Supplier> => {
-    // Convertir camelCase a snake_case para el backend
+  create: async (data: Partial<Supplier> & { name?: string }): Promise<Supplier> => {
     const payload: any = {};
+    // Aceptar tanto 'name' como 'companyName'
+    if (data.name) payload.company_name = data.name;
     if (data.companyName) payload.company_name = data.companyName;
     if (data.email) payload.email = data.email;
     if (data.website) payload.website = data.website;

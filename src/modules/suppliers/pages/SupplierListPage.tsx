@@ -120,7 +120,7 @@ export const SupplierListPage: React.FC = () => {
         paymentTerms: formData.paymentTerms || undefined,
         notes: `Teléfono: ${formData.phone}\nDirección: ${formData.address}, ${formData.city} ${formData.postalCode}`
       };
-      
+      console.log('📦 Datos a enviar al backend:', JSON.stringify(newSupplier, null, 2));
       await supplierService.create(newSupplier);
       setShowModal(false);
       resetForm();

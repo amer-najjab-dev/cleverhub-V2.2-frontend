@@ -110,14 +110,14 @@ export const SupplierListPage: React.FC = () => {
     setModalLoading(true);
     try {
       const newSupplier = {
-        company_name: formData.companyName,  // ← Cambiar de name a company_name
+        companyName: formData.companyName,  // ← Cambiar de company_name a companyName
         email: formData.email || undefined,
         phone: formData.phone,
         address: formData.address,
         city: formData.city,
-        postal_code: formData.postalCode,
-        tax_id: formData.taxId || undefined,
-        payment_terms: formData.paymentTerms || undefined,
+        postalCode: formData.postalCode,
+        taxId: formData.taxId || undefined,
+        paymentTerms: formData.paymentTerms || undefined,
         notes: `Teléfono: ${formData.phone}\nDirección: ${formData.address}, ${formData.city} ${formData.postalCode}`
       };
       

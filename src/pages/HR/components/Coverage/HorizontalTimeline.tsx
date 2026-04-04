@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Users, Settings } from 'lucide-react';
+import { format, addDays } from 'date-fns';
+
 
 interface HorizontalTimelineProps {
   startDate: Date;
@@ -52,33 +54,30 @@ export const HorizontalTimeline = ({
   }, [daysToShow]);
 
   const days = Array.from({ length: daysToShow }, (_, i) => {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + i);
-    return date;
+    return addDays(startDate, i);
   });
 
   const goPrevious = () => {
-    const newDate = new Date(startDate);
-    newDate.setDate(startDate.getDate() - daysToShow);
+    const newDate = addDays(startDate, -daysToShow);
     onDateChange(newDate);
   };
 
   const goNext = () => {
-    const newDate = new Date(startDate);
-    newDate.setDate(startDate.getDate() + daysToShow);
+    const newDate = addDays(startDate, daysToShow);
     onDateChange(newDate);
   };
 
-  const formatDay = (date: Date) => `${date.getDate()}/${date.getMonth() + 1}`;
+  const formatDay = (date: Date) => format(date, 'dd/MM');
 
   const getDayCoverage = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = format(date, 'yyyy-MM-dd');
     return coverageByDay[dateStr] || [];
   };
 
   const firstDayCoverage = getDayCoverage(days[0]);
   console.log('🔍 firstDayCoverage:', firstDayCoverage);
   console.log('🔍 coverageByDay completo:', coverageByDay);
+  
   const shifts = [...firstDayCoverage]
     .sort((a, b) => a.shiftId - b.shiftId)
     .map((s: any) => ({ 
@@ -110,7 +109,9 @@ export const HorizontalTimeline = ({
   };
 
   const handleCellClick = (dateStr: string, shiftId: number, shiftName: string) => {
-    const dayCoverage = getDayCoverage(new Date(dateStr));
+    // Usar parseISO en lugar de new Date()
+    const parsedDate = new Date(dateStr);
+    const dayCoverage = getDayCoverage(parsedDate);
     const shiftData = dayCoverage.find((s: any) => s.shiftId === shiftId);
     const employees = shiftData?.employees || [];
     onCellClick?.(dateStr, shiftId, shiftName, employees);
@@ -167,7 +168,7 @@ export const HorizontalTimeline = ({
           {/* Filas de turnos */}
           {shifts.map((shift: { id: number; name: string; minEmployeesRequired: number }, shiftIdx: number) => (
             <div key={shiftIdx} className="mt-2">
-              {/* ✅ Encabezado del turno con botón de configuración */}
+              {/* Encabezado del turno con botón de configuración */}
               <div className="flex items-center justify-between px-1 mb-1">
                 <div 
                   className="relative"
@@ -195,7 +196,7 @@ export const HorizontalTimeline = ({
               {/* Celdas del turno */}
               <div className="flex">
                 {days.map((date, dayIdx) => {
-                  const dateStr = date.toISOString().split('T')[0];
+                  const dateStr = format(date, 'yyyy-MM-dd');
                   const dayCoverage = getDayCoverage(date);
                   const shiftData = dayCoverage.find((s: any) => s.shiftId === shift.id);
                   const current = shiftData?.currentCount || 0;

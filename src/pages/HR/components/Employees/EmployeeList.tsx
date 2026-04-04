@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { employeeService, Employee, Shift } from '../../../../services/hr/employee.service';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { CreateEmployeeModal } from './CreateEmployeeModal';
 
 export const EmployeeList = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', shiftId: '' });
 
   useEffect(() => {
     loadData();
@@ -26,27 +26,6 @@ export const EmployeeList = () => {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.fullName || !formData.email) {
-      toast.error('Nombre y email son obligatorios');
-      return;
-    }
-    try {
-      await employeeService.createEmployee({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        shiftId: formData.shiftId ? parseInt(formData.shiftId) : undefined
-      });
-      toast.success('Empleado creado');
-      loadData();
-      setShowModal(false);
-      setFormData({ fullName: '', email: '', phone: '', shiftId: '' });
-    } catch (error) {
-      toast.error('Error al crear empleado');
     }
   };
 
@@ -70,10 +49,10 @@ export const EmployeeList = () => {
         <h2 className="text-lg font-semibold text-gray-900">Equipo</h2>
         <button
           onClick={() => setShowModal(true)}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          <Plus size={16} />
-          Añadir empleado
+          <Plus className="w-4 h-4" />
+          Nuevo Empleado
         </button>
       </div>
 
@@ -110,7 +89,8 @@ export const EmployeeList = () => {
         ))}
       </div>
 
-      {showModal && (
+      {/* Modal de creación de empleado - Versión antigua (comentada o eliminada) */}
+      {/* {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Nuevo empleado</h3>
@@ -153,7 +133,17 @@ export const EmployeeList = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+
+      {/* Nuevo modal de creación de empleado */}
+      <CreateEmployeeModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSuccess={() => {
+          // Recargar la lista de empleados
+          loadData();
+        }}
+      />
     </div>
   );
 };

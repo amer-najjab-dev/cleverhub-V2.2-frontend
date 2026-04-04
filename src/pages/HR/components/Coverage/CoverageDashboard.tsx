@@ -121,10 +121,13 @@ export const CoverageDashboard = () => {
   };
 
   // Función para refrescar todos los datos
-  const refreshAllData = () => {
-    console.log('🔄 refreshAllData ejecutado, recargando página...');
-    // Recargar la página para sincronizar empleados y cobertura
-    window.location.reload();
+  const refreshAllData = async () => {
+    // Recargar los datos de cobertura desde la API
+    const newCoverage = await employeeService.getCoverage({
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: new Date(startDate.getTime() + daysToShow * 86400000).toISOString().split('T')[0]
+    });
+    setCoverage(newCoverage);
   };
 
   // Obtener si el usuario es admin (esto debería venir del contexto de autenticación)

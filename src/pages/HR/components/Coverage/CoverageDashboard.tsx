@@ -33,7 +33,7 @@ export const CoverageDashboard = () => {
     currentMin: number;
   } | null>(null);
 
-  // Estado para el modal de asignación de empleados
+  // Estado para el modal de asignación de empleados - CORREGIDO con setter
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [selectedShift] = useState<{ id: number; name: string; date: string } | null>(null);
 
@@ -122,7 +122,7 @@ export const CoverageDashboard = () => {
 
   // Función para refrescar todos los datos
   const refreshAllData = () => {
-    // Recargar empleados y cobertura
+    // Recargar la página para sincronizar empleados y cobertura
     window.location.reload();
   };
 

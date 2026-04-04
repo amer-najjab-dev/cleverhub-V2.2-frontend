@@ -120,6 +120,12 @@ export const CoverageDashboard = () => {
     }
   };
 
+  // Función para refrescar todos los datos
+  const refreshAllData = () => {
+    // Recargar empleados y cobertura
+    window.location.reload();
+  };
+
   // Obtener si el usuario es admin (esto debería venir del contexto de autenticación)
   const isAdmin = true; // Temporalmente true, en producción usar useAuth
 
@@ -181,7 +187,7 @@ export const CoverageDashboard = () => {
           shiftName={selectedShift.name}
           date={selectedShift.date}
           onClose={() => setShowAssignmentModal(false)}
-          onAssign={refresh}
+          onAssign={refreshAllData}
         />
       )}
     </div>

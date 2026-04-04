@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { employeeService, Employee, Shift } from '../../../../services/hr/employee.service';
 import { Plus } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import { CreateEmployeeModal } from './CreateEmployeeModal';
 import { AssignShiftModal } from './AssignShiftModal';
 

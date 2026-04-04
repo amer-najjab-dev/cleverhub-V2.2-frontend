@@ -77,11 +77,13 @@ export const HorizontalTimeline = ({
   };
 
   const firstDayCoverage = getDayCoverage(days[0]);
-  const shifts = firstDayCoverage.map((s: any) => ({ 
-    id: s.shiftId, 
-    name: s.shiftName,
-    minEmployeesRequired: s.requiredMin 
-  }));
+  const shifts = [...firstDayCoverage]
+    .sort((a, b) => a.shiftId - b.shiftId)
+    .map((s: any) => ({ 
+      id: s.shiftId, 
+      name: s.shiftName,
+      minEmployeesRequired: s.requiredMin 
+    }));
 
   const handleDragOver = (e: React.DragEvent, dateStr: string, shiftId: number) => {
     e.preventDefault();

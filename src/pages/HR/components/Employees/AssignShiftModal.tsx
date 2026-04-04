@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { X, Calendar } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { employeeService, Shift } from '../../../../services/hr/employee.service';
 
 interface AssignShiftModalProps {
@@ -12,13 +14,12 @@ interface AssignShiftModalProps {
   onSuccess: () => void;
 }
 
-export const AssignShiftModal = ({ isOpen, onClose, employeeId, employeeName, shifts, onSuccess }: 
-AssignShiftModalProps) => {
+export const AssignShiftModal = ({ isOpen, onClose, employeeId, employeeName, shifts, onSuccess }: AssignShiftModalProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     shiftId: '',
-    startDate: '',
-    endDate: ''
+    startDate: null as Date | null,
+    endDate: null as Date | null
   });
 
   if (!isOpen) return null;
@@ -29,7 +30,7 @@ AssignShiftModalProps) => {
       return;
     }
 
-    if (new Date(formData.startDate) > new Date(formData.endDate)) {
+    if (formData.startDate > formData.endDate) {
       toast.error('La fecha fin debe ser posterior a la fecha inicio');
       return;
     }
@@ -39,13 +40,13 @@ AssignShiftModalProps) => {
       await employeeService.assignShiftWithRange(
         employeeId,
         parseInt(formData.shiftId),
-        formData.startDate,
-        formData.endDate
+        formData.startDate.toISOString().split('T')[0],
+        formData.endDate.toISOString().split('T')[0]
       );
-      toast.success(`Turno asignado del ${formData.startDate} al ${formData.endDate}`);
+      toast.success(`Turno asignado del ${formData.startDate.toLocaleDateString()} al ${formData.endDate.toLocaleDateString()}`);
       onSuccess();
       onClose();
-      setFormData({ shiftId: '', startDate: '', endDate: '' });
+      setFormData({ shiftId: '', startDate: null, endDate: null });
     } catch (error: any) {
       console.error('Error assigning shift:', error);
       toast.error(error.response?.data?.message || 'Error al asignar turno');
@@ -92,11 +93,16 @@ AssignShiftModalProps) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Fecha inicio *
             </label>
-            <input
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            <DatePicker
+              selected={formData.startDate}
+              onChange={(date: Date | null) => setFormData({ ...formData, startDate: date })}
+              selectsStart
+              startDate={formData.startDate}
+              endDate={formData.endDate}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholderText="Seleccionar fecha inicio"
+              dateFormat="dd/MM/yyyy"
+              minDate={new Date()}
             />
           </div>
 
@@ -104,11 +110,16 @@ AssignShiftModalProps) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Fecha fin *
             </label>
-            <input
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            <DatePicker
+              selected={formData.endDate}
+              onChange={(date: Date | null) => setFormData({ ...formData, endDate: date })}
+              selectsEnd
+              startDate={formData.startDate}
+              endDate={formData.endDate}
+              minDate={formData.startDate || new Date()}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholderText="Seleccionar fecha fin"
+              dateFormat="dd/MM/yyyy"
             />
           </div>
         </div>

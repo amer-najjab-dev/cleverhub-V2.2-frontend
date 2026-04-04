@@ -163,7 +163,7 @@ export const employeeService = {
   },
 
   updateShiftConfig: async (shiftId: number, minEmployeesRequired: number): Promise<void> => {
-    await api.put(`/hr/shifts/${shiftId}/config`, { shiftId, minEmployeesRequired });
+    await api.patch(`/hr/shifts/${shiftId}/config`, { shiftId, minEmployeesRequired });
   },
 
   removeShiftAssignment: async (employeeId: number, shiftId: number, date: string): Promise<void> => {

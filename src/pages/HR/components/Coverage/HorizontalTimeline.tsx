@@ -77,6 +77,8 @@ export const HorizontalTimeline = ({
   };
 
   const firstDayCoverage = getDayCoverage(days[0]);
+  console.log('🔍 firstDayCoverage:', firstDayCoverage);
+  console.log('🔍 coverageByDay completo:', coverageByDay);
   const shifts = [...firstDayCoverage]
     .sort((a, b) => a.shiftId - b.shiftId)
     .map((s: any) => ({ 

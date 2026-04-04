@@ -4,7 +4,7 @@ import { useShiftAssignment } from '../../hooks/useShiftAssignment';
 import { employeeService } from '../../../../services/hr/employee.service';
 import { RiskAlert } from './RiskAlert';
 import { HorizontalTimeline } from './HorizontalTimeline';
-import { EmployeeSidebar } from './EmployeeSidebar';
+import { EmployeeList } from '../Employees/EmployeeList';
 import { UpcomingAbsences } from './UpcomingAbsences';
 import { EmployeesModal } from './EmployeesModal';
 import { ShiftConfigModal } from './ShiftConfigModal';
@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast';
 
 export const CoverageDashboard = () => {
   const { coverage, employees, requests, loading, refresh } = useHRData();
-  const { isDragging, handleDragStart, handleDrop, handleDragEnd } = useShiftAssignment();
+  const { isDragging, handleDrop, handleDragEnd } = useShiftAssignment();
   const [startDate, setStartDate] = useState(new Date());
   const [daysToShow, setDaysToShow] = useState(21);
   const [modalOpen, setModalOpen] = useState(false);
@@ -146,7 +146,7 @@ export const CoverageDashboard = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <EmployeeSidebar employees={employees} requests={requests} onDragStart={handleDragStart} isDragging={isDragging} />
+          <EmployeeList />
         </div>
         <div>
           <UpcomingAbsences absences={upcomingAbsences} />

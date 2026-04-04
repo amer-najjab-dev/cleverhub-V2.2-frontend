@@ -31,7 +31,8 @@ export const EmployeeList = () => {
 
   const handleShiftChange = async (employeeId: number, shiftId: number) => {
     try {
-      await employeeService.updateEmployeeShift(employeeId, shiftId);
+      // Enviar fecha actual o null para turno por defecto
+      await employeeService.updateEmployeeShift(employeeId, shiftId, null);
       toast.success('Turno actualizado');
       loadData();
     } catch (error) {

@@ -92,8 +92,10 @@ export const employeeService = {
     return res.data.data;
   },
   
-  updateEmployeeShift: async (employeeId: number, shiftId: number): Promise<void> => {
-    await api.put(`/hr/employees/${employeeId}/shift`, { shiftId });
+  updateEmployeeShift: async (employeeId: number, shiftId: number, date: string | null = null): Promise<void> => {
+    const payload: any = { employeeId, shiftId };
+    if (date) payload.date = date;
+    await api.put(`/hr/employees/${employeeId}/shift`, payload);
   },
   
   // Turnos

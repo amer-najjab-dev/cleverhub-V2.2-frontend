@@ -39,23 +39,27 @@ export const AssignShiftModal = ({ isOpen, onClose, employeeId, employeeName, sh
     }
 
     setLoading(true);
-    try {
-      await employeeService.assignShiftWithRange(
-        employeeId,
-        parseInt(formData.shiftId),
-        formData.startDate.toISOString().split('T')[0],
-        formData.endDate.toISOString().split('T')[0]
-      );
-      toast.success(`Turno asignado del ${formData.startDate.toLocaleDateString()} al ${formData.endDate.toLocaleDateString()}`);
-      onSuccess();
-      onClose();
-      setFormData({ shiftId: '', startDate: null, endDate: null });
-    } catch (error: any) {
-      console.error('Error assigning shift:', error);
-      toast.error(error.response?.data?.message || 'Error al asignar turno');
-    } finally {
-      setLoading(false);
-    }
+      try {
+        await employeeService.assignShiftWithRange(
+          employeeId,
+          parseInt(formData.shiftId),
+          formData.startDate.toISOString().split('T')[0],
+          formData.endDate.toISOString().split('T')[0]
+        );
+        toast.success(`Turno asignado del ${formData.startDate.toLocaleDateString()} al ${formData.endDate.toLocaleDateString()}`);
+        onClose();
+        setFormData({ shiftId: '', startDate: null, endDate: null });
+        
+        // ✅ Forzar recarga completa después de 1 segundo
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (error: any) {
+        console.error('Error assigning shift:', error);
+        toast.error(error.response?.data?.message || 'Error al asignar turno');
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (

@@ -168,6 +168,54 @@ export const employeeService = {
 
   removeShiftAssignment: async (employeeId: number, shiftId: number, date: string): Promise<void> => {
     await api.delete('/hr/shift-assignments', { data: { employeeId, shiftId, date } });
-  }
+  },
 
+  // ==================== NUEVOS MÉTODOS ====================
+  
+  /**
+   * Obtener todos los empleados (versión genérica)
+   */
+  getEmployeesList: async (): Promise<any[]> => {
+    const response = await api.get('/hr/employees');
+    return response.data.data;
+  },
+
+  /**
+   * Obtener asignaciones de turno por shift y fecha
+   * @param shiftId - ID del turno
+   * @param date - Fecha en formato YYYY-MM-DD
+   */
+  getShiftAssignments: async (shiftId: number, date: string): Promise<any[]> => {
+    const response = await api.get(`/hr/shift-assignments?shiftId=${shiftId}&date=${date}`);
+    return response.data.data;
+  },
+
+  /**
+   * Asignar un empleado a un turno en una fecha específica
+   * @param employeeId - ID del empleado
+   * @param shiftId - ID del turno
+   * @param date - Fecha en formato YYYY-MM-DD
+   */
+  assignEmployeeToShift: async (employeeId: number, shiftId: number, date: string): Promise<void> => {
+    await api.post('/hr/shift-assignments', { employee_id: employeeId, shift_id: shiftId, date });
+  },
+
+  /**
+   * Eliminar asignación de turno
+   * @param shiftId - ID del turno
+   * @param employeeId - ID del empleado
+   * @param date - Fecha en formato YYYY-MM-DD
+   */
+  removeShiftAssignmentById: async (shiftId: number, employeeId: number, date: string): Promise<void> => {
+    await api.delete(`/hr/shift-assignments?shiftId=${shiftId}&employeeId=${employeeId}&date=${date}`);
+  },
+
+  /**
+   * Actualizar configuración mínima de empleados para un turno
+   * @param shiftId - ID del turno
+   * @param minEmployees - Número mínimo de empleados requeridos
+   */
+  updateShiftMinEmployees: async (shiftId: number, minEmployees: number): Promise<void> => {
+    await api.patch(`/hr/shifts/${shiftId}/config`, { min_employees_required: minEmployees });
+  },
 };

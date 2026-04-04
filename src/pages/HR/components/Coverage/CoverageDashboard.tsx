@@ -8,6 +8,7 @@ import { EmployeeSidebar } from './EmployeeSidebar';
 import { UpcomingAbsences } from './UpcomingAbsences';
 import { EmployeesModal } from './EmployeesModal';
 import { ShiftConfigModal } from './ShiftConfigModal';
+import { EmployeeShiftAssignment } from '../EmployeeShiftAssignment';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -24,13 +25,17 @@ export const CoverageDashboard = () => {
     employees: any[];
   } | null>(null);
   
-  // ✅ Estado para el modal de configuración de turnos
+  // Estado para el modal de configuración de turnos
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedShiftConfig, setSelectedShiftConfig] = useState<{
     shiftId: number;
     shiftName: string;
     currentMin: number;
   } | null>(null);
+
+  // Estado para el modal de asignación de empleados
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedShift] = useState<{ id: number; name: string; date: string } | null>(null);
 
   const coverageByDay = coverage.reduce((acc, item) => {
     if (!acc[item.date]) acc[item.date] = [];
@@ -61,18 +66,18 @@ export const CoverageDashboard = () => {
     handleDragEnd();
   };
 
-  // ✅ handleConfigClick - abre el modal de configuración
+  // handleConfigClick - abre el modal de configuración
   const handleConfigClick = (shiftId: number, shiftName: string, currentMin: number) => {
     setSelectedShiftConfig({ shiftId, shiftName, currentMin });
     setConfigModalOpen(true);
   };
 
-  // ✅ handleConfigUpdate - recarga los datos después de actualizar
+  // handleConfigUpdate - recarga los datos después de actualizar
   const handleConfigUpdate = async () => {
     await refresh();
   };
 
-  // ✅ handleCellClick con shiftId
+  // handleCellClick para el modal de empleados existente
   const handleCellClick = (date: string, shiftId: number, shiftName: string, employeesList: any[]) => {
     console.log('📊 Click en celda:', { date, shiftName, shiftId, employeesList });
     console.log('📊 coverageByDay para esta fecha:', coverageByDay[date]);
@@ -99,7 +104,7 @@ export const CoverageDashboard = () => {
     setModalOpen(true);
   };
 
-  // ✅ handleRemoveEmployee para eliminar asignaciones
+  // handleRemoveEmployee para eliminar asignaciones
   const handleRemoveEmployee = async (employeeId: number, shiftId: number, date: string) => {
     try {
       console.log('🗑️ Eliminando asignación:', { employeeId, shiftId, date });
@@ -115,7 +120,7 @@ export const CoverageDashboard = () => {
     }
   };
 
-  // ✅ Obtener si el usuario es admin (esto debería venir del contexto de autenticación)
+  // Obtener si el usuario es admin (esto debería venir del contexto de autenticación)
   const isAdmin = true; // Temporalmente true, en producción usar useAuth
 
   if (loading) {
@@ -159,7 +164,7 @@ export const CoverageDashboard = () => {
         onRemoveEmployee={handleRemoveEmployee}
       />
 
-      {/* ✅ Modal de configuración de turno */}
+      {/* Modal de configuración de turno */}
       <ShiftConfigModal
         isOpen={configModalOpen}
         onClose={() => setConfigModalOpen(false)}
@@ -168,6 +173,17 @@ export const CoverageDashboard = () => {
         currentMin={selectedShiftConfig?.currentMin || 1}
         onUpdate={handleConfigUpdate}
       />
+
+      {/* Modal de asignación de empleados */}
+      {showAssignmentModal && selectedShift && (
+        <EmployeeShiftAssignment
+          shiftId={selectedShift.id}
+          shiftName={selectedShift.name}
+          date={selectedShift.date}
+          onClose={() => setShowAssignmentModal(false)}
+          onAssign={refresh}
+        />
+      )}
     </div>
   );
 };

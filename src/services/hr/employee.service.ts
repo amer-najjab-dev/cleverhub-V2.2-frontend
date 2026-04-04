@@ -97,6 +97,15 @@ export const employeeService = {
     if (date) payload.date = date;
     await api.put(`/hr/employees/${employeeId}/shift`, payload);
   },
+
+  assignShiftWithRange: async (employeeId: number, shiftId: number, startDate: string, endDate: string): Promise<void> => {
+    await api.post('/hr/employees/assign-shift-range', {
+      employeeId,
+      shiftId,
+      startDate,
+      endDate
+    });
+  },
   
   // Turnos
   getShifts: async (): Promise<Shift[]> => {

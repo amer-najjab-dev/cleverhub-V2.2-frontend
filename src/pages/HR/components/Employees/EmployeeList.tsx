@@ -3,12 +3,15 @@ import { employeeService, Employee, Shift } from '../../../../services/hr/employ
 import { Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { CreateEmployeeModal } from './CreateEmployeeModal';
+import { AssignShiftModal } from './AssignShiftModal';
 
 export const EmployeeList = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -29,16 +32,7 @@ export const EmployeeList = () => {
     }
   };
 
-  const handleShiftChange = async (employeeId: number, shiftId: number) => {
-    try {
-      // Enviar fecha actual o null para turno por defecto
-      await employeeService.updateEmployeeShift(employeeId, shiftId, null);
-      toast.success('Turno actualizado');
-      loadData();
-    } catch (error) {
-      toast.error('Error al actualizar turno');
-    }
-  };
+
 
   if (loading) {
     return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
@@ -70,18 +64,15 @@ export const EmployeeList = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <select
-                value={emp.default_shift_id || ''}
-                onChange={(e) => handleShiftChange(emp.id, parseInt(e.target.value))}
-                className="px-2 py-1 border border-gray-200 rounded-lg text-sm bg-white"
+              <button
+                onClick={() => {
+                  setSelectedEmployee({ id: emp.id, name: emp.user?.full_name || 'Empleado' });
+                  setShowAssignModal(true);
+                }}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200"
               >
-                <option value="">Sin turno</option>
-                {shifts.map(shift => (
-                  <option key={shift.id} value={shift.id}>
-                    {shift.name} ({shift.start_time}-{shift.end_time})
-                  </option>
-                ))}
-              </select>
+                Asignar Turno
+              </button>
               <div className="text-sm text-gray-500">
                 {emp.vacation_days_used}/{emp.vacation_days} días
               </div>
@@ -136,7 +127,7 @@ export const EmployeeList = () => {
         </div>
       )} */}
 
-      {/* Nuevo modal de creación de empleado */}
+      {/* Modal de creación de empleado */}
       <CreateEmployeeModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -144,6 +135,16 @@ export const EmployeeList = () => {
           // Recargar la lista de empleados
           loadData();
         }}
+      />
+
+      {/* Modal de asignación de turno */}
+      <AssignShiftModal
+        isOpen={showAssignModal}
+        onClose={() => setShowAssignModal(false)}
+        employeeId={selectedEmployee?.id || 0}
+        employeeName={selectedEmployee?.name || ''}
+        shifts={shifts}
+        onSuccess={loadData}
       />
     </div>
   );

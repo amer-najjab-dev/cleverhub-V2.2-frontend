@@ -25,6 +25,9 @@ export const AssignShiftModal = ({ isOpen, onClose, employeeId, employeeName, sh
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
+    console.log('✅ Asignación exitosa, llamando a onSuccess y recargando...');
+    onSuccess();
+    console.log('✅ onSuccess ejecutado');
     if (!formData.shiftId || !formData.startDate || !formData.endDate) {
       toast.error('Todos los campos son obligatorios');
       return;

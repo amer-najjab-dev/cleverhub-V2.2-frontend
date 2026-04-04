@@ -122,6 +122,7 @@ export const CoverageDashboard = () => {
 
   // Función para refrescar todos los datos
   const refreshAllData = () => {
+    console.log('🔄 refreshAllData ejecutado, recargando página...');
     // Recargar la página para sincronizar empleados y cobertura
     window.location.reload();
   };

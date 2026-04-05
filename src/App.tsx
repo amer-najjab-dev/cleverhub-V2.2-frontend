@@ -37,6 +37,7 @@ import { HRDashboard } from './pages/HR/HRDashboard';
 import { useAuth } from './contexts/AuthContext';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 
+
 // Componente para la ruta raíz
 const RootRoute = () => {
   const { user } = useAuth();
@@ -104,6 +105,7 @@ function App() {
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />
+                <Route path="/hr" element={<HRDashboard />} />
                 
                 {/* Rutas de reports */}
                 <Route path="/reports" element={<ProtectedRoute><ReportsLayout /></ProtectedRoute>}>

@@ -4,6 +4,7 @@ import { shiftService, Shift } from '../../../../services/hr/shift.service';
 import { coverageService, CoverageData } from '../../../../services/hr/coverage.service';
 import { ShiftModal } from './ShiftModal';
 import { AssignShiftModal } from './AssignShiftModal';
+import { toast } from 'react-hot-toast';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -47,7 +48,6 @@ export const CoverageTab = () => {
   }, [currentDate]);
 
   const loadData = async () => {
-    //setIsLoading(true);
     try {
       const [shiftsData, coverageData] = await Promise.all([
         shiftService.getAll(),
@@ -57,8 +57,6 @@ export const CoverageTab = () => {
       setCoverage(coverageData);
     } catch (error) {
       console.error('Error loading data:', error);
-    } finally {
-      //setIsLoading(false);
     }
   };
 
@@ -76,6 +74,19 @@ export const CoverageTab = () => {
   const handleShiftClick = (shift: Shift) => {
     setSelectedShift(shift);
     setShowAssignModal(true);
+  };
+
+  const handleDeleteShift = async (id: number, name: string) => {
+    if (confirm(`¿Eliminar el turno "${name}"?`)) {
+      try {
+        await shiftService.delete(id);
+        toast.success('Turno eliminado correctamente');
+        loadData();
+      } catch (error) {
+        console.error('Error deleting shift:', error);
+        toast.error('Error al eliminar el turno');
+      }
+    }
   };
 
   return (
@@ -105,14 +116,50 @@ export const CoverageTab = () => {
       {/* Coverage Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
+          <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="w-32 p-3 text-left text-sm font-medium text-gray-500">Turno / Día</th>
-                {weekDays.map(day => (
-                  <th key={day.toISOString()} className="p-3 text-center text-sm font-medium text-gray-500">
-                    <div>{day.toLocaleDateString('es', { weekday: 'short' })}</div>
-                    <div className="text-xs">{day.getDate()}</div>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">Turno</th>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">Horario</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">Min. Personal</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">Color</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {shifts.map(shift => (
+                <tr key={shift.id} className="hover:bg-gray-50">
+                  <td className="p-3 font-medium text-gray-900">{shift.name}</td>
+                  <td className="p-3 text-gray-600">{shift.start_time} - {shift.end_time}</td>
+                  <td className="p-3 text-center">{shift.min_employees_required}</td>
+                  <td className="p-3 text-center">
+                    <div className="w-6 h-6 rounded-full mx-auto" style={{ backgroundColor: shift.color }} />
+                  </td>
+                  <td className="p-3 text-center">
+                    <button
+                      onClick={() => handleDeleteShift(shift.id, shift.name)}
+                      className="text-red-600 hover:text-red-800 transition"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Weekly Coverage Grid */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">Turno / Día</th>
+                {weekDays.map((day, idx) => (
+                  <th key={idx} className="p-3 text-center text-sm font-medium text-gray-500">
+                    {day.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
                   </th>
                 ))}
               </tr>
@@ -121,26 +168,31 @@ export const CoverageTab = () => {
               {shifts.map(shift => (
                 <tr key={shift.id} className="hover:bg-gray-50">
                   <td className="p-3 font-medium text-gray-900">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: shift.color }} />
-                      <span>{shift.name}</span>
-                      <span className="text-xs text-gray-400">({shift.start_time}-{shift.end_time})</span>
+                    <div>
+                      <div>{shift.name}</div>
+                      <div className="text-xs text-gray-500">{shift.start_time} - {shift.end_time}</div>
                     </div>
                   </td>
-                  {weekDays.map(day => {
+                  {weekDays.map((day, dayIdx) => {
                     const cellData = getCellData(day, shift.id);
                     return (
                       <td
-                        key={day.toISOString()}
+                        key={dayIdx}
                         onClick={() => handleShiftClick(shift)}
-                        className={`p-2 text-center cursor-pointer transition ${cellData ? 'hover:opacity-80' : 
-'hover:bg-gray-50'}`}
+                        className="p-2 text-center cursor-pointer transition hover:opacity-80"
                       >
                         {cellData ? (
-                          <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm 
-${getStatusColor(cellData.status)}`}>
-                            <span>{getStatusIcon(cellData.status)}</span>
-                            <span>{cellData.currentCount}/{cellData.requiredMin}</span>
+                          <div className="relative group">
+                            <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${getStatusColor(cellData.status)}`}>
+                              <span>{getStatusIcon(cellData.status)}</span>
+                              <span>{cellData.currentCount}/{cellData.requiredMin}</span>
+                            </div>
+                            {/* Tooltip con nombres de empleados */}
+                            {cellData.employees && cellData.employees.length > 0 && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
+                                {cellData.employees.map((emp: any) => emp.full_name || emp.name).join(', ')}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <span className="text-gray-300">—</span>

@@ -1,4 +1,3 @@
-// src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { RegionProvider } from './contexts/RegionContext';
@@ -6,13 +5,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LoginPage } from './pages/Auth/LoginPage';
 import { Header } from './layout/Header/Header';
-import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
-import { AdminDashboard } from './pages/Admin/AdminDashboard';
-import { PharmaciesPage } from './pages/Admin/PharmaciesPage';
-import { GlobalUsersPage } from './pages/Admin/GlobalUsersPage';
-import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
-import { BroadcastPage } from './pages/Admin/BroadcastPage';
-import { HealthPage } from './pages/Admin/HealthPage';
 import { HomeDashboard } from './pages/Home/HomeDashboard';
 import { SalesPage } from './pages/Sales/SalesPage';
 import ClientsPage from './pages/Clients/ClientsPage';
@@ -34,9 +26,15 @@ import { ConnectPage } from './modules/connect/pages/ConnectPage';
 import { SalesHistoryPage } from './pages/Sales/SalesHistoryPage';
 import EditClientPage from './pages/Clients/EditClientPage';
 import { HRDashboard } from './pages/HR/HRDashboard';
-import { useAuth } from './contexts/AuthContext';
+import { AdminDashboard } from './pages/Admin/AdminDashboard';
+import { PharmaciesPage } from './pages/Admin/PharmaciesPage';
+import { GlobalUsersPage } from './pages/Admin/GlobalUsersPage';
+import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
+import { BroadcastPage } from './pages/Admin/BroadcastPage';
+import { HealthPage } from './pages/Admin/HealthPage';
+import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
 import { SettingsPage } from './pages/Settings/SettingsPage';
-
+import { useAuth } from './contexts/AuthContext';
 
 // Componente para la ruta raíz
 const RootRoute = () => {
@@ -50,9 +48,9 @@ const RootRoute = () => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <RegionProvider>
-        <AuthProvider>
+    <RegionProvider>
+      <AuthProvider>
+        <BrowserRouter>
           <Toaster 
             position="top-right"
             toastOptions={{
@@ -72,25 +70,15 @@ function App() {
                 {/* Ruta pública */}
                 <Route path="/login" element={<LoginPage />} />
                 
-                {/* Ruta raíz - muestra AdminDashboard para SUPER_ADMIN */}
+                {/* Ruta raíz */}
                 <Route path="/" element={<ProtectedRoute><RootRoute /></ProtectedRoute>} />
                 
-                {/* Rutas de SUPER_ADMIN */}
-                <Route element={<AdminRouteWrapper />}>
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/pharmacies" element={<PharmaciesPage />} />
-                  <Route path="/admin/users" element={<GlobalUsersPage />} />
-                  <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
-                  <Route path="/admin/broadcast" element={<BroadcastPage />} />
-                  <Route path="/admin/health" element={<HealthPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Route>
-
-                 {/* Dashboard para ADMIN y EMPLOYEE */}
+                {/* Dashboard para ADMIN y EMPLOYEE */}
                 <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
                 
-                {/* Resto de rutas */}
+                {/* Rutas de negocio (ADMIN y EMPLOYEE) */}
                 <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
+                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/products" element={<ProtectedRoute><ProductTable /></ProtectedRoute>} />
                 <Route path="/products/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
                 <Route path="/stock" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
@@ -98,14 +86,10 @@ function App() {
                 <Route path="/clients/new" element={<ProtectedRoute><NewClientPage /></ProtectedRoute>} />
                 <Route path="/clients/:id" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
                 <Route path="/clients/:id/edit" element={<ProtectedRoute><EditClientPage /></ProtectedRoute>} />
-                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/hr" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
-                <Route path="/suppliers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
-                <Route path="/suppliers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />
-                <Route path="/hr" element={<HRDashboard />} />
                 
                 {/* Rutas de reports */}
                 <Route path="/reports" element={<ProtectedRoute><ReportsLayout /></ProtectedRoute>}>
@@ -134,12 +118,23 @@ function App() {
                     </div>
                   } />
                 </Route>
+
+                {/* RUTAS DE ADMINISTRACIÓN (SOLO SUPER_ADMIN) */}
+                <Route element={<AdminRouteWrapper />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/pharmacies" element={<PharmaciesPage />} />
+                  <Route path="/admin/users" element={<GlobalUsersPage />} />
+                  <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
+                  <Route path="/admin/broadcast" element={<BroadcastPage />} />
+                  <Route path="/admin/health" element={<HealthPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Route>
               </Routes>
             </div>
           </main>
-        </AuthProvider>
-      </RegionProvider>
-    </BrowserRouter>
+        </BrowserRouter>
+      </AuthProvider>
+    </RegionProvider>
   );
 }
 

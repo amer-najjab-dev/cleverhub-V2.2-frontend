@@ -50,7 +50,7 @@ export const HRDashboard = () => {
         {activeTab === 'coverage' && <CoverageTab />}
         {activeTab === 'employees' && <EmployeesTab />}
         {activeTab === 'payroll' && <div className="text-center py-20 text-gray-500">Próximamente...</div>}
-        {activeTab === 'calendar' && <CalendarTab />}
+        {activeTab === 'calendar' && <div className="bg-white rounded-xl shadow-sm p-6 text-center text-gray-500">Calendario en construcción</div>}
         {activeTab === 'requests' && <RequestsTab />}
         {activeTab === 'config' && <ConfigTab />}
       </div>

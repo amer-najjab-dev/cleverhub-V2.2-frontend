@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
 import { RegionProvider } from './contexts/RegionContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
@@ -35,10 +36,25 @@ import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
 
 function App() {
+  // Redirigir SUPER_ADMIN desde / a /admin/dashboard
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role === 'SUPER_ADMIN' && window.location.pathname === '/') {
+          window.location.href = '/admin/dashboard';
+        }
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+      }
+    }
+  }, []);
+
   return (
-    <BrowserRouter>  {/* ⬅️ PRIMERO: BrowserRouter */}
-      <RegionProvider>  {/* ⬅️ SEGUNDO: RegionProvider */}
-        <AuthProvider>  {/* ⬅️ TERCERO: AuthProvider (usa useNavigate) */}
+    <BrowserRouter>
+      <RegionProvider>
+        <AuthProvider>
           <Toaster 
             position="top-right"
             toastOptions={{

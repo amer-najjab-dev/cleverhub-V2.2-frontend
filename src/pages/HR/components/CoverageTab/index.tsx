@@ -24,6 +24,12 @@ const getStatusIcon = (status: string) => {
   }
 };
 
+const getStatusCircleColor = (currentCount: number, requiredMin: number) => {
+  if (currentCount >= requiredMin) return 'bg-green-500';
+  if (currentCount >= requiredMin * 0.7) return 'bg-yellow-500';
+  return 'bg-red-500';
+};
+
 export const CoverageTab = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [coverage, setCoverage] = useState<CoverageData>({});
@@ -182,20 +188,22 @@ export const CoverageTab = () => {
                         className="p-2 text-center cursor-pointer transition hover:opacity-80"
                       >
                         {cellData ? (
-                          <div className="relative group">
-                            <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${getStatusColor(cellData.status)}`}>
-                              <span>{getStatusIcon(cellData.status)}</span>
-                              <span>{cellData.currentCount}/{cellData.requiredMin}</span>
-                            </div>
-                            {/* Tooltip con nombres de empleados */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className={`w-3 h-3 rounded-full ${getStatusCircleColor(cellData.currentCount, cellData.requiredMin)}`} />
+                            <span className="text-xs font-medium">
+                              {cellData.currentCount}/{cellData.requiredMin}
+                            </span>
                             {cellData.employees && cellData.employees.length > 0 && (
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
-                                {cellData.employees.map((emp: any) => emp.full_name || emp.name).join(', ')}
-                              </div>
+                              <span className="text-xs text-gray-500 truncate max-w-[80px]">
+                                {cellData.employees.map((e: any) => e.name?.split(' ')[0] || e.full_name?.split(' ')[0]).join(', ')}
+                              </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-3 h-3 rounded-full bg-gray-300" />
+                            <span className="text-xs text-gray-400">0/{shift.min_employees_required}</span>
+                          </div>
                         )}
                       </td>
                     );

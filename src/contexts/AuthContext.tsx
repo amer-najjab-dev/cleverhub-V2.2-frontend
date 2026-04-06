@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const response = await api.get('/auth/me');
       if (response.data.success) {
+        console.log('✅ Usuario cargado en checkAuth:', response.data.data);
         setUser(response.data.data);
       } else {
         localStorage.removeItem('auth_token');

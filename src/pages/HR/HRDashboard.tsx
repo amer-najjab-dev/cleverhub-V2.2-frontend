@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Users, FileText, Settings, BarChart3 } from 'lucide-react';
 import { CoverageTab } from './components/CoverageTab';
-import { CalendarTab } from './components/CalendarTab';
 import { RequestsTab } from './components/RequestsTab';
 import { ConfigTab } from './components/ConfigTab';
 import { EmployeesTab } from './components/EmployeesTab';

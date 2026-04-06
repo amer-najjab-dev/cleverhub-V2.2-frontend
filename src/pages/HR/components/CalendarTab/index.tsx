@@ -8,14 +8,20 @@ import { calendarService, CalendarEvent } from '../../../../services/hr/calendar
 export const CalendarTab = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // ← Nueva bandera
   const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
-    loadEvents();
+    if (!isLoading) {
+      loadEvents();
+    }
   }, [currentDate]);
 
   const loadEvents = async () => {
+    if (isLoading) return; // ← Evita llamadas concurrentes
+    setIsLoading(true);
     setLoading(true);
+    
     try {
       const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -29,6 +35,7 @@ export const CalendarTab = () => {
       console.error('Error loading calendar events:', error);
       toast.error('Error al cargar el calendario');
     } finally {
+      setIsLoading(false);
       setLoading(false);
     }
   };
@@ -56,7 +63,14 @@ export const CalendarTab = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Cargando calendario...</div>;
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-8">
+        <div className="flex justify-center items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Cargando calendario...</span>
+        </div>
+      </div>
+    );
   }
 
   return (

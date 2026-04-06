@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { RegionProvider } from './contexts/RegionContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LoginPage } from './pages/Auth/LoginPage';
 import { Header } from './layout/Header/Header';
@@ -34,12 +34,10 @@ import { BroadcastPage } from './pages/Admin/BroadcastPage';
 import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
 import { SettingsPage } from './pages/Settings/SettingsPage';
-import { useAuth } from './contexts/AuthContext';
 
-// Componente para la ruta raíz
-const RootRoute = () => {
+// Componente para redirigir según rol en la ruta raíz
+const RootRedirect = () => {
   const { user } = useAuth();
-  
   if (user?.role === 'SUPER_ADMIN') {
     return <AdminDashboard />;
   }
@@ -71,12 +69,12 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 
                 {/* Ruta raíz */}
-                <Route path="/" element={<ProtectedRoute><RootRoute /></ProtectedRoute>} />
+                <Route path="/" element={<ProtectedRoute><RootRedirect /></ProtectedRoute>} />
                 
                 {/* Dashboard para ADMIN y EMPLOYEE */}
                 <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
                 
-                {/* Rutas de negocio (ADMIN y EMPLOYEE) */}
+                {/* Rutas de negocio */}
                 <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
                 <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/products" element={<ProtectedRoute><ProductTable /></ProtectedRoute>} />

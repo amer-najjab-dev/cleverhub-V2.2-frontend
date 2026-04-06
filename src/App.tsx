@@ -33,6 +33,18 @@ import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
 import { BroadcastPage } from './pages/Admin/BroadcastPage';
 import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
+import { SettingsPage } from './pages/Settings/SettingsPage';
+import { useAuth } from './contexts/AuthContext';
+
+// Componente para la ruta raíz
+const RootRoute = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === 'SUPER_ADMIN') {
+    return <AdminDashboard />;
+  }
+  return <HomeDashboard />;
+};
 
 function App() {
   return (
@@ -58,9 +70,15 @@ function App() {
                 {/* Ruta pública */}
                 <Route path="/login" element={<LoginPage />} />
                 
-                {/* Rutas protegidas principales */}
-                <Route path="/" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                {/* Ruta raíz */}
+                <Route path="/" element={<ProtectedRoute><RootRoute /></ProtectedRoute>} />
+                
+                {/* Dashboard para ADMIN y EMPLOYEE */}
+                <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                
+                {/* Rutas de negocio (ADMIN y EMPLOYEE) */}
                 <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
+                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/products" element={<ProtectedRoute><ProductTable /></ProtectedRoute>} />
                 <Route path="/products/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
                 <Route path="/stock" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
@@ -68,17 +86,12 @@ function App() {
                 <Route path="/clients/new" element={<ProtectedRoute><NewClientPage /></ProtectedRoute>} />
                 <Route path="/clients/:id" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
                 <Route path="/clients/:id/edit" element={<ProtectedRoute><EditClientPage /></ProtectedRoute>} />
-                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/hr" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
-                
-                {/* Rutas de proveedores */}
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
-                
-                {/* Ruta directa para Connect (opcional) */}
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />
                 
-                {/* RUTA DE REPORTS */}
+                {/* Rutas de reports */}
                 <Route path="/reports" element={<ProtectedRoute><ReportsLayout /></ProtectedRoute>}>
                   <Route index element={<CashClosurePage />} />
                   <Route path="cash-closure" element={<CashClosurePage />} />
@@ -114,6 +127,7 @@ function App() {
                   <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
                   <Route path="/admin/broadcast" element={<BroadcastPage />} />
                   <Route path="/admin/health" element={<HealthPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
                 </Route>
               </Routes>
             </div>

@@ -64,10 +64,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('auth_token', response.data.token);
         
-        console.log('Login exitoso. Rol:', userData.role);
-        console.log('Redirigiendo a:', userData.role === 'SUPER_ADMIN' ? '/admin/dashboard' : '/');
+        // ✅ GUARDAR EL USUARIO EN localStorage
+        localStorage.setItem('user', JSON.stringify({
+          id: userData.id,
+          email: userData.email,
+          fullName: userData.fullName,
+          role: userData.role,
+          pharmacyId: userData.pharmacyId
+        }));
         
-        // Forzar redirección con window.location
+        // Redirigir según el rol
         if (userData.role === 'SUPER_ADMIN') {
           window.location.href = '/admin/dashboard';
         } else {
@@ -88,8 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error en logout:', error);
     }
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');  // ✅ Limpiar también el usuario
     setUser(null);
-    navigate('/login'); // Redirigir al login después de logout
+    window.location.href = '/login';
   };
 
   const getUsers = async (): Promise<User[]> => {

@@ -1,42 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { toast } from 'react-hot-toast';
 import { calendarService, CalendarEvent } from '../../../../services/hr/calendar.service';
 
 export const CalendarTab = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLoading, setIsLoading] = useState(false); // ← Nueva bandera
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const initialLoadDone = useRef(false);
+  const calendarRef = useRef<FullCalendar>(null);
 
+  // Cargar eventos una sola vez al montar el componente
   useEffect(() => {
-    if (!isLoading) {
-      loadEvents();
-    }
-  }, [currentDate]);
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+    
+    const loadEvents = async () => {
+      try {
+        // Obtener el mes actual
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        
+        const startStr = startOfMonth.toISOString().split('T')[0];
+        const endStr = endOfMonth.toISOString().split('T')[0];
+        
+        const data = await calendarService.getEvents(startStr, endStr);
+        setEvents(data);
+      } catch (error) {
+        console.error('Error loading calendar events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadEvents();
+  }, []); // Array vacío: solo se ejecuta una vez
 
-  const loadEvents = async () => {
-    if (isLoading) return; // ← Evita llamadas concurrentes
-    setIsLoading(true);
-    setLoading(true);
+  // Manejar cambio de mes en el calendario (sin recargar todo)
+  const handleDatesSet = async (info: any) => {
+    const startStr = info.startStr;
+    const endStr = info.endStr;
     
     try {
-      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-      
-      const startStr = startOfMonth.toISOString().split('T')[0];
-      const endStr = endOfMonth.toISOString().split('T')[0];
-      
       const data = await calendarService.getEvents(startStr, endStr);
       setEvents(data);
     } catch (error) {
-      console.error('Error loading calendar events:', error);
-      toast.error('Error al cargar el calendario');
-    } finally {
-      setIsLoading(false);
-      setLoading(false);
+      console.error('Error loading events for date range:', error);
     }
   };
 
@@ -47,7 +57,6 @@ export const CalendarTab = () => {
       case 'vacation':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'sick':
-      case 'medical_leave':
         return 'bg-red-100 text-red-800 border-red-200';
       case 'maternity':
         return 'bg-pink-100 text-pink-800 border-pink-200';
@@ -58,24 +67,14 @@ export const CalendarTab = () => {
     }
   };
 
-  const handleDateChange = (info: any) => {
-    setCurrentDate(info.view.currentStart);
-  };
-
   if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-sm p-8">
-        <div className="flex justify-center items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Cargando calendario...</span>
-        </div>
-      </div>
-    );
+    return <div className="flex justify-center p-8">Cargando calendario...</div>;
   }
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4">
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale="es"
@@ -94,7 +93,7 @@ export const CalendarTab = () => {
           backgroundColor: event.color,
           borderColor: event.color
         }))}
-        datesSet={handleDateChange}
+        datesSet={handleDatesSet}
         height="auto"
         buttonText={{
           today: 'Hoy',
@@ -103,7 +102,6 @@ export const CalendarTab = () => {
         }}
       />
       
-      {/* Leyenda */}
       <div className="mt-6 pt-4 border-t">
         <h4 className="text-sm font-medium text-gray-700 mb-2">Leyenda</h4>
         <div className="flex flex-wrap gap-4">

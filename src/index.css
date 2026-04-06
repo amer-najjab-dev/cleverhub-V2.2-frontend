@@ -17,3 +17,37 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out;
 }
+
+/* Sobrescribir estilos de FullCalendar para que use los colores de CleverHub */
+.fc .fc-button-primary {
+  background-color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #2563EB !important;
+  border-color: #2563EB !important;
+}
+
+.fc .fc-button-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.5) !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #1D4ED8 !important;
+  border-color: #1D4ED8 !important;
+}
+
+.fc .fc-today-button {
+  background-color: #3B82F6 !important;
+  border-color: #3B82F6 !important;
+}
+
+.fc .fc-today-button:hover {
+  background-color: #2563EB !important;
+}
+
+.fc .fc-day-today {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}

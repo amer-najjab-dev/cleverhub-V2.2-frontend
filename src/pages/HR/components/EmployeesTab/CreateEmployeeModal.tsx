@@ -20,7 +20,8 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onSuccess }: CreateEmploy
     children_count: 0,
     cni: '',
     address: '',
-    phone: ''
+    phone: '',
+    password: ''
   });
 
   if (!isOpen) return null;
@@ -33,10 +34,21 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onSuccess }: CreateEmploy
 
     setLoading(true);
     try {
-      await employeeService.create({
-        ...formData,
-        password: 'empleado123' // Contraseña temporal
-      });
+      // Si no se proporciona contraseña, el backend generará una automática
+      const payload = {
+        full_name: formData.full_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        birth_date: formData.birth_date || undefined,
+        marital_status: formData.marital_status || undefined,
+        children_count: formData.children_count,
+        cni: formData.cni,
+        address: formData.address || undefined,
+        phone: formData.phone || undefined,
+        password: formData.password || undefined // Si está vacío, el backend genera automática
+      };
+      
+      await employeeService.create(payload);
       toast.success('Empleado creado correctamente');
       onSuccess();
       onClose();
@@ -49,18 +61,19 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onSuccess }: CreateEmploy
         children_count: 0,
         cni: '',
         address: '',
-        phone: ''
+        phone: '',
+        password: ''
       });
-    } catch (error) {
-      toast.error('Error al crear empleado');
+    } catch (error: any) {
+      console.error('Error creating employee:', error);
+      toast.error(error.response?.data?.message || 'Error al crear empleado');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 
-overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
           <div className="flex items-center gap-2">
@@ -166,6 +179,20 @@ overflow-y-auto">
                 placeholder="Carte d'Identité Nationale"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña (opcional)</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+              placeholder="Dejar vacío para generar automática"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Si no especificas una contraseña, se generará una automática y se enviará por email.
+            </p>
           </div>
 
           <div>

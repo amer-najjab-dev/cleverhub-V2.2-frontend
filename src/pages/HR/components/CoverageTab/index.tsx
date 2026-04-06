@@ -6,24 +6,6 @@ import { ShiftModal } from './ShiftModal';
 import { AssignShiftModal } from './AssignShiftModal';
 import { toast } from 'react-hot-toast';
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'full': return 'bg-green-100 text-green-700 border-green-200';
-    case 'warning': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-    case 'risk': return 'bg-red-100 text-red-700 border-red-200';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'full': return '✅';
-    case 'warning': return '🟡';
-    case 'risk': return '🔴';
-    default: return '⚪';
-  }
-};
-
 const getStatusCircleColor = (currentCount: number, requiredMin: number) => {
   if (currentCount >= requiredMin) return 'bg-green-500';
   if (currentCount >= requiredMin * 0.7) return 'bg-yellow-500';

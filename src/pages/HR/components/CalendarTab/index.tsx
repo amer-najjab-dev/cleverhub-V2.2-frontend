@@ -53,17 +53,17 @@ export const CalendarTab = () => {
   const getEventClassName = (event: CalendarEvent) => {
     switch (event.type) {
       case 'holiday':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'vacation':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-100 text-green-700 border-green-200';
       case 'sick':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-100 text-red-700 border-red-200';
       case 'maternity':
-        return 'bg-pink-100 text-pink-800 border-pink-200';
+        return 'bg-pink-100 text-pink-700 border-pink-200';
       case 'paternity':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-purple-100 text-purple-700 border-purple-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
@@ -106,7 +106,7 @@ export const CalendarTab = () => {
         <h4 className="text-sm font-medium text-gray-700 mb-2">Leyenda</h4>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
             <span className="text-xs text-gray-600">Festivos</span>
           </div>
           <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import { CoverageTab } from './components/CoverageTab';
 import { RequestsTab } from './components/RequestsTab';
 import { ConfigTab } from './components/ConfigTab';
 import { EmployeesTab } from './components/EmployeesTab';
+import { CalendarTab } from './components/CalendarTab';
 
 type TabType = 'coverage' | 'employees' | 'payroll' | 'calendar' | 'requests' | 'config';
 
@@ -49,7 +50,7 @@ export const HRDashboard = () => {
         {activeTab === 'coverage' && <CoverageTab />}
         {activeTab === 'employees' && <EmployeesTab />}
         {activeTab === 'payroll' && <div className="text-center py-20 text-gray-500">Próximamente...</div>}
-        {activeTab === 'calendar' && <div className="bg-white rounded-xl shadow-sm p-6 text-center text-gray-500">Calendario en construcción</div>}
+        {activeTab === 'calendar' && <CalendarTab />}
         {activeTab === 'requests' && <RequestsTab />}
         {activeTab === 'config' && <ConfigTab />}
       </div>

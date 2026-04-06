@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { RegionProvider } from './contexts/RegionContext';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LoginPage } from './pages/Auth/LoginPage';
 import { Header } from './layout/Header/Header';
@@ -33,16 +33,6 @@ import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
 import { BroadcastPage } from './pages/Admin/BroadcastPage';
 import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
-import { SettingsPage } from './pages/Settings/SettingsPage';
-
-// Componente para redirigir según rol en la ruta raíz
-const RootRedirect = () => {
-  const { user } = useAuth();
-  if (user?.role === 'SUPER_ADMIN') {
-    return <AdminDashboard />;
-  }
-  return <HomeDashboard />;
-};
 
 function App() {
   return (
@@ -68,15 +58,9 @@ function App() {
                 {/* Ruta pública */}
                 <Route path="/login" element={<LoginPage />} />
                 
-                {/* Ruta raíz */}
-                <Route path="/" element={<ProtectedRoute><RootRedirect /></ProtectedRoute>} />
-                
-                {/* Dashboard para ADMIN y EMPLOYEE */}
-                <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
-                
-                {/* Rutas de negocio */}
+                {/* Rutas protegidas principales */}
+                <Route path="/" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
                 <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
-                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/products" element={<ProtectedRoute><ProductTable /></ProtectedRoute>} />
                 <Route path="/products/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
                 <Route path="/stock" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
@@ -84,12 +68,17 @@ function App() {
                 <Route path="/clients/new" element={<ProtectedRoute><NewClientPage /></ProtectedRoute>} />
                 <Route path="/clients/:id" element={<ProtectedRoute><ClientDetailPage /></ProtectedRoute>} />
                 <Route path="/clients/:id/edit" element={<ProtectedRoute><EditClientPage /></ProtectedRoute>} />
+                <Route path="/sales/history" element={<ProtectedRoute><SalesHistoryPage /></ProtectedRoute>} />
                 <Route path="/hr" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
+                
+                {/* Rutas de proveedores */}
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
+                
+                {/* Ruta directa para Connect (opcional) */}
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />
                 
-                {/* Rutas de reports */}
+                {/* RUTA DE REPORTS */}
                 <Route path="/reports" element={<ProtectedRoute><ReportsLayout /></ProtectedRoute>}>
                   <Route index element={<CashClosurePage />} />
                   <Route path="cash-closure" element={<CashClosurePage />} />
@@ -125,7 +114,6 @@ function App() {
                   <Route path="/admin/subscriptions" element={<SubscriptionsPage />} />
                   <Route path="/admin/broadcast" element={<BroadcastPage />} />
                   <Route path="/admin/health" element={<HealthPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
                 </Route>
               </Routes>
             </div>

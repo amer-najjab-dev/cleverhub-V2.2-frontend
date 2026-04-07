@@ -26,6 +26,42 @@ export interface CoverageData {
 export const coverageService = {
   getCoverage: async (startDate: string, endDate: string): Promise<CoverageData> => {
     const response = await api.get(`/hr/shift-assignments/coverage?startDate=${startDate}&endDate=${endDate}`);
-    return response.data.data;
+    const assignments = response.data.data;
+    
+    // Transformar el array en el formato esperado por el componente
+    const coverageMap: CoverageData = {};
+    
+    assignments.forEach((assignment: any) => {
+      const date = assignment.date.split('T')[0];
+      const shiftId = assignment.shift_id;
+      
+      if (!coverageMap[date]) {
+        coverageMap[date] = {};
+      }
+      
+      // Si ya existe un empleado para este turno en esta fecha, agregar
+      if (coverageMap[date][shiftId]) {
+        coverageMap[date][shiftId].employees.push({
+          id: assignment.employee.user.id,
+          full_name: assignment.employee.user.full_name,
+          email: assignment.employee.user.email
+        });
+        coverageMap[date][shiftId].currentCount++;
+      } else {
+        coverageMap[date][shiftId] = {
+          shift: assignment.shift,
+          employees: [{
+            id: assignment.employee.user.id,
+            full_name: assignment.employee.user.full_name,
+            email: assignment.employee.user.email
+          }],
+          currentCount: 1,
+          requiredMin: assignment.shift.min_employees_required,
+          status: 1 >= assignment.shift.min_employees_required ? 'full' : 'risk'
+        };
+      }
+    });
+    
+    return coverageMap;
   }
 };

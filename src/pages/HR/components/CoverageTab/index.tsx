@@ -37,10 +37,14 @@ export const CoverageTab = () => {
 
   const loadData = async () => {
     try {
+      console.log('📅 Fechas:', { startDate, endDate });
       const [shiftsData, coverageData] = await Promise.all([
         shiftService.getAll(),
         coverageService.getCoverage(startDate, endDate)
       ]);
+      console.log('📊 Shifts recibidos:', shiftsData);
+      console.log('📊 Coverage recibido:', coverageData);
+      console.log('📊 Coverage keys:', Object.keys(coverageData));
       setShifts(shiftsData);
       setCoverage(coverageData);
     } catch (error) {

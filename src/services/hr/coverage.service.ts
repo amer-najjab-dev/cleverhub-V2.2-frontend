@@ -25,7 +25,7 @@ export interface CoverageData {
 
 export const coverageService = {
   getCoverage: async (startDate: string, endDate: string): Promise<CoverageData> => {
-    const response = await api.get(`/hr/coverage?startDate=${startDate}&endDate=${endDate}`);
+    const response = await api.get(`/hr/shift-assignments/coverage?startDate=${startDate}&endDate=${endDate}`);
     return response.data.data;
   }
 };

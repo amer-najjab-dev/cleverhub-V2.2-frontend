@@ -5,68 +5,12 @@
       "destination": "https://cleverhub-v2-backend-production.up.railway.app/api/$1"
     },
     {
-      "source": "/modules",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/modules"
-    },
-    {
       "source": "/auth/(.*)",
       "destination": "https://cleverhub-v2-backend-production.up.railway.app/auth/$1"
     },
     {
-      "source": "/admin/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/admin/$1"
-    },
-    {
-      "source": "/hr/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/hr/$1"
-    },
-    {
-      "source": "/sales/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/sales/$1"
-    },
-    {
-      "source": "/dashboard/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/dashboard/$1"
-    },
-    {
-      "source": "/clients/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/clients/$1"
-    },
-    {
-      "source": "/products/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/products/$1"
-    },
-    {
-      "source": "/stock/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/stock/$1"
-    },
-    {
-      "source": "/inventory/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/inventory/$1"
-    },
-    {
-      "source": "/suppliers/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/suppliers/$1"
-    },
-    {
-      "source": "/reports/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/reports/$1"
-    },
-    {
-      "source": "/connect/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/connect/$1"
-    },
-    {
-      "source": "/campaigns/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/campaigns/$1"
-    },
-    {
-      "source": "/ai/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/ai/$1"
-    },
-    {
-      "source": "/users/(.*)",
-      "destination": "https://cleverhub-v2-backend-production.up.railway.app/users/$1"
+      "source": "/modules",
+      "destination": "https://cleverhub-v2-backend-production.up.railway.app/modules"
     },
     {
       "source": "/(.*)",

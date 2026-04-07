@@ -13,6 +13,10 @@
       "destination": "https://cleverhub-v2-backend-production.up.railway.app/modules"
     },
     {
+      "source": "/hr/(.*)",
+      "destination": "https://cleverhub-v2-backend-production.up.railway.app/hr/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

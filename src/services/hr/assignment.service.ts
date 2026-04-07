@@ -26,7 +26,7 @@ export const assignmentService = {
   // Asignar rango de fechas
   assignRange: async (employeeId: number, shiftId: number, startDate: string, endDate: string): 
 Promise<Assignment[]> => {
-    const response = await api.post('/hr/assignments/range', { employeeId, shiftId, startDate, endDate });
+    const response = await api.post('/hr/shift-assignments/range', { employeeId, shiftId, startDate, endDate });
     return response.data.data;
   },
 

@@ -6,10 +6,11 @@ import { ShiftModal } from './ShiftModal';
 import { AssignShiftModal } from './AssignShiftModal';
 import { toast } from 'react-hot-toast';
 
+// ✅ Mejora 1: Nuevos colores según estado
 const getStatusCircleColor = (currentCount: number, requiredMin: number) => {
-  if (currentCount >= requiredMin) return 'bg-green-500';
-  if (currentCount >= requiredMin * 0.7) return 'bg-yellow-500';
-  return 'bg-red-500';
+  if (currentCount === 0) return 'bg-red-500';           // Rojo: sin empleados
+  if (currentCount < requiredMin) return 'bg-orange-500'; // Naranja: insuficiente
+  return 'bg-green-500';                                  // Verde: completo
 };
 
 export const CoverageTab = () => {
@@ -37,14 +38,10 @@ export const CoverageTab = () => {
 
   const loadData = async () => {
     try {
-      console.log('📅 Fechas:', { startDate, endDate });
       const [shiftsData, coverageData] = await Promise.all([
         shiftService.getAll(),
         coverageService.getCoverage(startDate, endDate)
       ]);
-      console.log('📊 Shifts recibidos:', shiftsData);
-      console.log('📊 Coverage recibido:', coverageData);
-      console.log('📊 Coverage keys:', Object.keys(coverageData));
       setShifts(shiftsData);
       setCoverage(coverageData);
     } catch (error) {
@@ -175,19 +172,22 @@ export const CoverageTab = () => {
                       >
                         {cellData ? (
                           <div className="flex flex-col items-center gap-1">
+                            {/* ✅ Círculo con color según estado */}
                             <div className={`w-3 h-3 rounded-full ${getStatusCircleColor(cellData.currentCount, cellData.requiredMin)}`} />
                             <span className="text-xs font-medium">
                               {cellData.currentCount}/{cellData.requiredMin}
                             </span>
+                            {/* ✅ Mostrar nombres de empleados */}
                             {cellData.employees && cellData.employees.length > 0 && (
-                              <span className="text-xs text-gray-500 truncate max-w-[80px]">
-                                {cellData.employees.map((e: any) => e.name?.split(' ')[0] || e.full_name?.split(' ')[0]).join(', ')}
-                              </span>
+                              <div className="text-xs text-gray-600 truncate max-w-[80px]">
+                                {cellData.employees.map((e: any) => (e.full_name || e.name || '').split(' ')[0]).filter(Boolean).join(', ')}
+                              </div>
                             )}
                           </div>
                         ) : (
                           <div className="flex flex-col items-center gap-1">
-                            <div className="w-3 h-3 rounded-full bg-gray-300" />
+                            {/* ✅ Sin asignaciones: círculo rojo */}
+                            <div className="w-3 h-3 rounded-full bg-red-500" />
                             <span className="text-xs text-gray-400">0/{shift.min_employees_required}</span>
                           </div>
                         )}

@@ -11,17 +11,38 @@ interface AssignShiftModalProps {
   shift: Shift | null;
   shifts: Shift[];
   onSuccess: () => void;
+  defaultStartDate?: string;
+  defaultEndDate?: string;
 }
 
-export const AssignShiftModal = ({ isOpen, onClose, shift, shifts, onSuccess }: AssignShiftModalProps) => {
+export const AssignShiftModal = ({ 
+  isOpen, 
+  onClose, 
+  shift, 
+  shifts, 
+  onSuccess,
+  defaultStartDate,
+  defaultEndDate
+}: AssignShiftModalProps) => {
   const [loading, setLoading] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [formData, setFormData] = useState({
     employeeId: '',
     shiftId: shift?.id.toString() || '',
-    startDate: '',
-    endDate: ''
+    startDate: defaultStartDate || '',
+    endDate: defaultEndDate || ''
   });
+
+  // Actualizar formData cuando cambian las props
+  useEffect(() => {
+    if (defaultStartDate && defaultEndDate) {
+      setFormData(prev => ({
+        ...prev,
+        startDate: defaultStartDate,
+        endDate: defaultEndDate
+      }));
+    }
+  }, [defaultStartDate, defaultEndDate]);
 
   useEffect(() => {
     if (isOpen) {
@@ -143,8 +164,7 @@ export const AssignShiftModal = ({ isOpen, onClose, shift, shifts, onSuccess }: 
 
           {formData.startDate && formData.endDate && (
             <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-              📅 Días a asignar: {Math.ceil((new Date(formData.endDate).getTime() - new 
-Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} días
+              📅 Días a asignar: {Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} días
             </div>
           )}
         </div>

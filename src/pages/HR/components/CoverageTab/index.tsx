@@ -214,6 +214,8 @@ export const CoverageTab = () => {
         shift={selectedShift}
         shifts={shifts}
         onSuccess={loadData}
+        defaultStartDate={startDate}
+        defaultEndDate={endDate}
       />
     </div>
   );

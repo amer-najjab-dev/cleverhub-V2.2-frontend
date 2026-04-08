@@ -46,7 +46,7 @@ export const navigation: NavItem[] = [
   },
   {
     label: 'Proveedores',
-    path: '/suppliers',
+    path: '/providers',
     icon: 'Truck',
     roles: ['admin'],
     description: 'Recepciones y pagos'

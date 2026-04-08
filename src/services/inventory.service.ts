@@ -93,7 +93,7 @@ export const inventoryService = {
    * @param params - Filtros (categoría, laboratorio, zona, etc.)
    */
   getInventory: async (params?: any): Promise<ApiResponse<InventoryProduct[]>> => {
-    const response = await api.get<ApiResponse<any[]>>('/inventory', { params });
+    const response = await api.get<ApiResponse<any[]>>('/stock', { params });
     
     // Transformar los datos del backend al formato esperado por el frontend
     const transformedData = response.data.data.map((item: any) => ({
@@ -125,7 +125,7 @@ export const inventoryService = {
    * Obtener resumen del inventario
    */
   getSummary: async (): Promise<ApiResponse<InventorySummary>> => {
-    const response = await api.get<ApiResponse<any>>('/inventory/summary');
+    const response = await api.get<ApiResponse<any>>('/stock/summary');
     
     // Transformar los datos del backend al formato esperado por el frontend
     const transformedData: InventorySummary = {
@@ -148,14 +148,14 @@ export const inventoryService = {
    * Obtener un producto específico por ID
    */
   getProduct: (id: number): Promise<ApiResponse<InventoryProduct>> => 
-    api.get<ApiResponse<InventoryProduct>>(`/inventory/products/${id}`).then(extractData),
+    api.get<ApiResponse<InventoryProduct>>(`/stock/products/${id}`).then(extractData),
 
   /**
    * Obtener alertas de caducidad
    * @param days - Días para considerar (ej: 90 para crítico, 180 para advertencia)
    */
   getExpiryAlerts: (days?: number): Promise<ApiResponse<ExpiryAlert[]>> => 
-    api.get<ApiResponse<ExpiryAlert[]>>('/inventory/expiry-alerts', { params: { days } }).then(extractData),
+    api.get<ApiResponse<ExpiryAlert[]>>('/stock/expiry-alerts', { params: { days } }).then(extractData),
 
   /**
    * Obtener historial de movimientos de stock
@@ -164,18 +164,18 @@ export const inventoryService = {
   getStockMovements: (productId?: number): Promise<ApiResponse<StockMovement[]>> => {
     const params: any = {};
     if (productId) params.productId = productId;
-    return api.get<ApiResponse<StockMovement[]>>('/inventory/movements', { params }).then(extractData);
+    return api.get<ApiResponse<StockMovement[]>>('/stock/movements', { params }).then(extractData);
   },
 
   /**
    * Ajustar stock de un producto
    */
   adjustStock: (data: StockAdjustment): Promise<ApiResponse<InventoryProduct>> => 
-    api.post<ApiResponse<InventoryProduct>>('/inventory/adjust', data).then(extractData),
+    api.post<ApiResponse<InventoryProduct>>('/stock/adjust', data).then(extractData),
 
   /**
    * Buscar productos por código de barras
    */
   scanBarcode: (barcode: string): Promise<ApiResponse<InventoryProduct>> => 
-    api.get<ApiResponse<InventoryProduct>>(`/inventory/scan/${barcode}`).then(extractData),
+    api.get<ApiResponse<InventoryProduct>>(`/stock/scan/${barcode}`).then(extractData),
 };

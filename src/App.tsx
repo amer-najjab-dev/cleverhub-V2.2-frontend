@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { RegionProvider } from './contexts/RegionContext';
@@ -90,6 +90,9 @@ function App() {
                 {/* Rutas de proveedores */}
                 <Route path="/providers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
                 <Route path="/providers/:id" element={<ProtectedRoute><SupplierDetailPage /></ProtectedRoute>} />
+                {/* Redirección de /suppliers a /providers (compatibilidad) */}
+                <Route path="/suppliers" element={<Navigate to="/providers" replace />} />
+                <Route path="/suppliers/:id" element={<Navigate to="/providers/:id" replace />} />
                 
                 {/* Ruta directa para Connect (opcional) */}
                 <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />

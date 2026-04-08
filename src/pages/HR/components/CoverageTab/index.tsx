@@ -4,6 +4,7 @@ import { shiftService, Shift } from '../../../../services/hr/shift.service';
 import { coverageService, CoverageData } from '../../../../services/hr/coverage.service';
 import { ShiftModal } from './ShiftModal';
 import { AssignShiftModal } from './AssignShiftModal';
+import { EditShiftModal } from './EditShiftModal';
 import { toast } from 'react-hot-toast';
 
 // ✅ Mejora 1: Nuevos colores según estado
@@ -19,6 +20,7 @@ export const CoverageTab = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
 
   const startOfWeek = new Date(currentDate);
@@ -78,6 +80,11 @@ export const CoverageTab = () => {
     }
   };
 
+  const handleEditClick = (shift: Shift) => {
+    setSelectedShift(shift);
+    setShowEditModal(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -122,15 +129,25 @@ export const CoverageTab = () => {
                   <td className="p-3 text-gray-600">{shift.start_time} - {shift.end_time}</td>
                   <td className="p-3 text-center">{shift.min_employees_required}</td>
                   <td className="p-3 text-center">
-                    <div className="w-6 h-6 rounded-full mx-auto" style={{ backgroundColor: shift.color }} />
+                    <div className="w-6 h-6 rounded-full mx-auto" style={{ backgroundColor: shift.color || '#3B82F6' }} />
                   </td>
                   <td className="p-3 text-center">
-                    <button
-                      onClick={() => handleDeleteShift(shift.id, shift.name)}
-                      className="text-red-600 hover:text-red-800 transition"
-                    >
-                      🗑️
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleEditClick(shift)}
+                        className="text-blue-600 hover:text-blue-800 transition"
+                        title="Editar turno"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDeleteShift(shift.id, shift.name)}
+                        className="text-red-600 hover:text-red-800 transition"
+                        title="Eliminar turno"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -172,12 +189,10 @@ export const CoverageTab = () => {
                       >
                         {cellData ? (
                           <div className="flex flex-col items-center gap-1">
-                            {/* ✅ Círculo con color según estado */}
                             <div className={`w-3 h-3 rounded-full ${getStatusCircleColor(cellData.currentCount, cellData.requiredMin)}`} />
                             <span className="text-xs font-medium">
                               {cellData.currentCount}/{cellData.requiredMin}
                             </span>
-                            {/* ✅ Mostrar nombres de empleados */}
                             {cellData.employees && cellData.employees.length > 0 && (
                               <div className="text-xs text-gray-600 truncate max-w-[80px]">
                                 {cellData.employees.map((e: any) => (e.full_name || e.name || '').split(' ')[0]).filter(Boolean).join(', ')}
@@ -186,7 +201,6 @@ export const CoverageTab = () => {
                           </div>
                         ) : (
                           <div className="flex flex-col items-center gap-1">
-                            {/* ✅ Sin asignaciones: círculo rojo */}
                             <div className="w-3 h-3 rounded-full bg-red-500" />
                             <span className="text-xs text-gray-400">0/{shift.min_employees_required}</span>
                           </div>
@@ -216,6 +230,13 @@ export const CoverageTab = () => {
         onSuccess={loadData}
         defaultStartDate={startDate}
         defaultEndDate={endDate}
+      />
+
+      <EditShiftModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        shift={selectedShift}
+        onSuccess={loadData}
       />
     </div>
   );

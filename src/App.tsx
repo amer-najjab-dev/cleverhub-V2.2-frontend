@@ -73,6 +73,9 @@ function App() {
               <Routes>
                 {/* Ruta pública */}
                 <Route path="/login" element={<LoginPage />} />
+
+                {/* Redirección de /dashboard a / */}
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 
                 {/* Rutas protegidas principales */}
                 <Route path="/" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />

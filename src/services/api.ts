@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// URL completa del backend
-const BACKEND_URL = 'https://cleverhub-v2-backend-production.up.railway.app/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://cleverhub-v2-2-backend.up.railway.app/api';
 
 export const API_URL = BACKEND_URL;
 

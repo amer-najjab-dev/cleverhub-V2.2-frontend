@@ -50,7 +50,7 @@ const FilterComponent: React.FC<FilterProps> = ({
     let newValue: any = e.target.value;
     if (type === 'number') {
       newValue = newValue === '' ? '' : Number(newValue);
-    } else if (type === 'select' && e.target instanceof HTMLSelectElement) {
+    } else if (type === 'select') {
       if (options && options.some(opt => typeof opt.value === 'boolean')) {
         newValue = newValue === 'true' ? true : newValue === 'false' ? false : newValue;
       }
@@ -63,7 +63,8 @@ const FilterComponent: React.FC<FilterProps> = ({
     }
   };
 
-  const baseClassName = "w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white";
+  // Clases más compactas
+  const baseClassName = "w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white";
 
   if (type === 'select') {
     return (
@@ -108,7 +109,7 @@ const FilterComponent: React.FC<FilterProps> = ({
         className={baseClassName}
       />
       {minLength > 0 && localValue.length > 0 && localValue.length < minLength && (
-        <p className="text-xs text-amber-600 mt-1">Mínimo {minLength} caracteres</p>
+        <p className="text-xs text-amber-600 mt-0.5">Mínimo {minLength} caracteres</p>
       )}
     </div>
   );

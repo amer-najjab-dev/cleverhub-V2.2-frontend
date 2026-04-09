@@ -121,7 +121,7 @@ const ProductTable: React.FC = () => {
                   onChange={(val) => handleFilterChange('name', val)}
                   placeholder="Buscar nombre..."
                   debounce={300}
-                  minLength={3}
+                  minLength={1}
                 />
               </th>
               <th className="px-4 py-2">

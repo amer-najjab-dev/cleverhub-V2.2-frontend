@@ -29,6 +29,20 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
+  // Debounce para el filtro de nombre
+  const [nameSearchTerm, setNameSearchTerm] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (nameSearchTerm !== filters.name) {
+        setFilters(prev => ({ ...prev, name: nameSearchTerm }));
+        setCurrentPage(1);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [nameSearchTerm]);
+
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
     fetchProducts();
@@ -72,8 +86,12 @@ const ProductTable: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: any) => {
+    if (field === 'name') {
+      // El nombre se maneja con debounce, no actualizamos directamente
+      return;
+    }
     setFilters(prev => ({ ...prev, [field]: value }));
-    setCurrentPage(1); // Resetear a primera página al filtrar
+    setCurrentPage(1);
   };
 
   const handlePageSizeChange = (newSize: number) => {
@@ -119,8 +137,8 @@ const ProductTable: React.FC = () => {
               <th className="px-4 py-2">
                 <FilterComponent
                   type="text"
-                  value={filters.name}
-                  onChange={(val) => handleFilterChange('name', val)}
+                  value={nameSearchTerm}
+                  onChange={(val) => setNameSearchTerm(val)}
                   placeholder="Filtrar nombre"
                 />
               </th>

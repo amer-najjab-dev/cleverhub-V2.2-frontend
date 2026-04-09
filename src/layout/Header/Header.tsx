@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, ShoppingCart, Users, Package, ClipboardCheck, 
-  Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown, Store
+  Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown, Store,
+  CreditCard, Activity, FileText, Menu, X
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { RegionSelector } from '../../components/RegionSelector';
@@ -21,8 +22,11 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   Store: Store,
   LayoutDashboard: Home,
   Settings: Settings,
-  FileText: BarChart3,
-  Box: Package
+  FileText: FileText,
+  Box: Package,
+  CreditCard: CreditCard,
+  Activity: Activity,
+  Bell: Bell
 };
 
 export const Header = () => {
@@ -30,6 +34,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -81,11 +86,11 @@ export const Header = () => {
   if (loading) {
     return (
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-screen-2xl mx-auto px-6 py-3">
-          <div className="flex justify-between items-center">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 lg:h-20">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl"></div>
-              <span className="font-bold text-gray-900">CleverHub</span>
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl"></div>
+              <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline">CleverHub</span>
             </div>
             <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
           </div>
@@ -96,19 +101,19 @@ export const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-screen-2xl mx-auto px-6">
-        <div className="flex justify-between items-center h-15">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-sm">CH</span>
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+              <span className="text-white font-bold text-sm lg:text-base">CH</span>
             </div>
-            <span className="font-bold text-gray-900 text-lg hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
+            <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* Navegación dinámica */}
-          <nav className="hidden md:flex items-center justify-center flex-1 mx-4">
-            <div className="flex items-center space-x-1">
+          {/* Desktop Navigation (xl+) */}
+          <nav className="hidden xl:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
+            <div className="flex items-center space-x-1 2xl:space-x-2">
               {modules.map((module) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
@@ -117,13 +122,13 @@ export const Header = () => {
                   <Link
                     key={module.path}
                     to={module.path}
-                    className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap text-sm font-medium ${
+                    className={`flex items-center px-3 2xl:px-4 py-2.5 rounded-lg transition-all duration-200 whitespace-nowrap text-sm 2xl:text-base font-medium ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <Icon className={`w-4 h-4 2xl:w-5 2xl:h-5 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
                     <span>{module.name}</span>
                   </Link>
                 );
@@ -131,8 +136,48 @@ export const Header = () => {
             </div>
           </nav>
 
-          {/* Menú derecho (sin cambios) */}
-          <div className="flex items-center space-x-2 shrink-0">
+          {/* Tablet Navigation (lg - xl) - Botón hamburguesa */}
+          <div className="hidden lg:block xl:hidden">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="p-2 rounded-lg hover:bg-gray-100"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Menú móvil/tablet desplegable */}
+          {mobileMenuOpen && (
+            <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
+              <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="space-y-2">
+                  {modules.map((module) => {
+                    const Icon = iconMap[module.icon] || Home;
+                    const isActive = isActiveRoute(module.path);
+                    
+                    return (
+                      <Link
+                        key={module.path}
+                        to={module.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                          isActive 
+                            ? 'bg-blue-50 text-blue-700' 
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+                        <span className="text-base font-medium">{module.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Menú derecho */}
+          <div className="flex items-center space-x-2 lg:space-x-4 shrink-0">
             {/* Notificaciones */}
             <div className="relative">
               <button
@@ -170,7 +215,7 @@ export const Header = () => {
                 className="flex items-center space-x-2 p-1.5 pr-3 rounded-lg hover:bg-gray-50 transition-colors group"
                 title="Menú de usuario"
               >
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
+                <div className="w-7 h-7 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
                   {getInitials()}
                 </div>
                 <div className="hidden lg:block text-left">
@@ -231,8 +276,8 @@ export const Header = () => {
           </div>
         </div>
 
-        {/* Navegación móvil */}
-        <div className="md:hidden pb-3 overflow-x-auto">
+        {/* Navegación móvil (menor que lg) */}
+        <div className="lg:hidden pb-3 overflow-x-auto">
           <div className="flex space-x-2">
             {modules.map((module) => {
               const Icon = iconMap[module.icon] || Home;

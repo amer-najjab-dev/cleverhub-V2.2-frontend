@@ -101,8 +101,8 @@ export const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
-        <div className="flex justify-between items-center h-14 lg:h-16">
+      <div className="w-full">
+        <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
            <Link to="/" className="flex items-center space-x-2 shrink-0 group">
         <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
@@ -148,7 +148,7 @@ export const Header = () => {
 
           {/* Menú móvil/tablet desplegable */}
           {mobileMenuOpen && (
-            <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
+             <div className="lg:hidden pb-3 overflow-x-auto px-4 sm:px-6">
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="space-y-2">
                   {modules.map((module) => {

@@ -104,8 +104,8 @@ export const HomeDashboard = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6">
-          <div className="max-w-[1600px] mx-auto">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="w-full space-y-6 lg:space-y-8">
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
               {error}
             </div>

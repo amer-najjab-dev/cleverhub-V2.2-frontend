@@ -8,8 +8,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [paginatedProducts, setPaginatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatCurrency } = useCurrencyFormatter();
 
@@ -17,6 +15,7 @@ const ProductTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Estados de filtros
   const [filters, setFilters] = useState({
@@ -30,33 +29,41 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
+  // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
     fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [products, filters]);
-
-  // Actualizar paginación cuando cambien los productos filtrados
-  useEffect(() => {
-    const pages = Math.ceil(filteredProducts.length / pageSize);
-    setTotalPages(pages || 1);
-    setCurrentPage(1); // Resetear a primera página al filtrar
-  }, [filteredProducts, pageSize]);
-
-  // Actualizar productos paginados cuando cambie la página o el tamaño de página
-  useEffect(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    setPaginatedProducts(filteredProducts.slice(start, end));
-  }, [filteredProducts, currentPage, pageSize]);
+  }, [currentPage, pageSize, filters]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productsService.getAll();
-      setProducts(response);
+      
+      // Construir parámetros de búsqueda
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+      };
+      
+      // Añadir filtros solo si tienen valor
+      if (filters.name) params.name = filters.name;
+      if (filters.category) params.category = filters.category;
+      if (filters.dosageForm) params.dosageForm = filters.dosageForm;
+      if (filters.barcode) params.barcode = filters.barcode;
+      if (filters.zone) params.zone = filters.zone;
+      if (filters.active !== '') params.active = filters.active === 'true';
+      if (filters.pricePPV) {
+        const val = parseFloat(filters.pricePPV);
+        if (!isNaN(val)) params.pricePPV = val;
+      }
+      if (filters.pricePPH) {
+        const val = parseFloat(filters.pricePPH);
+        if (!isNaN(val)) params.pricePPH = val;
+      }
+      
+      const response = await productsService.getAllPaginated(params);
+      setProducts(response.data);
+      setTotalPages(response.meta.totalPages);
+      setTotalItems(response.meta.total);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -64,50 +71,9 @@ const ProductTable: React.FC = () => {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...products];
-
-    if (filters.name) {
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(filters.name.toLowerCase())
-      );
-    }
-    if (filters.category) {
-      filtered = filtered.filter(p => p.category === filters.category);
-    }
-    if (filters.dosageForm) {
-      filtered = filtered.filter(p => p.dosageForm === filters.dosageForm);
-    }
-    if (filters.pricePPV) {
-      const val = parseFloat(filters.pricePPV);
-      if (!isNaN(val)) {
-        filtered = filtered.filter(p => p.pricePPV === val);
-      }
-    }
-    if (filters.pricePPH) {
-      const val = parseFloat(filters.pricePPH);
-      if (!isNaN(val)) {
-        filtered = filtered.filter(p => p.pricePPH === val);
-      }
-    }
-    if (filters.barcode) {
-      filtered = filtered.filter(p =>
-        p.barcode && p.barcode.includes(filters.barcode)
-      );
-    }
-    if (filters.zone) {
-      filtered = filtered.filter(p => p.zone === filters.zone);
-    }
-    if (filters.active !== '') {
-      const activeBool = filters.active === 'true';
-      filtered = filtered.filter(p => p.active === activeBool);
-    }
-
-    setFilteredProducts(filtered);
-  };
-
   const handleFilterChange = (field: string, value: any) => {
     setFilters(prev => ({ ...prev, [field]: value }));
+    setCurrentPage(1); // Resetear a primera página al filtrar
   };
 
   const handlePageSizeChange = (newSize: number) => {
@@ -120,7 +86,7 @@ const ProductTable: React.FC = () => {
   };
 
   const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, filteredProducts.length);
+  const endItem = Math.min(currentPage * pageSize, totalItems);
 
   if (loading) {
     return (
@@ -224,7 +190,7 @@ const ProductTable: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedProducts.map((product) => {
+            {products.map((product) => {
               const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
               const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
               
@@ -257,18 +223,18 @@ const ProductTable: React.FC = () => {
         </table>
 
         {/* Mensaje si no hay resultados */}
-        {filteredProducts.length === 0 && (
+        {products.length === 0 && (
           <div className="p-4 text-center text-gray-500">No se encontraron productos</div>
         )}
 
         {/* Paginación */}
-        {filteredProducts.length > 0 && (
+        {totalItems > 0 && (
           <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-700">
                 Mostrando <span className="font-medium">{startItem}</span> a{' '}
                 <span className="font-medium">{endItem}</span>{' '}
-                de <span className="font-medium">{filteredProducts.length}</span> productos
+                de <span className="font-medium">{totalItems}</span> productos
               </span>
               
               <select

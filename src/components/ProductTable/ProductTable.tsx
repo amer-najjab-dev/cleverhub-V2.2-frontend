@@ -4,7 +4,7 @@ import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
 import { CATEGORIES, DOSAGE_FORMS, ZONES, ACTIVE_OPTIONS } from '../../constants/productConstants';
 import FilterComponent from './FilterComponent';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,27 +28,6 @@ const ProductTable: React.FC = () => {
     zone: '',
     active: '' as '' | 'true' | 'false',
   });
-
-  // Búsqueda con debounce (mismo patrón que en ventas)
-  const [query, setQuery] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (query.length >= 3 || query.length === 0) {
-        setSearchTerm(query);
-      }
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [query]);
-
-  useEffect(() => {
-    if (searchTerm !== filters.name) {
-      setFilters(prev => ({ ...prev, name: searchTerm }));
-      setCurrentPage(1);
-    }
-  }, [searchTerm]);
 
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
@@ -136,19 +115,14 @@ const ProductTable: React.FC = () => {
             </tr>
             <tr className="border-t border-gray-200">
               <th className="px-4 py-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Buscar... (min 3)"
-                    className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                {query.length > 0 && query.length < 3 && (
-                  <p className="text-xs text-amber-600 mt-1">Mínimo 3 caracteres</p>
-                )}
+                <FilterComponent
+                  type="text"
+                  value={filters.name}
+                  onChange={(val) => handleFilterChange('name', val)}
+                  placeholder="Buscar nombre..."
+                  debounce={300}
+                  minLength={3}
+                />
               </th>
               <th className="px-4 py-2">
                 <FilterComponent

@@ -148,142 +148,138 @@ export const HomeDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6">
-        <div className="max-w-[1600px] mx-auto space-y-6 lg:space-y-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-sm lg:text-base text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              {/* Period Selector */}
-              <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
-                <button
-                  onClick={() => setSelectedPeriod('today')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
-                    selectedPeriod === 'today' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Hoy
-                </button>
-                <button
-                  onClick={() => setSelectedPeriod('week')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
-                    selectedPeriod === 'week' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Semana
-                </button>
-                <button
-                  onClick={() => setSelectedPeriod('month')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
-                    selectedPeriod === 'month' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Mes
-                </button>
+    <div className="space-y-6 lg:space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm lg:text-base text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {/* Period Selector */}
+          <div className="flex items-center bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+            <button
+              onClick={() => setSelectedPeriod('today')}
+              className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
+                selectedPeriod === 'today' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Hoy
+            </button>
+            <button
+              onClick={() => setSelectedPeriod('week')}
+              className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
+                selectedPeriod === 'week' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => setSelectedPeriod('month')}
+              className={`px-3 lg:px-4 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors ${
+                selectedPeriod === 'month' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Mes
+            </button>
+          </div>
+
+          <button
+            onClick={() => fetchKPIs(selectedPeriod)}
+            className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm lg:text-base"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <QuickStats 
+          kpis={kpis} 
+          loading={loading} 
+          formatCurrency={formatCurrency} 
+        />
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickActions.map((action) => (
+            <button
+              key={action.title}
+              onClick={() => handleQuickAction(action.route, action.enabled)}
+              disabled={!action.enabled}
+              className={`${action.color} ${action.hover} text-white rounded-xl p-4 lg:p-6 shadow-sm transition-all transform hover:scale-105 ${
+                !action.enabled && 'opacity-50 cursor-not-allowed'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <action.icon className="w-6 h-6 lg:w-8 lg:h-8 mb-2 lg:mb-3" />
+                  <h3 className="text-base lg:text-lg font-semibold mb-1">{action.title}</h3>
+                  <p className="text-xs lg:text-sm opacity-90">{action.description}</p>
+                </div>
+                {action.enabled && <ArrowRight className="w-4 h-5 lg:w-5 lg:h-5 opacity-70" />}
               </div>
+            </button>
+          ))}
+        </div>
+      </div>
 
-              <button
-                onClick={() => fetchKPIs(selectedPeriod)}
-                className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm lg:text-base"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Actualizar
-              </button>
-            </div>
-          </div>
+      {/* Sales History */}
+      <SalesHistory 
+        showPagination={true}
+        onViewFullHistory={handleViewFullHistory}
+      />
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <QuickStats 
-              kpis={kpis} 
-              loading={loading} 
-              formatCurrency={formatCurrency} 
-            />
-          </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        <SalesChart period={selectedPeriod} />
+        <ComparativeChart />
+      </div>
 
-          {/* Quick Actions */}
-          <div>
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action) => (
-                <button
-                  key={action.title}
-                  onClick={() => handleQuickAction(action.route, action.enabled)}
-                  disabled={!action.enabled}
-                  className={`${action.color} ${action.hover} text-white rounded-xl p-4 lg:p-6 shadow-sm transition-all transform hover:scale-105 ${
-                    !action.enabled && 'opacity-50 cursor-not-allowed'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <action.icon className="w-6 h-6 lg:w-8 lg:h-8 mb-2 lg:mb-3" />
-                      <h3 className="text-base lg:text-lg font-semibold mb-1">{action.title}</h3>
-                      <p className="text-xs lg:text-sm opacity-90">{action.description}</p>
-                    </div>
-                    {action.enabled && <ArrowRight className="w-4 h-5 lg:w-5 lg:h-5 opacity-70" />}
-                  </div>
-                </button>
+      {/* Top Products */}
+      <div>
+        <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Productos Más Vendidos</h2>
+        {loadingProducts ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />
               ))}
             </div>
           </div>
-
-          {/* Sales History */}
-          <SalesHistory 
-            showPagination={true}
-            onViewFullHistory={handleViewFullHistory}
+        ) : (
+          <TopProductsTable 
+            products={topProducts}
+            period={topProductsPeriod}
+            startDate={topProductsStartDate}
+            endDate={topProductsEndDate}
+            onPeriodChange={handleTopProductsPeriodChange}
+            onDateRangeChange={handleTopProductsDateRangeChange}
           />
+        )}
+      </div>
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
-            <SalesChart period={selectedPeriod} />
-            <ComparativeChart />
-          </div>
-
-          {/* Top Products */}
-          <div>
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Productos Más Vendidos</h2>
-            {loadingProducts ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="space-y-3">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <TopProductsTable 
-                products={topProducts}
-                period={topProductsPeriod}
-                startDate={topProductsStartDate}
-                endDate={topProductsEndDate}
-                onPeriodChange={handleTopProductsPeriodChange}
-                onDateRangeChange={handleTopProductsDateRangeChange}
-              />
-            )}
-          </div>
-
-          {/* Botón para ver historial completo */}
-          <div className="flex justify-end">
-            <button
-              onClick={handleViewFullHistory}
-              className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2 text-sm lg:text-base"
-            >
-              Ver historial completo
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+      {/* Botón para ver historial completo */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleViewFullHistory}
+          className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2 text-sm lg:text-base"
+        >
+          Ver historial completo
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

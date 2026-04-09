@@ -104,7 +104,7 @@ export const HomeDashboard = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="px-4 sm:px-6 lg:px-8 py-6">
+        <div className="py-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
             {error}
           </div>
@@ -147,7 +147,7 @@ export const HomeDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
+      <div className="py-6">
         <div className="space-y-6 lg:space-y-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

@@ -101,14 +101,14 @@ export const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 lg:h-20">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
+        <div className="flex justify-between items-center h-14 lg:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 shrink-0 group">
-            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-sm lg:text-base">CH</span>
+           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
+        <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-xs lg:text-sm">CH</span>
             </div>
-            <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
+             <span className="font-bold text-gray-900 text-base lg:text-lg hidden sm:inline">CleverHub</span>
           </Link>
 
           {/* Desktop Navigation (xl+) */}

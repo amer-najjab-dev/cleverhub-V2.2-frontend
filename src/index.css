@@ -51,3 +51,113 @@
 .fc .fc-day-today {
   background-color: rgba(59, 130, 246, 0.1) !important;
 }
+
+/* ============================================
+   AJUSTES RESPONSIVOS POR TAMAÑO DE PANTALLA
+   ============================================ */
+
+/* Pantallas pequeñas (MacBook 13: 1024px - 1366px) */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .container-padding {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .header-padding {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .main-padding {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Pantallas medianas (laptops estándar: 1366px - 1600px) */
+@media (min-width: 1366px) and (max-width: 1600px) {
+  .container-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .header-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Pantallas grandes (Desktop 24 pulgadas: 1920px+) */
+@media (min-width: 1920px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .container-padding {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+  
+  .header-padding {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+  
+  .main-padding {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Pantallas extra grandes (4K: 2560px+) */
+@media (min-width: 2560px) {
+  body {
+    font-size: 18px;
+  }
+  
+  .container-padding {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+  
+  .header-padding {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+  
+  .main-padding {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+  }
+}
+
+/* Ajustes de espaciado para elementos comunes en pantallas grandes */
+@media (min-width: 1920px) {
+  .card-padding {
+    padding: 1.5rem !important;
+  }
+  
+  .table-cell-padding {
+    padding: 1rem 1.5rem !important;
+  }
+  
+  .button-large {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Ajustes de espaciado para pantallas pequeñas */
+@media (max-width: 1024px) {
+  .card-padding {
+    padding: 1rem !important;
+  }
+  
+  .table-cell-padding {
+    padding: 0.75rem 1rem !important;
+  }
+}

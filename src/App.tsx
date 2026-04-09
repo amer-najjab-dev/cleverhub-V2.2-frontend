@@ -70,8 +70,8 @@ function App() {
           
           <main className="min-h-screen bg-gray-50">
             {/* ✅ Contenedor responsive mejorado */}
-            <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
-              <div className="max-w-[1600px] mx-auto py-6">
+             <div className="w-full mx-auto px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
+              <div className="max-w-[1600px] mx-auto py-4 sm:py-5 md:py-6">
                 <Routes>
                   {/* Ruta pública */}
                   <Route path="/login" element={<LoginPage />} />

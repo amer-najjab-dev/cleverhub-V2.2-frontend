@@ -4,7 +4,7 @@ import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
 import { CATEGORIES, DOSAGE_FORMS, ZONES, ACTIVE_OPTIONS } from '../../constants/productConstants';
 import FilterComponent from './FilterComponent';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,19 +29,26 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
-  // Debounce para el filtro de nombre
-  const [nameSearchTerm, setNameSearchTerm] = useState('');
-  
+  // Búsqueda con debounce (mismo patrón que en ventas)
+  const [query, setQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (nameSearchTerm !== filters.name) {
-        setFilters(prev => ({ ...prev, name: nameSearchTerm }));
-        setCurrentPage(1);
+    const debounceTimer = setTimeout(() => {
+      if (query.length >= 3 || query.length === 0) {
+        setSearchTerm(query);
       }
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [nameSearchTerm]);
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [query]);
+
+  useEffect(() => {
+    if (searchTerm !== filters.name) {
+      setFilters(prev => ({ ...prev, name: searchTerm }));
+      setCurrentPage(1);
+    }
+  }, [searchTerm]);
 
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
@@ -52,13 +59,11 @@ const ProductTable: React.FC = () => {
     try {
       setLoading(true);
       
-      // Construir parámetros de búsqueda
       const params: any = {
         page: currentPage,
         limit: pageSize,
       };
       
-      // Añadir filtros solo si tienen valor
       if (filters.name) params.name = filters.name;
       if (filters.category) params.category = filters.category;
       if (filters.dosageForm) params.dosageForm = filters.dosageForm;
@@ -86,10 +91,6 @@ const ProductTable: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: any) => {
-    if (field === 'name') {
-      // El nombre se maneja con debounce, no actualizamos directamente
-      return;
-    }
     setFilters(prev => ({ ...prev, [field]: value }));
     setCurrentPage(1);
   };
@@ -119,6 +120,23 @@ const ProductTable: React.FC = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Listado de Productos</h1>
       
+      {/* Búsqueda por nombre (estilo ventas) */}
+      <div className="mb-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar productos... (mínimo 3 caracteres)"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {query.length > 0 && query.length < 3 ? 'Escribe al menos 3 caracteres para buscar' : ' '}
+        </p>
+      </div>
+
       {/* Tabla de productos */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
@@ -135,12 +153,8 @@ const ProductTable: React.FC = () => {
             </tr>
             <tr>
               <th className="px-4 py-2">
-                <FilterComponent
-                  type="text"
-                  value={nameSearchTerm}
-                  onChange={(val) => setNameSearchTerm(val)}
-                  placeholder="Filtrar nombre"
-                />
+                {/* El filtro de nombre está arriba, fuera de la tabla */}
+                <div className="text-gray-400 text-xs">-</div>
               </th>
               <th className="px-4 py-2">
                 <FilterComponent

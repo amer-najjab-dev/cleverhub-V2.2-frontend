@@ -90,7 +90,7 @@ const ProductTable: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: any) => {
-    if (field === 'name') return; // El nombre se maneja con query
+    //if (field === 'name') return; // El nombre se maneja con query
     setFilters(prev => ({ ...prev, [field]: value }));
     setCurrentPage(1);
   };
@@ -141,7 +141,7 @@ const ProductTable: React.FC = () => {
                   <input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => { setQuery(e.target.value); setFilters(prev => ({ ...prev, name: e.target.value })); setCurrentPage(1); }}
                     placeholder="Buscar... (min 3)"
                     className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />

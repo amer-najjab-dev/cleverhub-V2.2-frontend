@@ -29,14 +29,37 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
-  // Estado para el término de búsqueda (para el input)
+  // Estado para el término de búsqueda
   const [searchInput, setSearchInput] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Cargar productos cuando cambia la página, el tamaño o los filtros
+  // Búsqueda directa usando el mismo método que ventas
   useEffect(() => {
-    fetchProducts();
-  }, [currentPage, pageSize, filters]);
+    const searchProducts = async () => {
+      if (searchInput.length >= 3) {
+        setIsSearching(true);
+        try {
+          const results = await productsService.search(searchInput);
+          setProducts(results);
+          setTotalItems(results.length);
+          setTotalPages(Math.ceil(results.length / pageSize));
+          setCurrentPage(1);
+        } catch (error) {
+          console.error('Error searching products:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else if (searchInput.length === 0) {
+        // Si no hay búsqueda, cargar todos los productos paginados
+        fetchProducts();
+      }
+    };
+    
+    const debounceTimer = setTimeout(searchProducts, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchInput]);
 
+  // Cargar productos paginados cuando no hay búsqueda
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -46,7 +69,6 @@ const ProductTable: React.FC = () => {
         limit: pageSize,
       };
       
-      if (filters.name) params.name = filters.name;
       if (filters.category) params.category = filters.category;
       if (filters.dosageForm) params.dosageForm = filters.dosageForm;
       if (filters.barcode) params.barcode = filters.barcode;
@@ -72,24 +94,12 @@ const ProductTable: React.FC = () => {
     }
   };
 
-  // Buscar producto por nombre (búsqueda instantánea)
-  const handleSearch = async () => {
-    if (searchInput.length >= 3) {
-      setFilters(prev => ({ ...prev, name: searchInput }));
-      setCurrentPage(1);
-    } else if (searchInput.length === 0) {
-      setFilters(prev => ({ ...prev, name: '' }));
-      setCurrentPage(1);
-    }
-  };
-
-  // Debounce para la búsqueda
+  // Recargar cuando cambian los filtros que no son nombre
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleSearch();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    if (searchInput.length === 0) {
+      fetchProducts();
+    }
+  }, [currentPage, pageSize, filters.category, filters.dosageForm, filters.pricePPV, filters.pricePPH, filters.barcode, filters.zone, filters.active]);
 
   const handleFilterChange = (field: string, value: any) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -107,14 +117,14 @@ const ProductTable: React.FC = () => {
 
   const clearSearch = () => {
     setSearchInput('');
-    setFilters(prev => ({ ...prev, name: '' }));
     setCurrentPage(1);
+    fetchProducts();
   };
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
-  if (loading) {
+  if (loading || isSearching) {
     return (
       <div className="p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -163,6 +173,9 @@ const ProductTable: React.FC = () => {
                 </div>
                 {searchInput.length > 0 && searchInput.length < 3 && (
                   <p className="text-xs text-amber-600 mt-0.5">Mínimo 3 caracteres</p>
+                )}
+                {searchInput.length >= 3 && products.length === 0 && !isSearching && (
+                  <p className="text-xs text-red-500 mt-0.5">No se encontraron productos</p>
                 )}
               </th>
               <th className="px-4 py-2">
@@ -231,7 +244,7 @@ const ProductTable: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => {
+            {products.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((product) => {
               const pricePPV = typeof product.pricePPV === 'string' ? parseFloat(product.pricePPV) : product.pricePPV;
               const pricePPH = typeof product.pricePPH === 'string' ? parseFloat(product.pricePPH) : product.pricePPH;
               
@@ -264,7 +277,7 @@ const ProductTable: React.FC = () => {
         </table>
 
         {/* Mensaje si no hay resultados */}
-        {products.length === 0 && (
+        {products.length === 0 && !isSearching && searchInput.length === 0 && (
           <div className="p-4 text-center text-gray-500">No se encontraron productos</div>
         )}
 

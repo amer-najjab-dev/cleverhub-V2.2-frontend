@@ -31,7 +31,6 @@ const ProductTable: React.FC = () => {
 
   // Estado para el término de búsqueda (para el input)
   const [searchInput, setSearchInput] = useState('');
-  const [showClearButton, setShowClearButton] = useState(false);
 
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {

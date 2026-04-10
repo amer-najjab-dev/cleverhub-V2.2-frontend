@@ -4,8 +4,7 @@ import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
 import { CATEGORIES, DOSAGE_FORMS, ZONES, ACTIVE_OPTIONS } from '../../constants/productConstants';
 import FilterComponent from './FilterComponent';
-import ProductSearchDropdown from '../ProductSearchDropdown/ProductSearchDropdown';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -30,39 +29,9 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
-  // Estados para búsqueda de productos
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-
-  // Búsqueda de productos (igual que en ventas)
-  useEffect(() => {
-    const searchProducts = async () => {
-      if (searchQuery.length >= 3) {
-        setIsSearching(true);
-        try {
-          const results = await productsService.search(searchQuery);
-          setSearchResults(results);
-        } catch (error) {
-          console.error('Error searching products:', error);
-        } finally {
-          setIsSearching(false);
-        }
-      } else if (searchQuery.length === 0) {
-        setSearchResults([]);
-      }
-    };
-    
-    const debounceTimer = setTimeout(searchProducts, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
-
-  // Cuando se selecciona un producto de la búsqueda
-  const handleSelectProduct = (product: Product) => {
-    setFilters(prev => ({ ...prev, name: product.name }));
-    setSearchQuery('');
-    setCurrentPage(1);
-  };
+  // Estado para el término de búsqueda (para el input)
+  const [searchInput, setSearchInput] = useState('');
+  const [showClearButton, setShowClearButton] = useState(false);
 
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
@@ -104,6 +73,25 @@ const ProductTable: React.FC = () => {
     }
   };
 
+  // Buscar producto por nombre (búsqueda instantánea)
+  const handleSearch = async () => {
+    if (searchInput.length >= 3) {
+      setFilters(prev => ({ ...prev, name: searchInput }));
+      setCurrentPage(1);
+    } else if (searchInput.length === 0) {
+      setFilters(prev => ({ ...prev, name: '' }));
+      setCurrentPage(1);
+    }
+  };
+
+  // Debounce para la búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const handleFilterChange = (field: string, value: any) => {
     setFilters(prev => ({ ...prev, [field]: value }));
     setCurrentPage(1);
@@ -116,6 +104,12 @@ const ProductTable: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const clearSearch = () => {
+    setSearchInput('');
+    setFilters(prev => ({ ...prev, name: '' }));
+    setCurrentPage(1);
   };
 
   const startItem = (currentPage - 1) * pageSize + 1;
@@ -150,14 +144,27 @@ const ProductTable: React.FC = () => {
             </tr>
             <tr className="border-t border-gray-200">
               <th className="px-4 py-2">
-                <ProductSearchDropdown
-                  onSearch={setSearchQuery}
-                  onFilterChange={() => {}}
-                  onSelectProduct={handleSelectProduct}
-                  searchResults={searchResults}
-                  isSearching={isSearching}
-                  placeholder="Buscar productos... (mínimo 3 caracteres)"
-                />
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Buscar por nombre... (mínimo 3 caracteres)"
+                    className="w-full pl-7 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {searchInput && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                    >
+                      <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                    </button>
+                  )}
+                </div>
+                {searchInput.length > 0 && searchInput.length < 3 && (
+                  <p className="text-xs text-amber-600 mt-0.5">Mínimo 3 caracteres</p>
+                )}
               </th>
               <th className="px-4 py-2">
                 <FilterComponent

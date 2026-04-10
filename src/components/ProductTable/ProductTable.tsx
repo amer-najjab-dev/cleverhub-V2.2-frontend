@@ -4,7 +4,8 @@ import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
 import { CATEGORIES, DOSAGE_FORMS, ZONES, ACTIVE_OPTIONS } from '../../constants/productConstants';
 import FilterComponent from './FilterComponent';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import ProductSearchDropdown from '../ProductSearchDropdown/ProductSearchDropdown';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,25 +30,39 @@ const ProductTable: React.FC = () => {
     active: '' as '' | 'true' | 'false',
   });
 
-  // Búsqueda con debounce (mismo patrón que en ventas)
-  const [query, setQuery] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  // Estados para búsqueda de productos
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
+  // Búsqueda de productos (igual que en ventas)
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (query.length >= 3 || query.length === 0) {
-        setSearchTerm(query);
+    const searchProducts = async () => {
+      if (searchQuery.length >= 3) {
+        setIsSearching(true);
+        try {
+          const results = await productsService.search(searchQuery);
+          setSearchResults(results);
+        } catch (error) {
+          console.error('Error searching products:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else if (searchQuery.length === 0) {
+        setSearchResults([]);
       }
-    }, 300);
+    };
+    
+    const debounceTimer = setTimeout(searchProducts, 300);
     return () => clearTimeout(debounceTimer);
-  }, [query]);
+  }, [searchQuery]);
 
-  useEffect(() => {
-    if (searchTerm !== filters.name) {
-      setFilters(prev => ({ ...prev, name: searchTerm }));
-      setCurrentPage(1);
-    }
-  }, [searchTerm]);
+  // Cuando se selecciona un producto de la búsqueda
+  const handleSelectProduct = (product: Product) => {
+    setFilters(prev => ({ ...prev, name: product.name }));
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
 
   // Cargar productos cuando cambia la página, el tamaño o los filtros
   useEffect(() => {
@@ -90,7 +105,6 @@ const ProductTable: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: any) => {
-    //if (field === 'name') return; // El nombre se maneja con query
     setFilters(prev => ({ ...prev, [field]: value }));
     setCurrentPage(1);
   };
@@ -136,19 +150,14 @@ const ProductTable: React.FC = () => {
             </tr>
             <tr className="border-t border-gray-200">
               <th className="px-4 py-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => { setQuery(e.target.value); setFilters(prev => ({ ...prev, name: e.target.value })); setCurrentPage(1); }}
-                    placeholder="Buscar... (min 3)"
-                    className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                {query.length > 0 && query.length < 3 && (
-                  <p className="text-xs text-amber-600 mt-0.5">Mínimo 3 caracteres</p>
-                )}
+                <ProductSearchDropdown
+                  onSearch={setSearchQuery}
+                  onFilterChange={() => {}}
+                  onSelectProduct={handleSelectProduct}
+                  searchResults={searchResults}
+                  isSearching={isSearching}
+                  placeholder="Buscar productos... (mínimo 3 caracteres)"
+                />
               </th>
               <th className="px-4 py-2">
                 <FilterComponent

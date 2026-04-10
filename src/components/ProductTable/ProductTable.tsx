@@ -39,7 +39,6 @@ const ProductTable: React.FC = () => {
         setSearchTerm(query);
       }
     }, 300);
-
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
@@ -91,6 +90,7 @@ const ProductTable: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: any) => {
+    if (field === 'name') return; // El nombre se maneja con query
     setFilters(prev => ({ ...prev, [field]: value }));
     setCurrentPage(1);
   };
@@ -119,23 +119,6 @@ const ProductTable: React.FC = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Listado de Productos</h1>
-      
-      {/* Búsqueda por nombre (estilo ventas) */}
-      <div className="mb-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar productos... (mínimo 3 caracteres)"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          {query.length > 0 && query.length < 3 ? 'Escribe al menos 3 caracteres para buscar' : ' '}
-        </p>
-      </div>
 
       {/* Tabla de productos */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
@@ -151,10 +134,21 @@ const ProductTable: React.FC = () => {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zona</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
             </tr>
-            <tr>
+            <tr className="border-t border-gray-200">
               <th className="px-4 py-2">
-                {/* El filtro de nombre está arriba, fuera de la tabla */}
-                <div className="text-gray-400 text-xs">-</div>
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Buscar... (min 3)"
+                    className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {query.length > 0 && query.length < 3 && (
+                  <p className="text-xs text-amber-600 mt-0.5">Mínimo 3 caracteres</p>
+                )}
               </th>
               <th className="px-4 py-2">
                 <FilterComponent
@@ -177,7 +171,7 @@ const ProductTable: React.FC = () => {
                   type="number"
                   value={filters.pricePPV}
                   onChange={(val) => handleFilterChange('pricePPV', val)}
-                  placeholder="Precio exacto"
+                  placeholder="Precio"
                   min={0}
                   step={0.01}
                 />
@@ -187,7 +181,7 @@ const ProductTable: React.FC = () => {
                   type="number"
                   value={filters.pricePPH}
                   onChange={(val) => handleFilterChange('pricePPH', val)}
-                  placeholder="Precio exacto"
+                  placeholder="Precio"
                   min={0}
                   step={0.01}
                 />
@@ -197,7 +191,7 @@ const ProductTable: React.FC = () => {
                   type="text"
                   value={filters.barcode}
                   onChange={(val) => handleFilterChange('barcode', val)}
-                  placeholder="Código barras"
+                  placeholder="Código"
                 />
               </th>
               <th className="px-4 py-2">

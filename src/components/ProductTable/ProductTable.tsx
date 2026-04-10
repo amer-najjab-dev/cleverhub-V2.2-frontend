@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
@@ -10,6 +10,7 @@ const ProductTable: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatCurrency } = useCurrencyFormatter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,6 +34,13 @@ const ProductTable: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
+  // Mantener el foco en el input de búsqueda
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [products, loading]);
+
   // Búsqueda directa usando el mismo método que ventas
   useEffect(() => {
     const searchProducts = async () => {
@@ -50,7 +58,6 @@ const ProductTable: React.FC = () => {
           setIsSearching(false);
         }
       } else if (searchInput.length === 0) {
-        // Si no hay búsqueda, cargar todos los productos paginados
         fetchProducts();
       }
     };
@@ -119,6 +126,12 @@ const ProductTable: React.FC = () => {
     setSearchInput('');
     setCurrentPage(1);
     fetchProducts();
+    // Mantener el foco después de limpiar
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const startItem = (currentPage - 1) * pageSize + 1;
@@ -142,24 +155,25 @@ const ProductTable: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Forma</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PPV</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PPH</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código barras</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zona</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Forma</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PPV</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PPH</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Código barras</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Zona</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
             </tr>
             <tr className="border-t border-gray-200">
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
                   <input
+                    ref={searchInputRef}
                     type="text"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Buscar por nombre... (mínimo 3 caracteres)"
+                    placeholder="Buscar nombre..."
                     className="w-full pl-7 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                   {searchInput && (
@@ -167,7 +181,7 @@ const ProductTable: React.FC = () => {
                       onClick={clearSearch}
                       className="absolute right-2 top-1/2 transform -translate-y-1/2"
                     >
-                      <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                      <X className="w-3 h-3 text-gray-400 hover:text-gray-600" />
                     </button>
                   )}
                 </div>
@@ -178,7 +192,7 @@ const ProductTable: React.FC = () => {
                   <p className="text-xs text-red-500 mt-0.5">No se encontraron productos</p>
                 )}
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="select"
                   value={filters.category}
@@ -186,7 +200,7 @@ const ProductTable: React.FC = () => {
                   options={CATEGORIES.map((c: string) => ({ value: c, label: c }))}
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="select"
                   value={filters.dosageForm}
@@ -194,7 +208,7 @@ const ProductTable: React.FC = () => {
                   options={DOSAGE_FORMS.map((f: string) => ({ value: f, label: f }))}
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="number"
                   value={filters.pricePPV}
@@ -204,7 +218,7 @@ const ProductTable: React.FC = () => {
                   step={0.01}
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="number"
                   value={filters.pricePPH}
@@ -214,7 +228,7 @@ const ProductTable: React.FC = () => {
                   step={0.01}
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="text"
                   value={filters.barcode}
@@ -222,7 +236,7 @@ const ProductTable: React.FC = () => {
                   placeholder="Código"
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1">
                 <FilterComponent
                   type="select"
                   value={filters.zone}
@@ -230,7 +244,7 @@ const ProductTable: React.FC = () => {
                   options={ZONES.map((z: string) => ({ value: z, label: z }))}
                 />
               </th>
-              <th className="px-4 py-2">
+              <th className="px-2 py-1 min-w-[100px]">
                 <FilterComponent
                   type="select"
                   value={filters.active}
@@ -250,20 +264,20 @@ const ProductTable: React.FC = () => {
               
               return (
                 <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <Link to={`/products/${product.id}`} className="text-blue-600 hover:underline">
+                  <td className="px-4 py-2">
+                    <Link to={`/products/${product.id}`} className="text-blue-600 hover:underline text-sm">
                       {product.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{product.category}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{product.dosageForm || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{formatCurrency(pricePPV)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{formatCurrency(pricePPH)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{product.barcode || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{product.zone || '-'}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2 text-sm text-gray-700">{product.category}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{product.dosageForm || '-'}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{formatCurrency(pricePPV)}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{formatCurrency(pricePPH)}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{product.barcode || '-'}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{product.zone || '-'}</td>
+                  <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${
+                      className={`px-2 py-0.5 text-xs rounded-full ${
                         product.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}
                     >
@@ -283,44 +297,44 @@ const ProductTable: React.FC = () => {
 
         {/* Paginación */}
         {totalItems > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">
+          <div className="flex items-center justify-between px-4 py-2 bg-white border-t border-gray-200">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-700">
                 Mostrando <span className="font-medium">{startItem}</span> a{' '}
                 <span className="font-medium">{endItem}</span>{' '}
-                de <span className="font-medium">{totalItems}</span> productos
+                de <span className="font-medium">{totalItems}</span>
               </span>
               
               <select
                 value={pageSize}
                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-0.5 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
               >
-                <option value={10}>10 por página</option>
-                <option value={50}>50 por página</option>
-                <option value={100}>100 por página</option>
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3 h-3" />
               </button>
               
-              <span className="px-3 py-1 text-sm text-gray-700">
-                Página {currentPage} de {totalPages}
+              <span className="px-2 py-0.5 text-xs text-gray-700">
+                {currentPage} / {totalPages}
               </span>
               
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3 h-3" />
               </button>
             </div>
           </div>

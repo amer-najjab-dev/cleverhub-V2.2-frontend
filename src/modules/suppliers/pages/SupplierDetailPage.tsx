@@ -100,18 +100,18 @@ export const SupplierDetailPage: React.FC = () => {
             )}
           </div>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 px-6">
-            <div className="flex gap-6">
+          {/* Tabs estilo ReportsLayout */}
+          <div className="bg-white px-6 pt-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2">
               <button
                 onClick={() => {
                   setActiveTab('info');
                   setIsEditing(false);
                 }}
-                className={`pb-3 px-1 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-md ${
                   activeTab === 'info'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:shadow-xl hover:text-gray-900'
                 }`}
               >
                 Información
@@ -121,10 +121,10 @@ export const SupplierDetailPage: React.FC = () => {
                   setActiveTab('delivery');
                   setIsEditing(false);
                 }}
-                className={`pb-3 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-md ${
                   activeTab === 'delivery'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:shadow-xl hover:text-gray-900'
                 }`}
               >
                 <Package className="w-4 h-4" />
@@ -135,10 +135,10 @@ export const SupplierDetailPage: React.FC = () => {
                   setActiveTab('obligations');
                   setIsEditing(false);
                 }}
-                className={`pb-3 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shadow-md ${
                   activeTab === 'obligations'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:shadow-xl hover:text-gray-900'
                 }`}
               >
                 <CreditCard className="w-4 h-4" />
@@ -147,7 +147,7 @@ export const SupplierDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-6 border-t border-gray-100">
             {activeTab === 'info' && (
               <div className="space-y-4 max-w-2xl">
                 <div>
@@ -209,13 +209,25 @@ export const SupplierDetailPage: React.FC = () => {
             )}
 
             {activeTab === 'delivery' && id && (
-              <div className="w-full">
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Recepción de Albaranes</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Registra la entrada de mercancía. Se actualizará el stock y se creará una obligación de pago.
+                  </p>
+                </div>
                 <DeliveryForm supplierId={id} onSuccess={loadSupplier} />
               </div>
             )}
 
             {activeTab === 'obligations' && id && (
-              <div className="w-full">
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Obligaciones de Pago</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Gestiona los pagos pendientes con este proveedor.
+                  </p>
+                </div>
                 <PaymentObligations supplierId={id} />
               </div>
             )}

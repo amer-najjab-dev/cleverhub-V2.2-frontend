@@ -75,7 +75,7 @@ export const SupplierDetailPage: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-full mx-auto">
         <button
           onClick={() => navigate('/providers')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
@@ -149,7 +149,7 @@ export const SupplierDetailPage: React.FC = () => {
 
           <div className="p-6">
             {activeTab === 'info' && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   {isEditing ? (
@@ -209,11 +209,15 @@ export const SupplierDetailPage: React.FC = () => {
             )}
 
             {activeTab === 'delivery' && id && (
-              <DeliveryForm supplierId={id} onSuccess={loadSupplier} />
+              <div className="w-full">
+                <DeliveryForm supplierId={id} onSuccess={loadSupplier} />
+              </div>
             )}
 
             {activeTab === 'obligations' && id && (
-              <PaymentObligations supplierId={id} />
+              <div className="w-full">
+                <PaymentObligations supplierId={id} />
+              </div>
             )}
           </div>
         </div>

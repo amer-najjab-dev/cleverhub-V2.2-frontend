@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { deliveryService } from '../../services/delivery.service';
 import { productsService } from '../../services/products.service';
+import { Search, X } from 'lucide-react';
 
 interface DeliveryFormProps {
   supplierId: string;
@@ -9,41 +10,71 @@ interface DeliveryFormProps {
 
 interface FormItem {
   product_id: string;
+  product_name: string;
   quantity: number;
   unit_cost_pph: number;
+  suggested_ppv: number;
   expiration_date: string;
   batch_number: string;
 }
 
 export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
   const [formData, setFormData] = useState({
     note_number: '',
-    bl_number: '',
     reception_date: new Date().toISOString().split('T')[0],
     payment_terms: '30 días',
     due_date: '',
     notes: '',
-    items: [{ product_id: '', quantity: 1, unit_cost_pph: 0, expiration_date: '', batch_number: '' }] as FormItem[]
+    items: [] as FormItem[]
   });
 
   useEffect(() => {
-    loadProducts();
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      const data = await productsService.getAll();
-      setProducts(data);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    }
-  };
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (searchTerm.length >= 2) {
+        try {
+          const results = await productsService.search(searchTerm);
+          setSearchResults(results);
+          setShowDropdown(true);
+        } catch (error) {
+          console.error('Error searching products:', error);
+        }
+      } else {
+        setSearchResults([]);
+        setShowDropdown(false);
+      }
+    };
+    
+    const debounceTimer = setTimeout(searchProducts, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
 
   const addItem = () => {
     setFormData({
       ...formData,
-      items: [...formData.items, { product_id: '', quantity: 1, unit_cost_pph: 0, expiration_date: '', batch_number: '' }]
+      items: [...formData.items, { 
+        product_id: '', 
+        product_name: '',
+        quantity: 1, 
+        unit_cost_pph: 0, 
+        suggested_ppv: 0,
+        expiration_date: '', 
+        batch_number: '' 
+      }]
     });
   };
 
@@ -52,13 +83,40 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
     setFormData({ ...formData, items: newItems });
   };
 
+  const selectProduct = (product: any, index: number) => {
+    const newItems = [...formData.items];
+    newItems[index] = {
+      ...newItems[index],
+      product_id: product.id,
+      product_name: product.name,
+      suggested_ppv: product.pricePPV || 0
+    };
+    setFormData({ ...formData, items: newItems });
+    setSearchTerm('');
+    setShowDropdown(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.note_number) {
+      alert('El número de BL es obligatorio');
+      return;
+    }
+    if (formData.items.length === 0) {
+      alert('Debe añadir al menos un producto');
+      return;
+    }
+    for (const item of formData.items) {
+      if (!item.product_id || item.quantity <= 0 || item.unit_cost_pph <= 0 || !item.expiration_date) {
+        alert('Complete todos los campos de los productos');
+        return;
+      }
+    }
+
     try {
       await deliveryService.registerDelivery({
         note_number: formData.note_number,
         supplier_id: supplierId,
-        bl_number: formData.bl_number,
         reception_date: formData.reception_date,
         payment_terms: formData.payment_terms,
         due_date: formData.due_date,
@@ -74,12 +132,11 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
       alert('Albarán registrado correctamente');
       setFormData({
         note_number: '',
-        bl_number: '',
         reception_date: new Date().toISOString().split('T')[0],
         payment_terms: '30 días',
         due_date: '',
         notes: '',
-        items: [{ product_id: '', quantity: 1, unit_cost_pph: 0, expiration_date: '', batch_number: '' }]
+        items: []
       });
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -90,26 +147,17 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Registrar Albarán de Entrada</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Nº Albarán *</label>
+            <label className="block text-sm font-medium mb-1">Nº BL *</label>
             <input
               type="text"
               required
               value={formData.note_number}
               onChange={(e) => setFormData({ ...formData, note_number: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Nº BL</label>
-            <input
-              type="text"
-              value={formData.bl_number}
-              onChange={(e) => setFormData({ ...formData, bl_number: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Número de albarán"
             />
           </div>
           <div>
@@ -129,6 +177,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
               value={formData.payment_terms}
               onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
               className="w-full px-3 py-2 border rounded-lg"
+              placeholder="Ej: 30 días"
             />
           </div>
           <div>
@@ -155,74 +204,140 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
         <div>
           <div className="flex justify-between items-center mb-2">
             <h4 className="font-semibold">Productos</h4>
-            <button type="button" onClick={addItem} className="text-blue-600 text-sm">+ Añadir producto</button>
+            <button type="button" onClick={addItem} className="text-blue-600 text-sm hover:text-blue-700">
+              + Añadir producto
+            </button>
           </div>
-          <div className="space-y-2">
-            {formData.items.map((item, index) => (
-              <div key={index} className="grid grid-cols-6 gap-2 p-2 border rounded-lg">
-                <select
-                  required
-                  value={item.product_id}
-                  onChange={(e) => {
-                    const newItems = [...formData.items];
-                    newItems[index].product_id = e.target.value;
-                    setFormData({ ...formData, items: newItems });
-                  }}
-                  className="col-span-2 px-2 py-1 border rounded"
-                >
-                  <option value="">Producto</option>
-                  {products.map((p: any) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+          
+          {formData.items.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-sm font-medium text-gray-700">Producto</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">Qt</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">PPH (€)</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">PPV (€)</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">Caducidad</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700">Lote</th>
+                    <th className="px-3 py-2 text-center text-sm font-medium text-gray-700"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.items.map((item, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="px-3 py-2">
+                        <div className="relative" ref={searchRef}>
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                              type="text"
+                              value={item.product_name}
+                              onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                const newItems = [...formData.items];
+                                newItems[index].product_name = e.target.value;
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                              onFocus={() => setShowDropdown(true)}
+                              placeholder="Buscar producto..."
+                              className="w-full pl-8 pr-2 py-1 border rounded text-sm"
+                            />
+                          </div>
+                          {showDropdown && searchResults.length > 0 && (
+                            <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                              {searchResults.map((product) => (
+                                <button
+                                  key={product.id}
+                                  type="button"
+                                  onClick={() => selectProduct(product, index)}
+                                  className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
+                                >
+                                  <div className="font-medium">{product.name}</div>
+                                  <div className="text-xs text-gray-500">{product.barcode || 'Sin código'}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index].quantity = parseInt(e.target.value) || 0;
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="w-20 px-2 py-1 border rounded text-center text-sm"
+                          min="1"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={item.unit_cost_pph}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index].unit_cost_pph = parseFloat(e.target.value) || 0;
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="w-24 px-2 py-1 border rounded text-right text-sm"
+                          placeholder="0.00"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={item.suggested_ppv}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index].suggested_ppv = parseFloat(e.target.value) || 0;
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="w-24 px-2 py-1 border rounded text-right text-sm"
+                          placeholder="0.00"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="date"
+                          value={item.expiration_date}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index].expiration_date = e.target.value;
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="w-32 px-2 py-1 border rounded text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={item.batch_number}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index].batch_number = e.target.value;
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="w-28 px-2 py-1 border rounded text-sm"
+                          placeholder="Lote"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <button type="button" onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
                   ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="Cantidad"
-                  value={item.quantity}
-                  onChange={(e) => {
-                    const newItems = [...formData.items];
-                    newItems[index].quantity = parseInt(e.target.value) || 0;
-                    setFormData({ ...formData, items: newItems });
-                  }}
-                  className="px-2 py-1 border rounded"
-                />
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Precio compra"
-                  value={item.unit_cost_pph}
-                  onChange={(e) => {
-                    const newItems = [...formData.items];
-                    newItems[index].unit_cost_pph = parseFloat(e.target.value) || 0;
-                    setFormData({ ...formData, items: newItems });
-                  }}
-                  className="px-2 py-1 border rounded"
-                />
-                <input
-                  type="date"
-                  value={item.expiration_date}
-                  onChange={(e) => {
-                    const newItems = [...formData.items];
-                    newItems[index].expiration_date = e.target.value;
-                    setFormData({ ...formData, items: newItems });
-                  }}
-                  className="px-2 py-1 border rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="Lote"
-                  value={item.batch_number}
-                  onChange={(e) => {
-                    const newItems = [...formData.items];
-                    newItems[index].batch_number = e.target.value;
-                    setFormData({ ...formData, items: newItems });
-                  }}
-                  className="px-2 py-1 border rounded"
-                />
-                <button type="button" onClick={() => removeItem(index)} className="text-red-500">✖</button>
-              </div>
-            ))}
-          </div>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">

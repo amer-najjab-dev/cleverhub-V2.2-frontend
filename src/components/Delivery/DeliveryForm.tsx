@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { deliveryService } from '../../services/delivery.service';
 import { productsService } from '../../services/products.service';
-import { Search, X } from 'lucide-react';
+import { Search, X, Check } from 'lucide-react';
 
 interface DeliveryFormProps {
   supplierId: string;
@@ -11,18 +11,23 @@ interface DeliveryFormProps {
 interface FormItem {
   product_id: string;
   product_name: string;
+  product_barcode: string;
   quantity: number;
   unit_cost_pph: number;
   suggested_ppv: number;
   expiration_date: string;
   batch_number: string;
+  is_selected: boolean;
 }
 
 export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedProductIndex, setSelectedProductIndex] = useState<number | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     note_number: '',
@@ -46,12 +51,15 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   useEffect(() => {
     const searchProducts = async () => {
       if (searchTerm.length >= 2) {
+        setIsSearching(true);
         try {
           const results = await productsService.search(searchTerm);
           setSearchResults(results);
           setShowDropdown(true);
         } catch (error) {
           console.error('Error searching products:', error);
+        } finally {
+          setIsSearching(false);
         }
       } else {
         setSearchResults([]);
@@ -64,23 +72,34 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   }, [searchTerm]);
 
   const addItem = () => {
+    setSelectedProductIndex(formData.items.length);
     setFormData({
       ...formData,
       items: [...formData.items, { 
         product_id: '', 
         product_name: '',
+        product_barcode: '',
         quantity: 1, 
         unit_cost_pph: 0, 
         suggested_ppv: 0,
         expiration_date: '', 
-        batch_number: '' 
+        batch_number: '',
+        is_selected: false
       }]
     });
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   };
 
   const removeItem = (index: number) => {
     const newItems = formData.items.filter((_, i) => i !== index);
     setFormData({ ...formData, items: newItems });
+    if (selectedProductIndex === index) {
+      setSelectedProductIndex(null);
+    }
   };
 
   const selectProduct = (product: any, index: number) => {
@@ -89,11 +108,21 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
       ...newItems[index],
       product_id: product.id,
       product_name: product.name,
-      suggested_ppv: product.pricePPV || 0
+      product_barcode: product.barcode || '',
+      suggested_ppv: product.pricePPV || 0,
+      is_selected: true
     };
     setFormData({ ...formData, items: newItems });
     setSearchTerm('');
     setShowDropdown(false);
+    setSelectedProductIndex(null);
+  };
+
+  const updateItemField = (index: number, field: keyof FormItem, value: any) => {
+    const newItems = [...formData.items];
+    const updatedItem = { ...newItems[index], [field]: value };
+    newItems[index] = updatedItem;
+    setFormData({ ...formData, items: newItems });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,8 +136,20 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
       return;
     }
     for (const item of formData.items) {
-      if (!item.product_id || item.quantity <= 0 || item.unit_cost_pph <= 0 || !item.expiration_date) {
-        alert('Complete todos los campos de los productos');
+      if (!item.is_selected) {
+        alert('Debe seleccionar un producto válido');
+        return;
+      }
+      if (item.quantity <= 0) {
+        alert('La cantidad debe ser mayor a 0');
+        return;
+      }
+      if (item.unit_cost_pph <= 0) {
+        alert('El precio de compra (PPH) debe ser mayor a 0');
+        return;
+      }
+      if (!item.expiration_date) {
+        alert('La fecha de caducidad es obligatoria');
         return;
       }
     }
@@ -227,51 +268,62 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                   {formData.items.map((item, index) => (
                     <tr key={index} className="border-t">
                       <td className="px-3 py-2">
-                        <div className="relative" ref={searchRef}>
-                          <div className="relative">
-                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
-                              type="text"
-                              value={item.product_name}
-                              onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                const newItems = [...formData.items];
-                                newItems[index].product_name = e.target.value;
-                                setFormData({ ...formData, items: newItems });
-                              }}
-                              onFocus={() => setShowDropdown(true)}
-                              placeholder="Buscar producto..."
-                              className="w-full pl-8 pr-2 py-1 border rounded text-sm"
-                            />
-                          </div>
-                          {showDropdown && searchResults.length > 0 && (
-                            <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                              {searchResults.map((product) => (
-                                <button
-                                  key={product.id}
-                                  type="button"
-                                  onClick={() => selectProduct(product, index)}
-                                  className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm"
-                                >
-                                  <div className="font-medium">{product.name}</div>
-                                  <div className="text-xs text-gray-500">{product.barcode || 'Sin código'}</div>
-                                </button>
-                              ))}
+                        {!item.is_selected ? (
+                          <div className="relative" ref={searchRef}>
+                            <div className="relative">
+                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                              <input
+                                ref={selectedProductIndex === index ? inputRef : null}
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onFocus={() => setSelectedProductIndex(index)}
+                                placeholder="Escanear o escribir nombre (mínimo 2 caracteres)"
+                                className="w-full pl-8 pr-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
+                              />
                             </div>
-                          )}
-                        </div>
+                            {showDropdown && searchResults.length > 0 && selectedProductIndex === index && (
+                              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                {searchResults.map((product) => (
+                                  <button
+                                    key={product.id}
+                                    type="button"
+                                    onClick={() => selectProduct(product, index)}
+                                    className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm flex justify-between items-center"
+                                  >
+                                    <div>
+                                      <div className="font-medium">{product.name}</div>
+                                      <div className="text-xs text-gray-500">Código: {product.barcode || 'N/A'}</div>
+                                    </div>
+                                    <div className="text-xs text-gray-400">{product.pricePPV}€</div>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            {isSearching && selectedProductIndex === index && (
+                              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
+                                Buscando...
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium text-sm">{item.product_name}</div>
+                              <div className="text-xs text-gray-500">Código: {item.product_barcode || 'N/A'}</div>
+                            </div>
+                            <Check className="w-4 h-4 text-green-500" />
+                          </div>
+                        )}
                       </td>
                       <td className="px-3 py-2">
                         <input
                           type="number"
                           value={item.quantity}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index].quantity = parseInt(e.target.value) || 0;
-                            setFormData({ ...formData, items: newItems });
-                          }}
+                          onChange={(e) => updateItemField(index, 'quantity', parseInt(e.target.value) || 0)}
                           className="w-20 px-2 py-1 border rounded text-center text-sm"
                           min="1"
+                          disabled={!item.is_selected}
                         />
                       </td>
                       <td className="px-3 py-2">
@@ -279,13 +331,10 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           type="number"
                           step="0.01"
                           value={item.unit_cost_pph}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index].unit_cost_pph = parseFloat(e.target.value) || 0;
-                            setFormData({ ...formData, items: newItems });
-                          }}
+                          onChange={(e) => updateItemField(index, 'unit_cost_pph', parseFloat(e.target.value) || 0)}
                           className="w-24 px-2 py-1 border rounded text-right text-sm"
                           placeholder="0.00"
+                          disabled={!item.is_selected}
                         />
                       </td>
                       <td className="px-3 py-2">
@@ -293,38 +342,29 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           type="number"
                           step="0.01"
                           value={item.suggested_ppv}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index].suggested_ppv = parseFloat(e.target.value) || 0;
-                            setFormData({ ...formData, items: newItems });
-                          }}
+                          onChange={(e) => updateItemField(index, 'suggested_ppv', parseFloat(e.target.value) || 0)}
                           className="w-24 px-2 py-1 border rounded text-right text-sm"
                           placeholder="0.00"
+                          disabled={!item.is_selected}
                         />
                       </td>
                       <td className="px-3 py-2">
                         <input
                           type="date"
                           value={item.expiration_date}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index].expiration_date = e.target.value;
-                            setFormData({ ...formData, items: newItems });
-                          }}
+                          onChange={(e) => updateItemField(index, 'expiration_date', e.target.value)}
                           className="w-32 px-2 py-1 border rounded text-sm"
+                          disabled={!item.is_selected}
                         />
                       </td>
                       <td className="px-3 py-2">
                         <input
                           type="text"
                           value={item.batch_number}
-                          onChange={(e) => {
-                            const newItems = [...formData.items];
-                            newItems[index].batch_number = e.target.value;
-                            setFormData({ ...formData, items: newItems });
-                          }}
+                          onChange={(e) => updateItemField(index, 'batch_number', e.target.value)}
                           className="w-28 px-2 py-1 border rounded text-sm"
                           placeholder="Lote"
+                          disabled={!item.is_selected}
                         />
                       </td>
                       <td className="px-3 py-2 text-center">

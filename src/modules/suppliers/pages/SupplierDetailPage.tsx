@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Save } from 'lucide-react';
+import { ArrowLeft, Edit, Save, Package, CreditCard } from 'lucide-react';
 import { supplierService } from '../services/supplier.service';
 import { Supplier } from '../types/supplier.types';
+import { DeliveryForm } from '../../../components/Delivery/DeliveryForm';
+import { PaymentObligations } from '../../../components/Delivery/PaymentObligations';
 
 export const SupplierDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,7 @@ export const SupplierDetailPage: React.FC = () => {
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'delivery' | 'obligations'>('info');
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
@@ -86,71 +89,132 @@ export const SupplierDetailPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               {isEditing ? 'Editar Proveedor' : supplier.companyName}
             </h1>
-            <button
-              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-              {isEditing ? 'Guardar' : 'Editar'}
-            </button>
+            {activeTab === 'info' && (
+              <button
+                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+                {isEditing ? 'Guardar' : 'Editar'}
+              </button>
+            )}
           </div>
 
-          <div className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nombre</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              ) : (
-                <p className="mt-1 text-gray-900">{supplier.companyName}</p>
-              )}
+          {/* Tabs */}
+          <div className="border-b border-gray-200 px-6">
+            <div className="flex gap-6">
+              <button
+                onClick={() => {
+                  setActiveTab('info');
+                  setIsEditing(false);
+                }}
+                className={`pb-3 px-1 text-sm font-medium transition-colors ${
+                  activeTab === 'info'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Información
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('delivery');
+                  setIsEditing(false);
+                }}
+                className={`pb-3 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'delivery'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Package className="w-4 h-4" />
+                Recepción BL
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('obligations');
+                  setIsEditing(false);
+                }}
+                className={`pb-3 px-1 text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'obligations'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                Obligaciones de Pago
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              ) : (
-                <p className="mt-1 text-gray-900">{supplier.email || '-'}</p>
-              )}
-            </div>
+          <div className="p-6">
+            {activeTab === 'info' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={formData.companyName}
+                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="mt-1 text-gray-900">{supplier.companyName}</p>
+                  )}
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Condiciones de pago</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.paymentTerms}
-                  onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              ) : (
-                <p className="mt-1 text-gray-900">{supplier.paymentTerms || '-'}</p>
-              )}
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="mt-1 text-gray-900">{supplier.email || '-'}</p>
+                  )}
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">NIF</label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.taxId}
-                  onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              ) : (
-                <p className="mt-1 text-gray-900">{supplier.taxId || '-'}</p>
-              )}
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Condiciones de pago</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={formData.paymentTerms}
+                      onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="mt-1 text-gray-900">{supplier.paymentTerms || '-'}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">NIF</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={formData.taxId}
+                      onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <p className="mt-1 text-gray-900">{supplier.taxId || '-'}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'delivery' && id && (
+              <DeliveryForm supplierId={id} onSuccess={loadSupplier} />
+            )}
+
+            {activeTab === 'obligations' && id && (
+              <PaymentObligations supplierId={id} />
+            )}
           </div>
         </div>
       </div>

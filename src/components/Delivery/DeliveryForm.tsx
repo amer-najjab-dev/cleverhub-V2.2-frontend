@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { deliveryService } from '../../services/delivery.service';
-import { supplierService } from '../../modules/suppliers/services/supplier.service';
 import { productsService } from '../../services/products.service';
+
+interface DeliveryFormProps {
+  supplierId: string;
+  onSuccess?: () => void;
+}
 
 interface FormItem {
   product_id: string;
@@ -11,12 +15,10 @@ interface FormItem {
   batch_number: string;
 }
 
-export const DeliveryForm = () => {
-  const [suppliers, setSuppliers] = useState<any[]>([]);
+export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   const [products, setProducts] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     note_number: '',
-    supplier_id: '',
     bl_number: '',
     reception_date: new Date().toISOString().split('T')[0],
     payment_terms: '30 días',
@@ -26,18 +28,8 @@ export const DeliveryForm = () => {
   });
 
   useEffect(() => {
-    loadSuppliers();
     loadProducts();
   }, []);
-
-  const loadSuppliers = async () => {
-    try {
-      const data = await supplierService.getAll();
-      setSuppliers(data);
-    } catch (error) {
-      console.error('Error loading suppliers:', error);
-    }
-  };
 
   const loadProducts = async () => {
     try {
@@ -65,7 +57,7 @@ export const DeliveryForm = () => {
     try {
       await deliveryService.registerDelivery({
         note_number: formData.note_number,
-        supplier_id: formData.supplier_id,
+        supplier_id: supplierId,
         bl_number: formData.bl_number,
         reception_date: formData.reception_date,
         payment_terms: formData.payment_terms,
@@ -82,7 +74,6 @@ export const DeliveryForm = () => {
       alert('Albarán registrado correctamente');
       setFormData({
         note_number: '',
-        supplier_id: '',
         bl_number: '',
         reception_date: new Date().toISOString().split('T')[0],
         payment_terms: '30 días',
@@ -90,6 +81,7 @@ export const DeliveryForm = () => {
         notes: '',
         items: [{ product_id: '', quantity: 1, unit_cost_pph: 0, expiration_date: '', batch_number: '' }]
       });
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error:', error);
       alert('Error al registrar albarán');
@@ -97,8 +89,8 @@ export const DeliveryForm = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-4">Registrar Albarán de Entrada</h2>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Registrar Albarán de Entrada</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -110,20 +102,6 @@ export const DeliveryForm = () => {
               onChange={(e) => setFormData({ ...formData, note_number: e.target.value })}
               className="w-full px-3 py-2 border rounded-lg"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Proveedor *</label>
-            <select
-              required
-              value={formData.supplier_id}
-              onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
-            >
-              <option value="">Seleccionar proveedor</option>
-              {suppliers.map((s: any) => (
-                <option key={s.id} value={s.id}>{s.company_name}</option>
-              ))}
-            </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Nº BL</label>
@@ -150,7 +128,6 @@ export const DeliveryForm = () => {
               type="text"
               value={formData.payment_terms}
               onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-              placeholder="Ej: 30 días"
               className="w-full px-3 py-2 border rounded-lg"
             />
           </div>
@@ -177,7 +154,7 @@ export const DeliveryForm = () => {
 
         <div>
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-semibold">Productos</h3>
+            <h4 className="font-semibold">Productos</h4>
             <button type="button" onClick={addItem} className="text-blue-600 text-sm">+ Añadir producto</button>
           </div>
           <div className="space-y-2">

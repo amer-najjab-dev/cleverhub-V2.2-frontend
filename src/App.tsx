@@ -34,8 +34,7 @@ import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
 import { BroadcastPage } from './pages/Admin/BroadcastPage';
 import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
-import { DeliveryForm } from './components/Delivery/DeliveryForm';
-import { PaymentObligations } from './components/Delivery/PaymentObligations';
+
 
 function App() {
   // Redirigir SUPER_ADMIN desde / a /admin/dashboard
@@ -100,8 +99,6 @@ function App() {
                   {/* Redirección de /suppliers a /providers (compatibilidad) */}
                   <Route path="/suppliers" element={<Navigate to="/providers" replace />} />
                   <Route path="/suppliers/:id" element={<Navigate to="/providers/:id" replace />} />
-                  <Route path="/delivery" element={<ProtectedRoute><DeliveryForm /></ProtectedRoute>} />
-                  <Route path="/suppliers/:id/obligations" element={<ProtectedRoute><PaymentObligations /></ProtectedRoute>} />
                   
                   {/* Ruta directa para Connect (opcional) */}
                   <Route path="/connect" element={<ProtectedRoute><ConnectPage /></ProtectedRoute>} />

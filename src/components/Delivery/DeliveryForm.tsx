@@ -28,6 +28,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   const [selectedProductIndex, setSelectedProductIndex] = useState<number | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState({
     note_number: '',
@@ -56,6 +57,11 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
           const results = await productsService.search(searchTerm);
           setSearchResults(results);
           setShowDropdown(true);
+          setTimeout(() => {
+            if (dropdownRef.current) {
+              dropdownRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }, 50);
         } catch (error) {
           console.error('Error searching products:', error);
         } finally {
@@ -244,14 +250,18 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
 
         <div>
           <div className="flex justify-between items-center mb-2">
-            <h4 className="font-semibold">Productos</h4>
-            <button type="button" onClick={addItem} className="text-blue-600 text-sm hover:text-blue-700">
-              + Añadir producto
-            </button>
+            <div className="flex gap-2">
+              <button type="submit" className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                Registrar Albarán
+              </button>
+              <button type="button" onClick={addItem} className="px-4 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
+                + Añadir producto
+              </button>
+            </div>
           </div>
           
           {formData.items.length > 0 && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto mt-4">
               <table className="w-full border-collapse">
                 <thead className="bg-gray-50">
                   <tr>
@@ -283,7 +293,10 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                               />
                             </div>
                             {showDropdown && searchResults.length > 0 && selectedProductIndex === index && (
-                              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                              <div 
+                                ref={dropdownRef}
+                                className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                              >
                                 {searchResults.map((product) => (
                                   <button
                                     key={product.id}
@@ -325,7 +338,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           min="1"
                           disabled={!item.is_selected}
                         />
-                       </td>
+                      </td>
                       <td className="px-3 py-2 align-top">
                         <input
                           type="number"
@@ -336,7 +349,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           placeholder="0.00"
                           disabled={!item.is_selected}
                         />
-                       </td>
+                      </td>
                       <td className="px-3 py-2 align-top">
                         <input
                           type="number"
@@ -347,7 +360,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           placeholder="0.00"
                           disabled={!item.is_selected}
                         />
-                       </td>
+                      </td>
                       <td className="px-3 py-2 align-top">
                         <input
                           type="date"
@@ -356,7 +369,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           className="w-32 px-2 py-1 border rounded text-sm"
                           disabled={!item.is_selected}
                         />
-                       </td>
+                      </td>
                       <td className="px-3 py-2 align-top">
                         <input
                           type="text"
@@ -366,24 +379,18 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                           placeholder="Lote"
                           disabled={!item.is_selected}
                         />
-                       </td>
+                      </td>
                       <td className="px-3 py-2 align-top text-center">
                         <button type="button" onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700">
                           <X className="w-4 h-4" />
                         </button>
                        </td>
-                     </tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </div>
-
-        <div className="sticky bottom-0 bg-white pt-4 border-t">
-          <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Registrar Albarán
-          </button>
         </div>
       </form>
     </div>

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { deliveryService } from '../../services/delivery.service';
 import { productsService } from '../../services/products.service';
-import { Search, X, Check } from 'lucide-react';
+import { Search, X, Check, Plus } from 'lucide-react';
+import { Product } from '../../services/products.service';
 
 interface DeliveryFormProps {
   supplierId: string;
@@ -22,13 +23,10 @@ interface FormItem {
 
 export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedProductIndex, setSelectedProductIndex] = useState<number | null>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState({
     note_number: '',
@@ -40,28 +38,12 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
   });
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
     const searchProducts = async () => {
       if (searchTerm.length >= 2) {
         setIsSearching(true);
         try {
           const results = await productsService.search(searchTerm);
           setSearchResults(results);
-          setShowDropdown(true);
-          setTimeout(() => {
-            if (dropdownRef.current) {
-              dropdownRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-          }, 50);
         } catch (error) {
           console.error('Error searching products:', error);
         } finally {
@@ -69,7 +51,6 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
         }
       } else {
         setSearchResults([]);
-        setShowDropdown(false);
       }
     };
     
@@ -108,11 +89,11 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
     }
   };
 
-  const selectProduct = (product: any, index: number) => {
+  const selectProduct = (product: Product, index: number) => {
     const newItems = [...formData.items];
     newItems[index] = {
       ...newItems[index],
-      product_id: product.id,
+      product_id: product.id.toString(),
       product_name: product.name,
       product_barcode: product.barcode || '',
       suggested_ppv: product.pricePPV || 0,
@@ -120,7 +101,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
     };
     setFormData({ ...formData, items: newItems });
     setSearchTerm('');
-    setShowDropdown(false);
+    setSearchResults([]);
     setSelectedProductIndex(null);
   };
 
@@ -260,8 +241,9 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
             </div>
           </div>
           
+          {/* Tabla de productos seleccionados */}
           {formData.items.length > 0 && (
-            <div className="overflow-x-auto mt-4">
+            <div className="overflow-x-auto mt-4 mb-6">
               <table className="w-full border-collapse">
                 <thead className="bg-gray-50">
                   <tr>
@@ -279,7 +261,7 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                     <tr key={index} className="border-t">
                       <td className="px-3 py-2 align-top">
                         {!item.is_selected ? (
-                          <div className="relative" ref={searchRef}>
+                          <div className="relative">
                             <div className="relative">
                               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                               <input
@@ -292,32 +274,6 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                                 className="w-full pl-8 pr-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
-                            {showDropdown && searchResults.length > 0 && selectedProductIndex === index && (
-                              <div 
-                                ref={dropdownRef}
-                                className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto"
-                              >
-                                {searchResults.map((product) => (
-                                  <button
-                                    key={product.id}
-                                    type="button"
-                                    onClick={() => selectProduct(product, index)}
-                                    className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm flex justify-between items-center"
-                                  >
-                                    <div>
-                                      <div className="font-medium">{product.name}</div>
-                                      <div className="text-xs text-gray-500">Código: {product.barcode || 'N/A'}</div>
-                                    </div>
-                                    <div className="text-xs text-gray-400">{product.pricePPV}€</div>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                            {isSearching && selectedProductIndex === index && (
-                              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg p-3 text-center text-gray-500 text-sm">
-                                Buscando...
-                              </div>
-                            )}
                           </div>
                         ) : (
                           <div className="flex items-center justify-between">
@@ -384,11 +340,59 @@ export const DeliveryForm = ({ supplierId, onSuccess }: DeliveryFormProps) => {
                         <button type="button" onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700">
                           <X className="w-4 h-4" />
                         </button>
-                       </td>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Tabla de resultados de búsqueda */}
+          {searchResults.length > 0 && selectedProductIndex !== null && !formData.items[selectedProductIndex]?.is_selected && (
+            <div className="mt-4 border rounded-lg overflow-hidden">
+              <div className="bg-gray-50 px-4 py-2 border-b">
+                <h4 className="text-sm font-medium text-gray-700">Resultados de búsqueda</h4>
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Producto</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Código</th>
+                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">PPV</th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {searchResults.map((product) => (
+                      <tr key={product.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => selectProduct(product, selectedProductIndex)}>
+                        <td className="px-4 py-2 text-sm">{product.name}</td>
+                        <td className="px-4 py-2 text-sm text-gray-500">{product.barcode || '-'}</td>
+                        <td className="px-4 py-2 text-sm text-right">{product.pricePPV}€</td>
+                        <td className="px-4 py-2 text-center">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              selectProduct(product, selectedProductIndex);
+                            }}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {isSearching && selectedProductIndex !== null && (
+            <div className="mt-4 p-4 text-center text-gray-500 border rounded-lg">
+              Buscando productos...
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
-// src/modules/reports/layout/ReportsLayout.tsx - VERSIÓN CORREGIDA
-import React, { useState } from 'react';
+// src/modules/reports/layout/ReportsLayout.tsx - VERSIÓN CON PORTAL
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { 
   Wallet, 
   BarChart3, 
@@ -24,10 +25,17 @@ interface TabGroup {
   }[];
 }
 
+interface DropdownPosition {
+  top: number;
+  left: number;
+  groupId: string;
+}
+
 export const ReportsLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<DropdownPosition | null>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const tabGroups: TabGroup[] = [
     {
@@ -112,27 +120,49 @@ export const ReportsLayout: React.FC = () => {
 
   const activeGroup = findActiveGroup();
 
-  const handleButtonClick = (group: TabGroup) => {
+  const handleButtonClick = (group: TabGroup, event: React.MouseEvent<HTMLButtonElement>) => {
     const isCurrentGroupActive = group.children.some(child => location.pathname === child.path);
     
     if (!isCurrentGroupActive) {
       navigate(group.children[0].path);
     }
     
-    setOpenGroup(openGroup === group.id ? null : group.id);
+    if (dropdownPosition?.groupId === group.id) {
+      setDropdownPosition(null);
+    } else {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        groupId: group.id
+      });
+    }
   };
+
+  // Cerrar dropdown al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (dropdownPosition) {
+        setDropdownPosition(null);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [dropdownPosition]);
+
+  const activeGroupData = tabGroups.find(g => g.id === dropdownPosition?.groupId);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 sm:px-6 lg:px-8 py-6">
-        {/* Barra de navegación - sin overflow oculto */}
+        {/* Barra de navegación */}
         <div className="bg-white rounded-t-xl shadow-2xl border border-gray-200">
-          <div className="relative"> {/* ← Contenedor relativo para dropdowns */}
+          <div className="relative">
             <div className="flex items-center gap-1 p-2 overflow-x-auto">
               {tabGroups.map((group) => {
                 const Icon = group.icon;
                 const isActive = activeGroup === group.id;
-                const isOpen = openGroup === group.id;
+                const isOpen = dropdownPosition?.groupId === group.id;
 
                 if (group.children.length === 1) {
                   return (
@@ -156,7 +186,11 @@ export const ReportsLayout: React.FC = () => {
                 return (
                   <div key={group.id} className="relative inline-block">
                     <button
-                      onClick={() => handleButtonClick(group)}
+                      ref={(el) => {
+                        if (el) buttonRefs.current.set(group.id, el);
+                        else buttonRefs.current.delete(group.id);
+                      }}
+                      onClick={(e) => handleButtonClick(group, e)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                         isActive
                           ? 'bg-blue-600 text-white shadow-lg'
@@ -167,31 +201,6 @@ export const ReportsLayout: React.FC = () => {
                       <span>{group.label}</span>
                       <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
-
-                    {isOpen && (
-                      <div
-                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9999]"
-                        onMouseLeave={() => setOpenGroup(null)}
-                      >
-                        {group.children.map((child) => (
-                          <NavLink
-                            key={child.path}
-                            to={child.path}
-                            onClick={() => setOpenGroup(null)}
-                            className={({ isActive }) =>
-                              `block px-4 py-3 hover:bg-gray-50 transition-colors ${
-                                isActive ? 'bg-blue-50' : ''
-                              }`
-                            }
-                          >
-                            <div className="text-sm font-medium text-gray-900">{child.label}</div>
-                            {child.description && (
-                              <div className="text-xs text-gray-500 mt-0.5">{child.description}</div>
-                            )}
-                          </NavLink>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -204,6 +213,38 @@ export const ReportsLayout: React.FC = () => {
           <Outlet />
         </div>
       </div>
+
+      {/* Dropdown usando Portal para renderizar fuera del contenedor */}
+      {dropdownPosition && activeGroupData && createPortal(
+        <div
+          className="fixed w-64 bg-white rounded-lg shadow-2xl border border-gray-200 py-1"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            zIndex: 99999
+          }}
+          onMouseLeave={() => setDropdownPosition(null)}
+        >
+          {activeGroupData.children.map((child) => (
+            <NavLink
+              key={child.path}
+              to={child.path}
+              onClick={() => setDropdownPosition(null)}
+              className={({ isActive }) =>
+                `block px-4 py-3 hover:bg-gray-50 transition-colors ${
+                  isActive ? 'bg-blue-50' : ''
+                }`
+              }
+            >
+              <div className="text-sm font-medium text-gray-900">{child.label}</div>
+              {child.description && (
+                <div className="text-xs text-gray-500 mt-0.5">{child.description}</div>
+              )}
+            </NavLink>
+          ))}
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

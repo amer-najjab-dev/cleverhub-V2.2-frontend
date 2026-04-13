@@ -130,7 +130,8 @@ export const reportService = {
 
   getSupplierAnalysis: async (filters: any): Promise<SupplierPurchaseAnalysis[]> => {
     const response = await api.get('/reports/suppliers/analysis', { params: filters });
-    return response.data.data;
+    // CORRECCIÓN: Extraer el array 'suppliers' de la respuesta
+    return response.data.data?.suppliers || [];
   },
 
   getSupplierPurchaseHistory: async (supplierId: string, months: number) => {

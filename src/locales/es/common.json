@@ -1,0 +1,38 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Actualizar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "actions": "Acciones"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "reports": "Reportes",
+    "inventory": "Inventario",
+    "suppliers": "Proveedores",
+    "clients": "Clientes",
+    "products": "Productos",
+    "pharmacy": "Farmacia",
+    "users": "Usuarios",
+    "settings": "Configuración"
+  },
+  "reports": {
+    "cash": "Caja",
+    "analysis": "Análisis",
+    "suppliers": "Proveedores",
+    "products": "Productos",
+    "clients": "Clientes",
+    "loyalty": "Fidelización",
+    "connect": "Connect",
+    "audit": "Auditoría"
+  }
+}

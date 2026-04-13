@@ -34,7 +34,13 @@ import { SubscriptionsPage } from './pages/Admin/SubscriptionsPage';
 import { BroadcastPage } from './pages/Admin/BroadcastPage';
 import { HealthPage } from './pages/Admin/HealthPage';
 import { AdminRouteWrapper } from './components/Admin/AdminRouteWrapper';
+import { useSyncLanguageWithRegion } from './hooks/useSyncLanguageWithRegion';
 
+// Componente para sincronizar idioma con región
+const SyncLanguageComponent = () => {
+  useSyncLanguageWithRegion();
+  return null;
+};
 
 function App() {
   // Redirigir SUPER_ADMIN desde / a /admin/dashboard
@@ -56,6 +62,7 @@ function App() {
     <BrowserRouter>
       <RegionProvider>
         <AuthProvider>
+          <SyncLanguageComponent />
           <Toaster 
             position="top-right"
             toastOptions={{

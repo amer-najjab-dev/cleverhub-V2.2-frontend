@@ -13,8 +13,12 @@
     "error": "Error",
     "success": "Éxito",
     "actions": "Acciones",
-    "reset": "Reiniciar"
-    
+    "yes": "Sí",
+    "no": "No",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "submit": "Enviar"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -35,10 +39,35 @@
     "clients": "Clientes",
     "loyalty": "Fidelización",
     "connect": "Connect",
-    "audit": "Auditoría"
+    "audit": "Auditoría",
+    "title": "Reportes",
+    "description": "Análisis y reportes del sistema",
+    "comparative_supplier_analysis": "Análisis comparativo de proveedores",
+    "no_data": "No hay datos disponibles para el período seleccionado",
+    "select_period": "Seleccione un período para ver el análisis",
+    "invoiced": "Facturado",
+    "paid": "Pagado",
+    "reset": "Reiniciar"
+  },
+  "products": {
+    "title": "Inteligencia Productos",
+    "description": "Análisis predictivo y optimización de stock",
+    "predicted_demand": "Demanda prevista (30d)",
+    "recommended_investment": "Inversión recomendada",
+    "seasonal_risks": "Riesgos estacionales",
+    "emerging_trends": "Tendencias emergentes",
+    "search_product": "Buscar producto...",
+    "all_labs": "Todos los laboratorios",
+    "all_categories": "Todas las categorías",
+    "product": "Producto",
+    "laboratory": "Laboratorio",
+    "stock": "Stock",
+    "demand_30d": "Demanda 30d",
+    "recommended": "Recomendado",
+    "seasonal": "Estacional",
+    "source": "Fuente",
+    "confidence": "Confianza",
+    "hybrid": "Híbrido",
+    "market": "Mercado"
   }
 }
-,
-  "reports": {
-    "reset": "Reiniciar"
-  }

@@ -12,7 +12,8 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
-    "actions": "Actions"
+    "actions": "Actions",
+    "reset": "Réinitialiser"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -36,3 +37,7 @@
     "audit": "Audit"
   }
 }
+,
+  "reports": {
+    "reset": "Réinitialiser"
+  }

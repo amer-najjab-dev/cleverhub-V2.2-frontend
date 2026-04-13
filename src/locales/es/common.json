@@ -12,7 +12,9 @@
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "reset": "Reiniciar"
+    
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -36,3 +38,7 @@
     "audit": "Auditoría"
   }
 }
+,
+  "reports": {
+    "reset": "Reiniciar"
+  }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Building2, 
   Download,
@@ -9,6 +10,7 @@ import { reportService } from '../services/report.service';
 import { SupplierPurchaseAnalysis } from '../types/report.types';
 
 export const SupplierAnalysisPage: React.FC = () => {
+  const { t } = useTranslation();
   const { formatCurrency } = useCurrencyFormatter();
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -19,7 +21,7 @@ export const SupplierAnalysisPage: React.FC = () => {
 
   const loadData = async () => {
     if (!startDate || !endDate) {
-      return; // No cargar datos si no hay fechas seleccionadas
+      return;
     }
     
     try {
@@ -42,7 +44,7 @@ export const SupplierAnalysisPage: React.FC = () => {
       setAnalyses(data as SupplierPurchaseAnalysis[]);
     } catch (error) {
       console.error('Error loading supplier analysis:', error);
-      setError('Error al cargar los datos');
+      setError(t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export const SupplierAnalysisPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header con filtros */}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">Analyse comparative des fournisseurs</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t('reports.comparative_supplier_analysis')}</h2>
         <div className="flex gap-3">
           <DateRangePicker
             startDate={startDate}
@@ -72,11 +74,11 @@ export const SupplierAnalysisPage: React.FC = () => {
             }}
             className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Réinitialiser
+            {t('reports.reset')}
           </button>
           <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Download className="w-4 h-4" />
-            Exporter
+            {t('common.export')}
           </button>
         </div>
       </div>
@@ -84,7 +86,7 @@ export const SupplierAnalysisPage: React.FC = () => {
       {/* Mensaje si no hay fechas seleccionadas */}
       {!startDate || !endDate ? (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-          <p className="text-blue-800">Veuillez sélectionner une période pour voir l'analyse</p>
+          <p className="text-blue-800">{t('reports.select_period')}</p>
         </div>
       ) : loading ? (
         <div className="flex items-center justify-center py-12">
@@ -96,7 +98,7 @@ export const SupplierAnalysisPage: React.FC = () => {
         </div>
       ) : analyses.length === 0 ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-          <p className="text-yellow-800">Aucune donnée disponible pour la période sélectionnée</p>
+          <p className="text-yellow-800">{t('reports.no_data')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -123,13 +125,13 @@ export const SupplierAnalysisPage: React.FC = () => {
               </div>
               <div className="p-6 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs text-gray-500 uppercase mb-1">Facturé</div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">{t('reports.invoiced')}</div>
                   <div className="text-lg font-bold text-gray-900">
                     {formatCurrency(analysis.totals?.invoiced || 0)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 uppercase mb-1">Payé</div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">{t('reports.paid')}</div>
                   <div className="text-lg font-bold text-gray-900">
                     {formatCurrency(analysis.totals?.paid || 0)}
                   </div>

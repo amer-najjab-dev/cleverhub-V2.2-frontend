@@ -166,3 +166,17 @@
     padding: 0.75rem 1rem !important;
   }
 }
+
+.reports-layout-container {
+  overflow: visible !important;
+}
+
+.reports-nav-wrapper {
+  overflow: visible !important;
+}
+
+.reports-dropdown {
+  position: absolute !important;
+  z-index: 9999 !important;
+  background: white !important;
+}

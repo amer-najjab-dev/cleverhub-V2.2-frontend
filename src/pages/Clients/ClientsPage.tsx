@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit, Trash2, Eye, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { clientsService } from '../../services/clients.service';
 import { Client } from '../../services/clients.service';
 
 const ClientsPage = () => {
+  const { t } = useTranslation();
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [paginatedClients, setPaginatedClients] = useState<Client[]>([]);
@@ -39,7 +41,7 @@ const ClientsPage = () => {
   useEffect(() => {
     const pages = Math.ceil(filteredClients.length / pageSize);
     setTotalPages(pages || 1);
-    setCurrentPage(1); // Resetear a primera página al filtrar
+    setCurrentPage(1);
   }, [filteredClients, pageSize]);
 
   // Actualizar clientes paginados cuando cambie la página o el tamaño de página
@@ -74,7 +76,7 @@ const ClientsPage = () => {
       setClients(clientsData);
     } catch (error) {
       console.error('Error fetching clients:', error);
-      toast.error('Error al cargar los clientes');
+      toast.error(t('clients.error_loading'));
     } finally {
       setLoading(false);
     }
@@ -121,17 +123,17 @@ const ClientsPage = () => {
       const canDeleteResponse = await clientsService.checkCanDelete(clientToDelete.id);
       
       if (!canDeleteResponse.data.canDelete) {
-        toast.error('No se puede eliminar el cliente porque tiene un importe pendiente de pago mayor a 0');
+        toast.error(t('clients.cannot_delete_with_debt'));
         return;
       }
 
       await clientsService.delete(clientToDelete.id);
       
-      toast.success('Cliente eliminado correctamente');
+      toast.success(t('clients.delete_success'));
       fetchClients();
     } catch (error: any) {
       console.error('Error deleting client:', error);
-      toast.error(error.response?.data?.error || 'Error al eliminar el cliente');
+      toast.error(error.response?.data?.error || t('clients.delete_error'));
     } finally {
       setShowDeleteModal(false);
       setClientToDelete(null);
@@ -155,15 +157,15 @@ const ClientsPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="text-gray-600">Gestión de clientes y registros de salud</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('clients.title')}</h1>
+          <p className="text-gray-600">{t('clients.subtitle')}</p>
         </div>
         <Link
           to="/clients/new"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
           <Plus size={20} />
-          Nuevo Cliente
+          {t('clients.new_client')}
         </Link>
       </div>
 
@@ -175,7 +177,7 @@ const ClientsPage = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Buscar por nombre, teléfono, email o DNI..."
+                placeholder={t('clients.search_placeholder')}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -188,7 +190,7 @@ const ClientsPage = () => {
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2"
           >
             <Search size={20} />
-            Buscar
+            {t('common.search')}
           </button>
           
           <div className="relative">
@@ -201,7 +203,7 @@ const ClientsPage = () => {
               }`}
             >
               <Filter size={16} />
-              <span className="text-sm font-medium">Filtro deuda</span>
+              <span className="text-sm font-medium">{t('clients.debt_filter')}</span>
               {debtFilterActive && (
                 <span className="ml-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center">
                   !
@@ -216,7 +218,7 @@ const ClientsPage = () => {
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex flex-wrap items-end gap-4">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Deuda mínima (MAD)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('clients.min_debt')}</label>
                 <input
                   type="number"
                   value={debtRange[0]}
@@ -228,7 +230,7 @@ const ClientsPage = () => {
                 />
               </div>
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Deuda máxima (MAD)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('clients.max_debt')}</label>
                 <input
                   type="number"
                   value={debtRange[1]}
@@ -248,7 +250,7 @@ const ClientsPage = () => {
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium"
                 >
-                  Aplicar
+                  {t('common.apply')}
                 </button>
                 <button
                   onClick={() => {
@@ -259,7 +261,7 @@ const ClientsPage = () => {
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
                 >
-                  Limpiar
+                  {t('common.clear')}
                 </button>
               </div>
             </div>
@@ -272,11 +274,11 @@ const ClientsPage = () => {
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Cargando clientes...</p>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-600">No se encontraron clientes</p>
+            <p className="text-gray-600">{t('clients.no_clients_found')}</p>
           </div>
         ) : (
           <>
@@ -285,22 +287,22 @@ const ClientsPage = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cliente
+                      {t('clients.client')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contacto
+                      {t('clients.contact')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Última Compra
+                      {t('clients.last_purchase')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Deuda
+                      {t('clients.debt')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Puntos
+                      {t('clients.points')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
+                      {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -321,26 +323,26 @@ const ClientsPage = () => {
                               <div className="text-sm font-medium text-gray-900">
                                 {client.first_name} {client.last_name}
                               </div>
-                              <div className="text-sm text-gray-500">{client.dni || 'Sin DNI'}</div>
+                              <div className="text-sm text-gray-500">{client.dni || t('clients.no_dni')}</div>
                             </div>
                           </div>
                         </td>
 
                         {/* 2. CONTACTO - Email + Teléfono */}
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{client.email || 'Sin email'}</div>
-                          <div className="text-sm text-gray-500">{client.phone || 'Sin teléfono'}</div>
+                          <div className="text-sm text-gray-900">{client.email || t('clients.no_email')}</div>
+                          <div className="text-sm text-gray-500">{client.phone || t('clients.no_phone')}</div>
                         </td>
 
                         {/* 3. ÚLTIMA COMPRA - Fecha + Estado */}
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
                             {client.last_purchase_date 
-                              ? new Date(client.last_purchase_date).toLocaleDateString('es-ES')
-                              : 'Nunca'}
+                              ? new Date(client.last_purchase_date).toLocaleDateString()
+                              : t('clients.never')}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {client.last_purchase_date ? 'Con compras' : 'Sin compras'}
+                            {client.last_purchase_date ? t('clients.has_purchases') : t('clients.no_purchases')}
                           </div>
                         </td>
 
@@ -353,7 +355,7 @@ const ClientsPage = () => {
 
                         {/* 5. PUNTOS - Número */}
                         <td className="px-6 py-4">
-                          <span className="text-sm text-gray-900">{client.loyalty_points || 0} puntos</span>
+                          <span className="text-sm text-gray-900">{client.loyalty_points || 0} {t('clients.points_unit')}</span>
                         </td>
 
                         {/* 6. ACCIONES - Iconos */}
@@ -362,21 +364,21 @@ const ClientsPage = () => {
                             <Link
                               to={`/clients/${client.id}`}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                              title="Ver detalle"
+                              title={t('common.view_details')}
                             >
                               <Eye size={18} />
                             </Link>
                             <Link
                               to={`/clients/${client.id}/edit`}
                               className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg"
-                              title="Editar"
+                              title={t('common.edit')}
                             >
                               <Edit size={18} />
                             </Link>
                             <button
                               onClick={() => handleDeleteClick(client)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                              title="Eliminar"
+                              title={t('common.delete')}
                             >
                               <Trash2 size={18} />
                             </button>
@@ -393,9 +395,9 @@ const ClientsPage = () => {
             <div className="flex items-center justify-between px-6 py-3 bg-white border-t border-gray-200">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-gray-700">
-                  Mostrando <span className="font-medium">{startItem}</span> a{' '}
+                  {t('clients.showing')} <span className="font-medium">{startItem}</span> {t('clients.to')}{' '}
                   <span className="font-medium">{endItem}</span>{' '}
-                  de <span className="font-medium">{filteredClients.length}</span> clientes
+                  {t('clients.of')} <span className="font-medium">{filteredClients.length}</span> {t('clients.clients')}
                 </span>
                 
                 <select
@@ -403,9 +405,9 @@ const ClientsPage = () => {
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                   className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value={10}>10 por página</option>
-                  <option value={50}>50 por página</option>
-                  <option value={100}>100 por página</option>
+                  <option value={10}>10 {t('clients.per_page')}</option>
+                  <option value={50}>50 {t('clients.per_page')}</option>
+                  <option value={100}>100 {t('clients.per_page')}</option>
                 </select>
               </div>
 
@@ -419,7 +421,7 @@ const ClientsPage = () => {
                 </button>
                 
                 <span className="px-3 py-1 text-sm text-gray-700">
-                  Página {currentPage} de {totalPages}
+                  {t('clients.page')} {currentPage} {t('clients.of')} {totalPages}
                 </span>
                 
                 <button
@@ -439,10 +441,9 @@ const ClientsPage = () => {
       {showDeleteModal && clientToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('clients.confirm_delete_title')}</h3>
             <p className="text-gray-600 mb-4">
-              ¿Estás seguro de que quieres eliminar a {clientToDelete.first_name} {clientToDelete.last_name}?
-              Esta acción no se puede deshacer.
+              {t('clients.confirm_delete_message', { name: `${clientToDelete.first_name} ${clientToDelete.last_name}` })}
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -452,13 +453,13 @@ const ClientsPage = () => {
                 }}
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={confirmDelete}
                 className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg"
               >
-                Eliminar
+                {t('common.delete')}
               </button>
             </div>
           </div>

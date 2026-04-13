@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SalesCart } from '../../components/SalesCart/SalesCart';
 import { FinancialSummary } from '../../components/FinancialSummary/FinancialSummary';
 import { CleverHubPanel } from '../../components/CleverHubPanel/CleverHubPanel';
@@ -25,6 +26,7 @@ const useDebounce = (value: string, delay: number) => {
 };
 
 export const SalesPage = () => {
+  const { t } = useTranslation();
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [showNewCustomerModal, setShowNewCustomerModal] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState<Client | null>(null);
@@ -156,7 +158,7 @@ export const SalesPage = () => {
 
   useEffect(() => {
     const savedDraft = localStorage.getItem('sales_draft');
-    if (savedDraft && window.confirm('¿Recuperar venta en borrador?')) {
+    if (savedDraft && window.confirm(t('sales.recover_draft'))) {
       try {
         const draft = JSON.parse(savedDraft);
         console.log('📂 Borrador recuperado:', draft);
@@ -168,9 +170,9 @@ export const SalesPage = () => {
     localStorage.removeItem('sales_draft');
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const savedDraft = localStorage.getItem('sales_draft');
-    if (savedDraft && window.confirm('¿Recuperar venta en borrador?')) {
+    if (savedDraft && window.confirm(t('sales.recover_draft'))) {
       try {
         const draft = JSON.parse(savedDraft);
         console.log('📂 Borrador recuperado:', draft);
@@ -250,10 +252,10 @@ export const SalesPage = () => {
       useCartStore.getState().setClient(newClient.id);
       console.log('Nuevo cliente creado:', newClient);
       
-      alert(`Cliente ${newClient.first_name} ${newClient.last_name || ''} creado exitosamente`);
+      alert(t('sales.client_created_success'));
     } catch (error: any) {
       console.error('Error creando cliente:', error);
-      alert(error.response?.data?.message || 'Error al crear cliente');
+      alert(error.response?.data?.message || t('sales.client_create_error'));
     }
   };
   
@@ -310,7 +312,7 @@ export const SalesPage = () => {
       
     } catch (error) {
       console.error('Error añadiendo producto al carrito:', error);
-      alert('Error al añadir producto');
+      alert(t('sales.add_product_error'));
     }
   };
 
@@ -318,7 +320,7 @@ export const SalesPage = () => {
     if (client.first_name || client.last_name) {
       return `${client.first_name || ''} ${client.last_name || ''}`.trim();
     }
-    return client.name || 'Cliente';
+    return client.name || t('sales.customer');
   };
 
   return (
@@ -344,7 +346,7 @@ export const SalesPage = () => {
                     onSelectProduct={handleAddProductToCart}
                     searchResults={productSearchResults}
                     isSearching={isSearching}
-                    placeholder="Buscar productos... (mínimo 3 caracteres)"
+                    placeholder={t('sales.search_products_placeholder')}
                   />
                 </div>
               </div>
@@ -360,7 +362,7 @@ export const SalesPage = () => {
                   <input
                     ref={customerSearchRef}
                     type="text"
-                    placeholder="Buscar cliente..."
+                    placeholder={t('sales.search_customer_placeholder')}
                     value={customerSearchQuery}
                     onChange={(e) => handleCustomerSearch(e.target.value)}
                     onFocus={() => customerSearchQuery && setShowCustomerResults(true)}
@@ -371,7 +373,7 @@ export const SalesPage = () => {
                   {showCustomerResults && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-40 max-h-60 overflow-y-auto">
                       {isSearchingCustomers ? (
-                        <div className="p-3 text-center text-gray-500">Buscando...</div>
+                        <div className="p-3 text-center text-gray-500">{t('common.loading')}</div>
                       ) : customerSearchResults.length > 0 ? (
                         customerSearchResults.map(client => (
                           <button
@@ -394,7 +396,7 @@ export const SalesPage = () => {
                           </button>
                         ))
                       ) : (
-                        <div className="p-3 text-center text-gray-500">No se encontraron clientes</div>
+                        <div className="p-3 text-center text-gray-500">{t('sales.no_customers_found')}</div>
                       )}
                     </div>
                   )}
@@ -407,7 +409,7 @@ export const SalesPage = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Nuevo Cliente
+                  {t('sales.new_customer')}
                 </button>
               </div>
             </div>
@@ -438,7 +440,7 @@ export const SalesPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-5 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Nuevo Cliente</h3>
+              <h3 className="text-lg font-semibold">{t('sales.new_customer_title')}</h3>
               <button 
                 onClick={() => setShowNewCustomerModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -450,12 +452,12 @@ export const SalesPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre *
+                  {t('sales.first_name')} *
                 </label>
                 <input
                   type="text"
                   id="clientFirstName"
-                  placeholder="Ej: Juan"
+                  placeholder={t('sales.first_name_placeholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -463,24 +465,24 @@ export const SalesPage = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Apellido
+                  {t('sales.last_name')}
                 </label>
                 <input
                   type="text"
                   id="clientLastName"
-                  placeholder="Ej: Pérez"
+                  placeholder={t('sales.last_name_placeholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono *
+                  {t('sales.phone')} *
                 </label>
                 <input
                   type="tel"
                   id="clientPhone"
-                  placeholder="Ej: 0612345678"
+                  placeholder={t('sales.phone_placeholder')}
                   className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   required
                 />
@@ -488,24 +490,24 @@ export const SalesPage = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  {t('sales.email')}
                 </label>
                 <input
                   type="email"
                   id="clientEmail"
-                  placeholder="ejemplo@email.com"
+                  placeholder={t('sales.email_placeholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  DNI/NIF
+                  {t('sales.dni')}
                 </label>
                 <input
                   type="text"
                   id="clientDni"
-                  placeholder="12345678A"
+                  placeholder={t('sales.dni_placeholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -516,7 +518,7 @@ export const SalesPage = () => {
                 onClick={() => setShowNewCustomerModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={async () => {
@@ -527,7 +529,7 @@ export const SalesPage = () => {
                   const dni = (document.getElementById('clientDni') as HTMLInputElement)?.value;
                   
                   if (!firstName || !phone) {
-                    alert('Nombre y teléfono son obligatorios');
+                    alert(t('sales.required_fields'));
                     return;
                   }
                   
@@ -543,7 +545,7 @@ export const SalesPage = () => {
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap text-sm font-medium"
               >
-                Crear Cliente
+                {t('sales.create_customer')}
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCurrencyFormatter } from '../../utils/formatters';
 import { productsService, Product } from '../../services/products.service';
 import { CATEGORIES, DOSAGE_FORMS, ZONES, ACTIVE_OPTIONS } from '../../constants/productConstants';
@@ -7,6 +8,7 @@ import FilterComponent from './FilterComponent';
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 
 const ProductTable: React.FC = () => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatCurrency } = useCurrencyFormatter();
@@ -141,28 +143,28 @@ const ProductTable: React.FC = () => {
     return (
       <div className="p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Cargando productos...</p>
+        <p className="mt-4 text-gray-600">{t('common.loading')}</p>
       </div>
     );
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Listado de Productos</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('products.list_title')}</h1>
 
       {/* Tabla de productos */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Forma</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PPV</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PPH</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Código barras</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Zona</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Activo</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.name')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.category')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.dosage_form')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.ppv')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.pph')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.barcode')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.zone')}</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('products.active')}</th>
             </tr>
             <tr className="border-t border-gray-200">
               <th className="px-2 py-1">
@@ -173,7 +175,7 @@ const ProductTable: React.FC = () => {
                     type="text"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Buscar nombre..."
+                    placeholder={t('products.search_name_placeholder')}
                     className="w-full pl-7 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
                   {searchInput && (
@@ -186,10 +188,10 @@ const ProductTable: React.FC = () => {
                   )}
                 </div>
                 {searchInput.length > 0 && searchInput.length < 3 && (
-                  <p className="text-xs text-amber-600 mt-0.5">Mínimo 3 caracteres</p>
+                  <p className="text-xs text-amber-600 mt-0.5">{t('products.min_chars')}</p>
                 )}
                 {searchInput.length >= 3 && products.length === 0 && !isSearching && (
-                  <p className="text-xs text-red-500 mt-0.5">No se encontraron productos</p>
+                  <p className="text-xs text-red-500 mt-0.5">{t('products.no_products_found')}</p>
                 )}
               </th>
               <th className="px-2 py-1">
@@ -213,7 +215,7 @@ const ProductTable: React.FC = () => {
                   type="number"
                   value={filters.pricePPV}
                   onChange={(val) => handleFilterChange('pricePPV', val)}
-                  placeholder="Precio"
+                  placeholder={t('products.price_placeholder')}
                   min={0}
                   step={0.01}
                 />
@@ -223,7 +225,7 @@ const ProductTable: React.FC = () => {
                   type="number"
                   value={filters.pricePPH}
                   onChange={(val) => handleFilterChange('pricePPH', val)}
-                  placeholder="Precio"
+                  placeholder={t('products.price_placeholder')}
                   min={0}
                   step={0.01}
                 />
@@ -233,7 +235,7 @@ const ProductTable: React.FC = () => {
                   type="text"
                   value={filters.barcode}
                   onChange={(val) => handleFilterChange('barcode', val)}
-                  placeholder="Código"
+                  placeholder={t('products.barcode_placeholder')}
                 />
               </th>
               <th className="px-2 py-1">
@@ -251,7 +253,7 @@ const ProductTable: React.FC = () => {
                   onChange={(val) => handleFilterChange('active', val)}
                   options={ACTIVE_OPTIONS.map((opt: { value: boolean; label: string }) => ({ 
                     value: String(opt.value), 
-                    label: opt.label 
+                    label: opt.label === 'Sí' ? t('products.yes') : t('products.no')
                   }))}
                 />
               </th>
@@ -281,7 +283,7 @@ const ProductTable: React.FC = () => {
                         product.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {product.active ? 'Oui' : 'Non'}
+                      {product.active ? t('products.yes') : t('products.no')}
                     </span>
                   </td>
                 </tr>
@@ -292,7 +294,7 @@ const ProductTable: React.FC = () => {
 
         {/* Mensaje si no hay resultados */}
         {products.length === 0 && !isSearching && searchInput.length === 0 && (
-          <div className="p-4 text-center text-gray-500">No se encontraron productos</div>
+          <div className="p-4 text-center text-gray-500">{t('products.no_products')}</div>
         )}
 
         {/* Paginación */}
@@ -300,9 +302,9 @@ const ProductTable: React.FC = () => {
           <div className="flex items-center justify-between px-4 py-2 bg-white border-t border-gray-200">
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-700">
-                Mostrando <span className="font-medium">{startItem}</span> a{' '}
+                {t('products.showing')} <span className="font-medium">{startItem}</span> {t('products.to')}{' '}
                 <span className="font-medium">{endItem}</span>{' '}
-                de <span className="font-medium">{totalItems}</span>
+                {t('products.of')} <span className="font-medium">{totalItems}</span>
               </span>
               
               <select

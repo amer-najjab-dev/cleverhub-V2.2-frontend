@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   ShoppingCart, 
   Package, 
@@ -19,6 +20,7 @@ import { dashboardService } from '../../services/dashboard.service';
 type Period = 'today' | 'week' | 'month';
 
 export const HomeDashboard = () => {
+  const { t } = useTranslation();
   const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export const HomeDashboard = () => {
         setError(null);
       }
     } catch (err) {
-      setError('Error al cargar los indicadores');
+      setError(t('dashboard.error_loading_indicators'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -54,8 +56,8 @@ export const HomeDashboard = () => {
 
   const quickActions = [
     {
-      title: 'Nueva Venta',
-      description: 'Crear una nueva venta',
+      title: t('dashboard.new_sale'),
+      description: t('dashboard.create_new_sale'),
       icon: ShoppingCart,
       color: 'bg-blue-600',
       hover: 'hover:bg-blue-700',
@@ -63,8 +65,8 @@ export const HomeDashboard = () => {
       enabled: true
     },
     {
-      title: 'Reabastecer',
-      description: 'Productos con stock bajo',
+      title: t('dashboard.restock'),
+      description: t('dashboard.low_stock_products'),
       icon: Package,
       color: 'bg-emerald-600',
       hover: 'hover:bg-emerald-700',
@@ -72,8 +74,8 @@ export const HomeDashboard = () => {
       enabled: false
     },
     {
-      title: 'Reportes',
-      description: 'Análisis y estadísticas',
+      title: t('dashboard.reports'),
+      description: t('dashboard.analysis_stats'),
       icon: BarChart3,
       color: 'bg-violet-600',
       hover: 'hover:bg-violet-700',
@@ -81,8 +83,8 @@ export const HomeDashboard = () => {
       enabled: true
     },
     {
-      title: 'Caducidades',
-      description: 'Productos próximos a caducar',
+      title: t('dashboard.expiring'),
+      description: t('dashboard.products_expiring_soon'),
       icon: Calendar,
       color: 'bg-amber-600',
       hover: 'hover:bg-amber-700',
@@ -152,8 +154,8 @@ export const HomeDashboard = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-sm lg:text-base text-gray-600 mt-1">Resumen de actividad y rendimiento</p>
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+              <p className="text-sm lg:text-base text-gray-600 mt-1">{t('dashboard.subtitle')}</p>
             </div>
             
             <div className="flex items-center gap-3">
@@ -166,7 +168,7 @@ export const HomeDashboard = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  Hoy
+                  {t('dashboard.today')}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod('week')}
@@ -176,7 +178,7 @@ export const HomeDashboard = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  Semana
+                  {t('dashboard.week')}
                 </button>
                 <button
                   onClick={() => setSelectedPeriod('month')}
@@ -186,7 +188,7 @@ export const HomeDashboard = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  Mes
+                  {t('dashboard.month')}
                 </button>
               </div>
 
@@ -195,7 +197,7 @@ export const HomeDashboard = () => {
                 className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm lg:text-base"
               >
                 <RefreshCw className="w-4 h-4" />
-                Actualizar
+                {t('common.refresh')}
               </button>
             </div>
           </div>
@@ -211,7 +213,7 @@ export const HomeDashboard = () => {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h2>
+            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.quick_access')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickActions.map((action) => (
                 <button
@@ -249,7 +251,7 @@ export const HomeDashboard = () => {
 
           {/* Top Products */}
           <div>
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Productos Más Vendidos</h2>
+            <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.top_products')}</h2>
             {loadingProducts ? (
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="space-y-3">
@@ -276,7 +278,7 @@ export const HomeDashboard = () => {
               onClick={handleViewFullHistory}
               className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2 text-sm lg:text-base"
             >
-              Ver historial completo
+              {t('dashboard.view_full_history')}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, History, Search, Filter, Download, X, Check, Trash2 } from 'lucide-react';
 import { supplierService } from '../services/supplier.service';
 import { Supplier, SupplierAddress } from '../types/supplier.types';
+import { useTranslation } from 'react-i18next';
 
 export const SupplierListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [filteredSuppliers, setFilteredSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,14 +158,14 @@ export const SupplierListPage: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
-              Nouveau fournisseur
+              {t('suppliers.new_supplier')}
             </button>
             <button
               onClick={() => navigate('/providers/suggestions')}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
             >
               <History className="w-4 h-4" />
-              Historique des suggestions
+              {t('suppliers.suggestions_history')}
             </button>
           </div>
 
@@ -172,7 +174,7 @@ export const SupplierListPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher..."
+                placeholder={t('common.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full sm:w-64 pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -182,7 +184,7 @@ export const SupplierListPage: React.FC = () => {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-2 rounded-lg border ${showFilters ? 'bg-blue-50 border-blue-300' : 'border-gray-300 hover:bg-gray-50'}`}
-              title="Filtres avancés"
+              title={t('suppliers.advanced_filters')}
             >
               <Filter className="w-5 h-5 text-gray-600" />
             </button>
@@ -190,7 +192,7 @@ export const SupplierListPage: React.FC = () => {
             <button
               onClick={() => {/* Exportar */}}
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              title="Exporter"
+              title={t('common.export')}
             >
               <Download className="w-5 h-5 text-gray-600" />
             </button>
@@ -203,14 +205,14 @@ export const SupplierListPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ville
+                  {t('suppliers.city')}
                 </label>
                 <select
                   value={cityFilter}
                   onChange={(e) => setCityFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Toutes les villes</option>
+                  <option value="">{t('suppliers.all_cities')}</option>
                   {cities.map(city => (
                     <option key={city} value={city}>{city}</option>
                   ))}
@@ -219,7 +221,7 @@ export const SupplierListPage: React.FC = () => {
               
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Solde (DHS)
+                  {t('suppliers.balance')}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -228,7 +230,7 @@ export const SupplierListPage: React.FC = () => {
                     value={balanceRange[0]}
                     onChange={(e) => setBalanceRange([Number(e.target.value), balanceRange[1]])}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Min"
+                    placeholder={t('suppliers.min')}
                   />
                   <span className="text-gray-500">-</span>
                   <input
@@ -237,7 +239,7 @@ export const SupplierListPage: React.FC = () => {
                     value={balanceRange[1]}
                     onChange={(e) => setBalanceRange([balanceRange[0], Number(e.target.value)])}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Max"
+                    placeholder={t('suppliers.max')}
                   />
                 </div>
               </div>
@@ -257,19 +259,19 @@ export const SupplierListPage: React.FC = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nom
+                      {t('suppliers.name')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Téléphone
+                      {t('suppliers.phone')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ville et adresse
+                      {t('suppliers.city_and_address')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Solde (DHS)
+                      {t('suppliers.balance')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -301,7 +303,7 @@ export const SupplierListPage: React.FC = () => {
                           )}
                           {supplier.phones && supplier.phones.length > 1 && (
                             <div className="text-xs text-gray-500">
-                              +{supplier.phones.length - 1} autre(s)
+                              +{supplier.phones.length - 1} {t('suppliers.other')}
                             </div>
                           )}
                         </td>

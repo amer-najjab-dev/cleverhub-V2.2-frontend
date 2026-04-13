@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, FileText, Package, AlertTriangle } from 'lucide-react';
 import { StockTable } from '../../components/Inventory/StockTable';
 import { StockFilters } from '../../components/Inventory/StockFilters';
@@ -8,6 +9,7 @@ import { Pagination } from '../../components/Inventory/Pagination';
 import { inventoryService, InventoryProduct } from '../../services/inventory.service';
 
 export const InventoryPage = () => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | null>(null);
@@ -33,13 +35,13 @@ export const InventoryPage = () => {
 
   // Resumen
   const [summary, setSummary] = useState({
-  totalProducts: 0,
-  totalStockValue: 0,
-  totalRetailValue: 0,
-  lowStockCount: 0,
-  expiringCount: 0,
-  expiredCount: 0
-});
+    totalProducts: 0,
+    totalStockValue: 0,
+    totalRetailValue: 0,
+    lowStockCount: 0,
+    expiringCount: 0,
+    expiredCount: 0
+  });
 
   useEffect(() => {
     loadInventory();
@@ -96,23 +98,22 @@ export const InventoryPage = () => {
   };
 
   const loadSummary = async () => {
-  try {
-    const response = await inventoryService.getSummary();
-    if (response.success) {
-      // Mapear los campos de InventorySummary a nuestro estado
-      setSummary({
-        totalProducts: response.data.totalProducts,
-        totalStockValue: response.data.totalStockValue,
-        totalRetailValue: response.data.totalRetailValue,
-        lowStockCount: response.data.lowStockCount,
-        expiringCount: response.data.expiringCount,
-        expiredCount: response.data.expiredCount
-      });
+    try {
+      const response = await inventoryService.getSummary();
+      if (response.success) {
+        setSummary({
+          totalProducts: response.data.totalProducts,
+          totalStockValue: response.data.totalStockValue,
+          totalRetailValue: response.data.totalRetailValue,
+          lowStockCount: response.data.lowStockCount,
+          expiringCount: response.data.expiringCount,
+          expiredCount: response.data.expiredCount
+        });
+      }
+    } catch (error) {
+      console.error('Error loading summary:', error);
     }
-  } catch (error) {
-    console.error('Error loading summary:', error);
-  }
-};
+  };
 
   const handleEdit = (product: InventoryProduct) => {
     setSelectedProduct(product);
@@ -121,7 +122,6 @@ export const InventoryPage = () => {
 
   const handleSaveEdit = async (productId: number, data: any) => {
     try {
-      // Asegurarnos de que productId está incluido en data
       const adjustmentData = { ...data, productId };
       const response = await inventoryService.adjustStock(adjustmentData);
       if (response.success) {
@@ -143,21 +143,21 @@ export const InventoryPage = () => {
   };
 
   const handleResetStock = () => {
-    if (window.confirm('⚠️ ¿Estás seguro de querer poner todo el stock a cero?')) {
-      if (window.confirm('⚠️ CONFIRMACIÓN FINAL: Esta acción no se puede deshacer. ¿Continuar?')) {
+    if (window.confirm(t('inventory.reset_stock_warning'))) {
+      if (window.confirm(t('inventory.reset_stock_confirmation'))) {
         console.log('Stock reset');
       }
     }
   };
 
   const handleSearch = () => {
-    setCurrentPage(1); // Resetear a primera página al buscar
+    setCurrentPage(1);
     loadInventory();
   };
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
-    setCurrentPage(1); // Resetear a primera página al cambiar tamaño
+    setCurrentPage(1);
   };
 
   return (
@@ -165,8 +165,8 @@ export const InventoryPage = () => {
       <div className="">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Stock</h1>
-          <p className="text-gray-600 mt-2">Control de inventario y caducidades</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('inventory.title')}</h1>
+          <p className="text-gray-600 mt-2">{t('inventory.subtitle')}</p>
         </div>
 
         {/* Barra de acciones */}
@@ -178,32 +178,32 @@ export const InventoryPage = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Download className="w-4 h-4" />
-                Exportar
+                {t('common.export')}
               </button>
               <button
                 onClick={handlePrintStock}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <FileText className="w-4 h-4" />
-                Imprimir Stock
+                {t('inventory.print_stock')}
               </button>
               <button
                 onClick={handleResetStock}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 <RefreshCw className="w-4 h-4" />
-                Stock a Cero
+                {t('inventory.reset_stock')}
               </button>
             </div>
 
             <div className="flex items-center gap-3">
               <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                 <Package className="w-4 h-4" />
-                Importaciones
+                {t('inventory.imports')}
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                 <AlertTriangle className="w-4 h-4" />
-                Inventario
+                {t('inventory.inventory')}
               </button>
             </div>
           </div>

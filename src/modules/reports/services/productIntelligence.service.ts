@@ -49,7 +49,7 @@ export const productIntelligenceService = {
   },
 
   getEmergingTrends: async (): Promise<EmergingTrend[]> => {
-    const response = await api.get('/ai/products/emerging-trends');
+    const response = await api.get('/ai/products/trends');
     return response.data.data;
   },
 };

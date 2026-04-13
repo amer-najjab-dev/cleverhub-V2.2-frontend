@@ -124,76 +124,78 @@ export const ReportsLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className=" px-4 sm:px-6 lg:px-8 py-6">
-        {/* Barra de navegación */}
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
+        {/* Barra de navegación - sin overflow oculto */}
         <div className="bg-white rounded-t-xl shadow-2xl border border-gray-200">
-          <div className="flex items-center gap-1 p-2 overflow-x-auto">
-            {tabGroups.map((group) => {
-              const Icon = group.icon;
-              const isActive = activeGroup === group.id;
-              const isOpen = openGroup === group.id;
+          <div className="relative"> {/* ← Contenedor relativo para dropdowns */}
+            <div className="flex items-center gap-1 p-2 overflow-x-auto">
+              {tabGroups.map((group) => {
+                const Icon = group.icon;
+                const isActive = activeGroup === group.id;
+                const isOpen = openGroup === group.id;
 
-              if (group.children.length === 1) {
+                if (group.children.length === 1) {
+                  return (
+                    <NavLink
+                      key={group.id}
+                      to={group.children[0].path}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                          isActive
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'text-gray-600 bg-white shadow-md hover:shadow-xl hover:text-gray-900'
+                        }`
+                      }
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{group.label}</span>
+                    </NavLink>
+                  );
+                }
+
                 return (
-                  <NavLink
-                    key={group.id}
-                    to={group.children[0].path}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  <div key={group.id} className="relative inline-block">
+                    <button
+                      onClick={() => handleButtonClick(group)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                         isActive
                           ? 'bg-blue-600 text-white shadow-lg'
                           : 'text-gray-600 bg-white shadow-md hover:shadow-xl hover:text-gray-900'
-                      }`
-                    }
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{group.label}</span>
-                  </NavLink>
-                );
-              }
-
-              return (
-                <div key={group.id} className="relative">
-                  <button
-                    onClick={() => handleButtonClick(group)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                      isActive
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'text-gray-600 bg-white shadow-md hover:shadow-xl hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{group.label}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {isOpen && (
-                    <div
-                      className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-50"
-                      onMouseLeave={() => setOpenGroup(null)}
+                      }`}
                     >
-                      {group.children.map((child) => (
-                        <NavLink
-                          key={child.path}
-                          to={child.path}
-                          onClick={() => setOpenGroup(null)}
-                          className={({ isActive }) =>
-                            `block px-4 py-3 hover:bg-gray-50 transition-colors ${
-                              isActive ? 'bg-blue-50' : ''
-                            }`
-                          }
-                        >
-                          <div className="text-sm font-medium text-gray-900">{child.label}</div>
-                          {child.description && (
-                            <div className="text-xs text-gray-500 mt-0.5">{child.description}</div>
-                          )}
-                        </NavLink>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                      <Icon className="w-4 h-4" />
+                      <span>{group.label}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isOpen && (
+                      <div
+                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-2xl border border-gray-200 py-1 z-[9999]"
+                        onMouseLeave={() => setOpenGroup(null)}
+                      >
+                        {group.children.map((child) => (
+                          <NavLink
+                            key={child.path}
+                            to={child.path}
+                            onClick={() => setOpenGroup(null)}
+                            className={({ isActive }) =>
+                              `block px-4 py-3 hover:bg-gray-50 transition-colors ${
+                                isActive ? 'bg-blue-50' : ''
+                              }`
+                            }
+                          >
+                            <div className="text-sm font-medium text-gray-900">{child.label}</div>
+                            {child.description && (
+                              <div className="text-xs text-gray-500 mt-0.5">{child.description}</div>
+                            )}
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 

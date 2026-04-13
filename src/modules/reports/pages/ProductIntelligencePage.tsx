@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, 
   AlertTriangle,
@@ -15,6 +16,7 @@ import { ProductFilters } from '../components/products/ProductFilters';
 import { exportService } from '../services/export.service';
 
 export const ProductIntelligencePage: React.FC = () => {
+  const { t } = useTranslation();
   const { formatCurrency } = useCurrencyFormatter();
   const { 
     predictions, 
@@ -56,7 +58,7 @@ export const ProductIntelligencePage: React.FC = () => {
 
   // Datos para el gráfico (producto seleccionado)
   const getSeasonalData = () => {
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const months = [t('products.jan'), t('products.feb'), t('products.mar'), t('products.apr'), t('products.may'), t('products.jun'), t('products.jul'), t('products.aug'), t('products.sep'), t('products.oct'), t('products.nov'), t('products.dec')];
     const factors = months.map(() => {
       const product = predictions.find(p => p.productId === selectedProduct);
       return product?.seasonalFactor || 1.0;
@@ -104,11 +106,11 @@ export const ProductIntelligencePage: React.FC = () => {
   const getSourceBadge = (source: 'market' | 'hybrid' | 'real') => {
     switch(source) {
       case 'real':
-        return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Réel</span>;
+        return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">{t('products.real')}</span>;
       case 'hybrid':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Hybride</span>;
+        return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">{t('products.hybrid')}</span>;
       case 'market':
-        return <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">Marché</span>;
+        return <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">{t('products.market')}</span>;
     }
   };
 
@@ -118,8 +120,8 @@ export const ProductIntelligencePage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Intelligence Produits</h1>
-            <p className="text-gray-500 mt-1">Analyse prédictive et optimisation des stocks</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('products.title')}</h1>
+            <p className="text-gray-500 mt-1">{t('products.description')}</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -141,7 +143,7 @@ export const ProductIntelligencePage: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
-              Actualiser
+              {t('common.refresh')}
             </button>
           </div>
         </div>
@@ -154,7 +156,7 @@ export const ProductIntelligencePage: React.FC = () => {
                 <Package className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Demande prévue (30j)</p>
+                <p className="text-sm text-gray-500">{t('products.predicted_demand')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {marketIntelligence?.totalPredictedDemand || 0}
                 </p>
@@ -168,7 +170,7 @@ export const ProductIntelligencePage: React.FC = () => {
                 <TrendingUp className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Investissement recommandé</p>
+                <p className="text-sm text-gray-500">{t('products.recommended_investment')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {formatCurrency(marketIntelligence?.totalRecommendedInvestment || 0)}
                 </p>
@@ -182,7 +184,7 @@ export const ProductIntelligencePage: React.FC = () => {
                 <Calendar className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Risques saisonniers</p>
+                <p className="text-sm text-gray-500">{t('products.seasonal_risks')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {highRiskCategories.length}
                 </p>
@@ -196,7 +198,7 @@ export const ProductIntelligencePage: React.FC = () => {
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Tendances émergentes</p>
+                <p className="text-sm text-gray-500">{t('products.emerging_trends')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {emergingTrends.length}
                 </p>
@@ -232,7 +234,7 @@ export const ProductIntelligencePage: React.FC = () => {
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
             <h3 className="text-sm font-medium text-yellow-800 mb-3 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
-              Catégories à risque saisonnier élevé
+              {t('products.high_risk_categories')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {highRiskCategories.map((category, index) => (
@@ -253,7 +255,7 @@ export const ProductIntelligencePage: React.FC = () => {
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
               <h3 className="font-semibold flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-blue-600" />
-                Tendances émergentes
+                {t('products.emerging_trends_title')}
               </h3>
             </div>
             <div className="divide-y divide-gray-200">
@@ -272,10 +274,10 @@ export const ProductIntelligencePage: React.FC = () => {
                         trend.confidence === 'medium' ? 'bg-blue-100 text-blue-700' :
                         'bg-yellow-100 text-yellow-700'
                       }`}>
-                        {trend.confidence}
+                        {trend.confidence === 'high' ? t('products.high') : trend.confidence === 'medium' ? t('products.medium') : t('products.low')}
                       </span>
                       <p className="text-sm text-gray-500 mt-1">
-                        {trend.salesCount} ventes / {trend.period}
+                        {trend.salesCount} {t('products.sales')} / {trend.period}
                       </p>
                     </div>
                   </div>
@@ -289,23 +291,23 @@ export const ProductIntelligencePage: React.FC = () => {
         {/* Tabla de predicciones */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-semibold">Prévisions de demande par produit</h3>
+            <h3 className="font-semibold">{t('products.forecasts_title')}</h3>
             <span className="text-sm text-gray-500">
-              {filteredPredictions.length} produits
+              {filteredPredictions.length} {t('products.products_count')}
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produit</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Laboratoire</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stock</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Demande 30j</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Recommandé</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Saison</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Source</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Confiance</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('products.product')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('products.laboratory')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('products.stock')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('products.demand_30d')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('products.recommended')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('products.seasonal')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('products.source')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('products.confidence')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -365,7 +367,7 @@ export const ProductIntelligencePage: React.FC = () => {
 
           {filteredPredictions.length === 0 && (
             <div className="p-8 text-center text-gray-500">
-              Aucune donnée de prédiction disponible
+              {t('products.no_data_available')}
             </div>
           )}
         </div>

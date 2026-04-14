@@ -480,5 +480,20 @@
     "products": "productos",
     "per_page": "por página",
     "page": "Página"
+  },
+  "supplierDetail": {
+    "not_found": "Proveedor no encontrado",
+    "back_to_suppliers": "Volver a proveedores",
+    "edit_supplier": "Editar Proveedor",
+    "information": "Información",
+    "bl_reception": "Recepción BL",
+    "payment_obligations": "Obligaciones de Pago",
+    "name": "Nombre",
+    "payment_terms": "Condiciones de pago",
+    "tax_id": "NIF",
+    "delivery_reception": "Recepción de Albaranes",
+    "delivery_description": "Registra la entrada de mercancía. Se actualizará el stock y se creará una obligación de pago.",
+    "payment_obligations_title": "Obligaciones de Pago",
+    "payment_obligations_description": "Gestiona los pagos pendientes con este proveedor."
   }
 }

@@ -475,5 +475,20 @@
     "products": "produits",
     "per_page": "par page",
     "page": "Page"
+  },
+  "supplierDetail": {
+    "not_found": "Fournisseur non trouvé",
+    "back_to_suppliers": "Retour aux fournisseurs",
+    "edit_supplier": "Modifier le Fournisseur",
+    "information": "Informations",
+    "bl_reception": "Réception BL",
+    "payment_obligations": "Obligations de Paiement",
+    "name": "Nom",
+    "payment_terms": "Conditions de paiement",
+    "tax_id": "NIF",
+    "delivery_reception": "Réception des Bordereaux",
+    "delivery_description": "Enregistrez l'entrée de marchandise. Le stock sera mis à jour et une obligation de paiement sera créée.",
+    "payment_obligations_title": "Obligations de Paiement",
+    "payment_obligations_description": "Gérez les paiements en attente avec ce fournisseur."
   }
 }

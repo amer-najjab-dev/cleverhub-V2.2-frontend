@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Save, Package, CreditCard } from 'lucide-react';
 import { supplierService } from '../services/supplier.service';
@@ -7,6 +8,7 @@ import { DeliveryForm } from '../../../components/Delivery/DeliveryForm';
 import { PaymentObligations } from '../../../components/Delivery/PaymentObligations';
 
 export const SupplierDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [supplier, setSupplier] = useState<Supplier | null>(null);
@@ -70,7 +72,7 @@ export const SupplierDetailPage: React.FC = () => {
   }
 
   if (!supplier) {
-    return <div className="p-6 text-center text-gray-500">Proveedor no encontrado</div>;
+    return <div className="p-6 text-center text-gray-500">{t('supplierDetail.not_found')}</div>;
   }
 
   return (
@@ -81,13 +83,13 @@ export const SupplierDetailPage: React.FC = () => {
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver a proveedores
+          {t('supplierDetail.back_to_suppliers')}
         </button>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="flex justify-between items-center p-6 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'Editar Proveedor' : supplier.companyName}
+              {isEditing ? t('supplierDetail.edit_supplier') : supplier.companyName}
             </h1>
             {activeTab === 'info' && (
               <button
@@ -95,7 +97,7 @@ export const SupplierDetailPage: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 {isEditing ? <Save className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                {isEditing ? 'Guardar' : 'Editar'}
+                {isEditing ? t('common.save') : t('common.edit')}
               </button>
             )}
           </div>
@@ -114,7 +116,7 @@ export const SupplierDetailPage: React.FC = () => {
                     : 'bg-white text-gray-600 hover:shadow-xl hover:text-gray-900'
                 }`}
               >
-                Información
+                {t('supplierDetail.information')}
               </button>
               <button
                 onClick={() => {
@@ -128,7 +130,7 @@ export const SupplierDetailPage: React.FC = () => {
                 }`}
               >
                 <Package className="w-4 h-4" />
-                Recepción BL
+                {t('supplierDetail.bl_reception')}
               </button>
               <button
                 onClick={() => {
@@ -142,7 +144,7 @@ export const SupplierDetailPage: React.FC = () => {
                 }`}
               >
                 <CreditCard className="w-4 h-4" />
-                Obligaciones de Pago
+                {t('supplierDetail.payment_obligations')}
               </button>
             </div>
           </div>
@@ -151,7 +153,7 @@ export const SupplierDetailPage: React.FC = () => {
             {activeTab === 'info' && (
               <div className="space-y-4 max-w-2xl">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('supplierDetail.name')}</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -165,7 +167,7 @@ export const SupplierDetailPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('common.email')}</label>
                   {isEditing ? (
                     <input
                       type="email"
@@ -179,7 +181,7 @@ export const SupplierDetailPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Condiciones de pago</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('supplierDetail.payment_terms')}</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -193,7 +195,7 @@ export const SupplierDetailPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">NIF</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('supplierDetail.tax_id')}</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -211,9 +213,9 @@ export const SupplierDetailPage: React.FC = () => {
             {activeTab === 'delivery' && id && (
               <div>
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Recepción de Albaranes</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('supplierDetail.delivery_reception')}</h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Registra la entrada de mercancía. Se actualizará el stock y se creará una obligación de pago.
+                    {t('supplierDetail.delivery_description')}
                   </p>
                 </div>
                 <DeliveryForm supplierId={id} onSuccess={loadSupplier} />
@@ -223,9 +225,9 @@ export const SupplierDetailPage: React.FC = () => {
             {activeTab === 'obligations' && id && (
               <div>
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Obligaciones de Pago</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t('supplierDetail.payment_obligations_title')}</h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Gestiona los pagos pendientes con este proveedor.
+                    {t('supplierDetail.payment_obligations_description')}
                   </p>
                 </div>
                 <PaymentObligations supplierId={id} />

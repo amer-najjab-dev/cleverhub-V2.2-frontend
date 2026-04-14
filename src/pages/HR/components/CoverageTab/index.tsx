@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { shiftService, Shift } from '../../../../services/hr/shift.service';
 import { coverageService, CoverageData } from '../../../../services/hr/coverage.service';
@@ -7,14 +8,23 @@ import { AssignShiftModal } from './AssignShiftModal';
 import { EditShiftModal } from './EditShiftModal';
 import { toast } from 'react-hot-toast';
 
-// ✅ Mejora 1: Nuevos colores según estado
+// Colores según estado
 const getStatusCircleColor = (currentCount: number, requiredMin: number) => {
-  if (currentCount === 0) return 'bg-red-500';           // Rojo: sin empleados
-  if (currentCount < requiredMin) return 'bg-orange-500'; // Naranja: insuficiente
-  return 'bg-green-500';                                  // Verde: completo
+  if (currentCount === 0) return 'bg-red-500';
+  if (currentCount < requiredMin) return 'bg-orange-500';
+  return 'bg-green-500';
+};
+
+// Traducción de nombres de turnos
+const shiftNamesMap: Record<string, { es: string; fr: string }> = {
+  'Guardia': { es: 'Guardia', fr: 'Garde' },
+  'Mañana': { es: 'Mañana', fr: 'Matin' },
+  'Tarde': { es: 'Tarde', fr: 'Après-midi' },
+  'Noche': { es: 'Noche', fr: 'Nuit' }
 };
 
 export const CoverageTab = () => {
+  const { t, i18n } = useTranslation();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [coverage, setCoverage] = useState<CoverageData>({});
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -68,14 +78,14 @@ export const CoverageTab = () => {
   };
 
   const handleDeleteShift = async (id: number, name: string) => {
-    if (confirm(`¿Eliminar el turno "${name}"?`)) {
+    if (confirm(t('hr.coverage.confirm_delete_shift', { name }))) {
       try {
         await shiftService.delete(id);
-        toast.success('Turno eliminado correctamente');
+        toast.success(t('hr.coverage.shift_deleted'));
         loadData();
       } catch (error) {
         console.error('Error deleting shift:', error);
-        toast.error('Error al eliminar el turno');
+        toast.error(t('hr.coverage.delete_error'));
       }
     }
   };
@@ -83,6 +93,19 @@ export const CoverageTab = () => {
   const handleEditClick = (shift: Shift) => {
     setSelectedShift(shift);
     setShowEditModal(true);
+  };
+
+  const translateShiftName = (name: string): string => {
+    const translation = shiftNamesMap[name];
+    if (translation) {
+      return i18n.language === 'es' ? translation.es : translation.fr;
+    }
+    return name;
+  };
+
+  const formatDayHeader = (date: Date): string => {
+    const locale = i18n.language === 'es' ? 'es-ES' : 'fr-FR';
+    return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
   };
 
   return (
@@ -105,27 +128,27 @@ export const CoverageTab = () => {
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Plus className="w-4 h-4" />
-          Nuevo Turno
+          {t('hr.coverage.new_shift')}
         </button>
       </div>
 
-      {/* Coverage Table */}
+      {/* Shifts Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="p-3 text-left text-sm font-medium text-gray-500">Turno</th>
-                <th className="p-3 text-left text-sm font-medium text-gray-500">Horario</th>
-                <th className="p-3 text-center text-sm font-medium text-gray-500">Min. Personal</th>
-                <th className="p-3 text-center text-sm font-medium text-gray-500">Color</th>
-                <th className="p-3 text-center text-sm font-medium text-gray-500">Acciones</th>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">{t('hr.coverage.shift')}</th>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">{t('hr.coverage.schedule')}</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">{t('hr.coverage.min_staff')}</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">{t('hr.coverage.color')}</th>
+                <th className="p-3 text-center text-sm font-medium text-gray-500">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {shifts.map(shift => (
                 <tr key={shift.id} className="hover:bg-gray-50">
-                  <td className="p-3 font-medium text-gray-900">{shift.name}</td>
+                  <td className="p-3 font-medium text-gray-900">{translateShiftName(shift.name)}</td>
                   <td className="p-3 text-gray-600">{shift.start_time} - {shift.end_time}</td>
                   <td className="p-3 text-center">{shift.min_employees_required}</td>
                   <td className="p-3 text-center">
@@ -136,14 +159,14 @@ export const CoverageTab = () => {
                       <button
                         onClick={() => handleEditClick(shift)}
                         className="text-blue-600 hover:text-blue-800 transition"
-                        title="Editar turno"
+                        title={t('common.edit')}
                       >
                         ✏️
                       </button>
                       <button
                         onClick={() => handleDeleteShift(shift.id, shift.name)}
                         className="text-red-600 hover:text-red-800 transition"
-                        title="Eliminar turno"
+                        title={t('common.delete')}
                       >
                         🗑️
                       </button>
@@ -162,10 +185,10 @@ export const CoverageTab = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="p-3 text-left text-sm font-medium text-gray-500">Turno / Día</th>
+                <th className="p-3 text-left text-sm font-medium text-gray-500">{t('hr.coverage.shift_day')}</th>
                 {weekDays.map((day, idx) => (
                   <th key={idx} className="p-3 text-center text-sm font-medium text-gray-500">
-                    {day.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    {formatDayHeader(day)}
                   </th>
                 ))}
               </tr>
@@ -175,7 +198,7 @@ export const CoverageTab = () => {
                 <tr key={shift.id} className="hover:bg-gray-50">
                   <td className="p-3 font-medium text-gray-900">
                     <div>
-                      <div>{shift.name}</div>
+                      <div>{translateShiftName(shift.name)}</div>
                       <div className="text-xs text-gray-500">{shift.start_time} - {shift.end_time}</div>
                     </div>
                   </td>

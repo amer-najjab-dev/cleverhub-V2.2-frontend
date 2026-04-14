@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, DollarSign, Package, Activity } from 'lucide-react';
 
 interface QuickStatsProps {
@@ -7,6 +8,8 @@ interface QuickStatsProps {
 }
 
 export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <>
@@ -30,7 +33,7 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
       <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-2">Ventas Hoy</p>
+            <p className="text-sm text-gray-600 mb-2">{t('quickStats.today_sales')}</p>
             <p className="text-2xl font-bold text-blue-600">{formatCurrency(todaySales)}</p>
           </div>
           <div className="bg-blue-50 p-3 rounded-lg">
@@ -42,7 +45,7 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
       <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '100ms' }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-2">Ticket Promedio</p>
+            <p className="text-sm text-gray-600 mb-2">{t('quickStats.average_ticket')}</p>
             <p className="text-2xl font-bold text-green-600">{formatCurrency(averageTicket)}</p>
           </div>
           <div className="bg-green-50 p-3 rounded-lg">
@@ -54,7 +57,7 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
       <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '200ms' }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-2">Stock Bajo</p>
+            <p className="text-sm text-gray-600 mb-2">{t('quickStats.low_stock')}</p>
             <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
           </div>
           <div className="bg-amber-50 p-3 rounded-lg">
@@ -66,7 +69,7 @@ export const QuickStats = ({ kpis, loading, formatCurrency }: QuickStatsProps) =
       <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 animate-fadeIn" style={{ animationDelay: '300ms' }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-gray-600 mb-2">Crecimiento</p>
+            <p className="text-sm text-gray-600 mb-2">{t('quickStats.growth')}</p>
             <p className={`text-2xl font-bold ${growth >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
               {growth.toFixed(1)}%
             </p>

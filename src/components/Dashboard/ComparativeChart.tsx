@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useCurrencyFormatter } from '../../utils/formatters';
@@ -10,6 +11,7 @@ interface ComparativeChartProps {
 }
 
 export const ComparativeChart = ({ period }: ComparativeChartProps) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<ComparativeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [growth, setGrowth] = useState(0);
@@ -48,8 +50,8 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Ventas Comparativas</h3>
-          <p className="text-sm text-gray-500">Esta semana vs semana anterior</p>
+          <h3 className="text-lg font-semibold text-gray-900">{t('comparativeChart.title')}</h3>
+          <p className="text-sm text-gray-500">{t('comparativeChart.subtitle')}</p>
         </div>
         {!loading && data.length > 0 && (
           <div className="flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full">
@@ -77,22 +79,22 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
               <Tooltip 
                 formatter={(value: any) => {
                   if (typeof value === 'number') {
-                    return [formatCurrency(value), 'Ventas'];
+                    return [formatCurrency(value), t('comparativeChart.sales')];
                   }
-                  return [value, 'Ventas'];
+                  return [value, t('comparativeChart.sales')];
                 }}
                 labelStyle={{ color: '#111827' }}
               />
               <Legend />
               <Bar 
                 dataKey="actual" 
-                name="Esta semana" 
+                name={t('comparativeChart.this_week')} 
                 fill="#3b82f6" 
                 radius={[4, 4, 0, 0]}
               />
               <Bar 
                 dataKey="previous" 
-                name="Semana anterior" 
+                name={t('comparativeChart.last_week')} 
                 fill="#d1d5db" 
                 radius={[4, 4, 0, 0]}
               />
@@ -100,7 +102,7 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
           </ResponsiveContainer>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500">
-            No hay datos para el período seleccionado
+            {t('comparativeChart.no_data')}
           </div>
         )}
       </div>
@@ -109,15 +111,15 @@ export const ComparativeChart = ({ period }: ComparativeChartProps) => {
         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalActual)}</div>
-            <div className="text-sm text-gray-500">Total actual</div>
+            <div className="text-sm text-gray-500">{t('comparativeChart.total_current')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalPrevious)}</div>
-            <div className="text-sm text-gray-500">Total anterior</div>
+            <div className="text-sm text-gray-500">{t('comparativeChart.total_previous')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">+{typeof growth === 'number' ? growth.toFixed(1) : '0.0'}%</div>
-            <div className="text-sm text-gray-500">Crecimiento</div>
+            <div className="text-sm text-gray-500">{t('comparativeChart.growth')}</div>
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3 } from 'lucide-react';
 import { useCurrencyFormatter } from '../../utils/formatters';
@@ -11,6 +12,7 @@ interface SalesChartProps {
 }
 
 export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<HourlySale[]>([]);
   const [loading, setLoading] = useState(true);
   const { formatCurrency } = useCurrencyFormatter();
@@ -42,7 +44,7 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center">
           <BarChart3 className="w-5 h-5 text-gray-700 mr-2" />
-          <h3 className="text-lg font-semibold text-gray-900">Ventas por Hora</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('salesChart.title')}</h3>
         </div>
       </div>
       
@@ -65,9 +67,9 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
               <Tooltip 
                 formatter={(value: any) => {
                   if (typeof value === 'number') {
-                    return [formatCurrency(value), 'Ventas'];
+                    return [formatCurrency(value), t('salesChart.sales')];
                   }
-                  return [value, 'Ventas'];
+                  return [value, t('salesChart.sales')];
                 }}
                 labelStyle={{ color: '#111827' }}
               />
@@ -83,7 +85,7 @@ export const SalesChart = ({ period = 'today', date }: SalesChartProps) => {
           </ResponsiveContainer>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500">
-            No hay datos para el período seleccionado
+            {t('salesChart.no_data')}
           </div>
         )}
       </div>

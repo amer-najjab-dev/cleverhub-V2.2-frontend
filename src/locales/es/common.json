@@ -242,8 +242,89 @@
     "my_profile": "Mi perfil",
     "users": "Usuarios",
     "logout": "Cerrar sesión"
+  },
+  "salesHistory": {
+    "title": "Historial de Ventas Recientes",
+    "subtitle": "Últimas ventas registradas en el sistema",
+    "sale_id": "ID Venta",
+    "date_time": "Fecha/Hora",
+    "client": "Cliente",
+    "user": "Usuario",
+    "amount": "Importe",
+    "payment_method": "Método Pago",
+    "status": "Estado",
+    "id": "ID",
+    "discount": "desc",
+    "sale_products": "Productos de la venta",
+    "product": "Producto",
+    "quantity": "Cantidad",
+    "unit_price": "Precio Unit.",
+    "total": "Total",
+    "paid": "Pagado",
+    "partial": "Parcial",
+    "pending": "Pendiente",
+    "unknown": "Desconocido",
+    "not_specified": "No especificado",
+    "cash": "Efectivo",
+    "card": "Tarjeta",
+    "credit": "Crédito",
+    "transfer": "Transferencia",
+    "check": "Cheque",
+    "mixed": "Mixto",
+    "unregistered_client": "Cliente no registrado",
+    "product_unavailable": "Producto no disponible",
+    "date_unavailable": "Fecha no disponible",
+    "invalid_date": "Fecha inválida",
+    "date_format_error": "Error al formatear fecha",
+    "unexpected_format": "No se pudieron cargar las ventas",
+    "connection_error": "Error al conectar con el servidor",
+    "no_sales": "No hay ventas recientes",
+    "view_full_history": "Ver historial completo",
+    "sales": "ventas"
+  },
+  "quickStats": {
+    "today_sales": "Ventas Hoy",
+    "average_ticket": "Ticket Promedio",
+    "low_stock": "Stock Bajo",
+    "growth": "Crecimiento"
   }
-
-   
+,
+  "salesChart": {
+    "title": "Ventas por Hora",
+    "sales": "Ventas",
+    "no_data": "No hay datos para el período seleccionado"
+  },
+  "comparativeChart": {
+    "title": "Ventas Comparativas",
+    "subtitle": "Esta semana vs semana anterior",
+    "sales": "Ventas",
+    "this_week": "Esta semana",
+    "last_week": "Semana anterior",
+    "total_current": "Total actual",
+    "total_previous": "Total anterior",
+    "growth": "Crecimiento",
+    "no_data": "No hay datos para el período seleccionado"
+  },
+  "topProducts": {
+    "title": "Top 10 Productos",
+    "best_sellers": "Los más vendidos",
+    "period": "Período",
+    "last_week": "Última semana",
+    "last_month": "Último mes",
+    "last_quarter": "Último trimestre",
+    "custom_dates": "Personalizar fechas",
+    "start_date": "Fecha inicio",
+    "end_date": "Fecha fin",
+    "product": "Producto",
+    "category": "Categoría",
+    "quantity": "Cantidad",
+    "revenue": "C. A.",
+    "margin": "Marge",
+    "units": "u.",
+    "na": "N/A",
+    "from": "del",
+    "to": "al",
+    "selected_period": "período seleccionado",
+    "no_data": "No hay datos de productos para {period}"
+  }
 }
-  

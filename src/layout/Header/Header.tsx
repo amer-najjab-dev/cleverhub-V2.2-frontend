@@ -30,8 +30,21 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   Bell: Bell
 };
 
+// Traducciones manuales para el navbar (fallback)
+const navTranslations: Record<string, { es: string; fr: string }> = {
+  dashboard: { es: "Dashboard", fr: "Tableau de bord" },
+  sales: { es: "Ventas", fr: "Ventes" },
+  clients: { es: "Clientes", fr: "Clients" },
+  products: { es: "Productos", fr: "Produits" },
+  stock: { es: "Stock", fr: "Stock" },
+  providers: { es: "Proveedores", fr: "Fournisseurs" },
+  reports: { es: "Reportes", fr: "Rapports" },
+  hr: { es: "RRHH", fr: "RH" },
+  admin: { es: "Admin", fr: "Admin" }
+};
+
 export const Header = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -39,13 +52,36 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
   
   const { user, logout } = useAuth();
+
+  // Escuchar cambios de idioma
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setCurrentLanguage(i18n.language);
+    };
+    
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
 
   // Obtener nombre traducido del módulo
   const getTranslatedModuleName = (modulePath: string, defaultName: string): string => {
     const key = modulePath.replace('/', '') || 'dashboard';
-    return t(`nav.${key}`, defaultName);
+    // Intentar usar t() primero
+    const translated = t(`nav.${key}`, '');
+    if (translated && translated !== `nav.${key}`) {
+      return translated;
+    }
+    // Fallback a traducciones manuales
+    const translation = navTranslations[key];
+    if (translation) {
+      return currentLanguage === 'es' ? translation.es : translation.fr;
+    }
+    return defaultName;
   };
 
   // Cargar módulos según el rol del usuario
@@ -193,7 +229,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-lg hover:bg-gray-50 relative group"
-                title={t('header.notifications')}
+                title={currentLanguage === 'es' ? 'Notificaciones' : 'Notifications'}
               >
                 <Bell className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-1 ring-white"></span>
@@ -202,16 +238,26 @@ export const Header = () => {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                   <div className="px-5 py-3 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900 text-sm">{t('header.notifications_title')}</h3>
+                    <h3 className="font-semibold text-gray-900 text-sm">
+                      {currentLanguage === 'es' ? 'Notificaciones' : 'Notifications'}
+                    </h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-sm font-medium text-gray-900">{t('header.low_stock')}: Paracetamol</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{t('header.units_left')}: 12</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {currentLanguage === 'es' ? 'Stock bajo: Paracetamol' : 'Stock faible: Paracetamol'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {currentLanguage === 'es' ? 'Quedan 12 unidades' : 'Il reste 12 unités'}
+                      </p>
                     </div>
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors border-t border-gray-50">
-                      <p className="text-sm font-medium text-gray-900">{t('header.expiring_soon')}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Ibuprofeno {t('header.expires_in')} 30 {t('header.days')}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {currentLanguage === 'es' ? 'Caducidad próxima' : 'Expiration proche'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Ibuprofeno {currentLanguage === 'es' ? 'vence en 30 días' : 'expire dans 30 jours'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -223,7 +269,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center space-x-2 p-1.5 pr-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                title={t('header.user_menu')}
+                title={currentLanguage === 'es' ? 'Menú de usuario' : 'Menu utilisateur'}
               >
                 <div className="w-7 h-7 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
                   {getInitials()}
@@ -231,9 +277,9 @@ export const Header = () => {
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{user.fullName.split(' ')[0]}</p>
                   <p className="text-xs text-gray-400">
-                    {user.role === 'ADMIN' ? t('header.admin') : 
-                     user.role === 'SUPER_ADMIN' ? t('header.super_admin') : 
-                     t('header.employee')}
+                    {user.role === 'ADMIN' ? (currentLanguage === 'es' ? 'Admin' : 'Admin') : 
+                     user.role === 'SUPER_ADMIN' ? (currentLanguage === 'es' ? 'Super Admin' : 'Super Admin') : 
+                     (currentLanguage === 'es' ? 'Empleado' : 'Employé')}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
@@ -253,7 +299,7 @@ export const Header = () => {
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="w-4 h-4 mr-3 text-gray-500" />
-                      <span>{t('header.my_profile')}</span>
+                      <span>{currentLanguage === 'es' ? 'Mi perfil' : 'Mon profil'}</span>
                     </Link>
                     
                     {user.role === 'ADMIN' && (
@@ -263,7 +309,7 @@ export const Header = () => {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Settings className="w-4 h-4 mr-3 text-gray-500" />
-                        <span>{t('header.users')}</span>
+                        <span>{currentLanguage === 'es' ? 'Usuarios' : 'Utilisateurs'}</span>
                       </Link>
                     )}
                   </div>
@@ -274,7 +320,7 @@ export const Header = () => {
                       className="flex items-center w-full px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut className="w-4 h-4 mr-3" />
-                      <span>{t('header.logout')}</span>
+                      <span>{currentLanguage === 'es' ? 'Cerrar sesión' : 'Déconnexion'}</span>
                     </button>
                   </div>
                 </div>

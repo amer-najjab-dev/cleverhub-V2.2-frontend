@@ -44,7 +44,7 @@ const navTranslations: Record<string, { es: string; fr: string }> = {
 };
 
 export const Header = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -72,15 +72,11 @@ export const Header = () => {
   const getTranslatedModuleName = (modulePath: string, defaultName: string): string => {
     const key = modulePath.replace('/', '') || 'dashboard';
     // Intentar usar t() primero
-    const translated = t(`nav.${key}`, '');
-    if (translated && translated !== `nav.${key}`) {
-      return translated;
-    }
-    // Fallback a traducciones manuales
     const translation = navTranslations[key];
     if (translation) {
       return currentLanguage === 'es' ? translation.es : translation.fr;
     }
+    // Fallback a traducciones manuales
     return defaultName;
   };
 

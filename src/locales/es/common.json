@@ -29,7 +29,12 @@
     "products": "Productos",
     "pharmacy": "Farmacia",
     "users": "Usuarios",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "sales": "Ventas",
+    "stock": "Stock",
+    "providers": "Proveedores",
+    "hr": "RRHH",
+    "admin": "Admin"
   },
   "reports": {
     "cash": "Caja",
@@ -221,6 +226,22 @@
     "create_error": "Error al crear el proveedor",
     "delete_error": "Error al eliminar el proveedor",
     "confirm_delete": "¿Eliminar proveedor \"{{name}}\"? Esta acción no se puede deshacer."
+  },
+  "header": {
+    "notifications": "Notificaciones",
+    "notifications_title": "Notificaciones",
+    "low_stock": "Stock bajo",
+    "units_left": "Quedan",
+    "expiring_soon": "Caducidad próxima",
+    "expires_in": "vence en",
+    "days": "días",
+    "user_menu": "Menú de usuario",
+    "admin": "Admin",
+    "super_admin": "Super Admin",
+    "employee": "Empleado",
+    "my_profile": "Mi perfil",
+    "users": "Usuarios",
+    "logout": "Cerrar sesión"
   }
 
    

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, DollarSign, Percent } from 'lucide-react';
 import { useCurrencyFormatter } from '../../utils/formatters';
 
@@ -16,6 +17,7 @@ export const StockSummary = ({
   lowStockCount,
   expiringCount
 }: StockSummaryProps) => {
+  const { t } = useTranslation();
   const { formatCurrency } = useCurrencyFormatter();
 
   return (
@@ -26,7 +28,7 @@ export const StockSummary = ({
             <DollarSign className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <div className="text-sm text-gray-500">Valor PPH</div>
+            <div className="text-sm text-gray-500">{t('stockSummary.pph_value')}</div>
             <div className="text-xl font-bold text-gray-900">{formatCurrency(totalPPH)}</div>
           </div>
         </div>
@@ -36,7 +38,7 @@ export const StockSummary = ({
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <div className="text-sm text-gray-500">Valor PPV</div>
+            <div className="text-sm text-gray-500">{t('stockSummary.ppv_value')}</div>
             <div className="text-xl font-bold text-gray-900">{formatCurrency(totalPPV)}</div>
           </div>
         </div>
@@ -46,7 +48,7 @@ export const StockSummary = ({
             <Percent className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <div className="text-sm text-gray-500">Margen bruto</div>
+            <div className="text-sm text-gray-500">{t('stockSummary.gross_margin')}</div>
             <div className="text-xl font-bold text-purple-600">{formatCurrency(margin)}</div>
           </div>
         </div>
@@ -54,12 +56,12 @@ export const StockSummary = ({
         <div className="flex items-center gap-4">
           {lowStockCount > 0 && (
             <div className="text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
-              {lowStockCount} productos con stock bajo
+              {t('stockSummary.low_stock_products', { count: lowStockCount })}
             </div>
           )}
           {expiringCount > 0 && (
             <div className="text-sm bg-red-100 text-red-800 px-3 py-1 rounded-full">
-              {expiringCount} próximos a caducar
+              {t('stockSummary.expiring_soon', { count: expiringCount })}
             </div>
           )}
         </div>

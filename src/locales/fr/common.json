@@ -413,5 +413,67 @@
     "upselling_completed": "Upselling complétés",
     "interactions_prevented": "Interactions évitées",
     "conversion_rate": "Taux de conversion"
+  },
+  "stockFilters": {
+    "search_placeholder": "Rechercher un produit...",
+    "all_categories": "Toutes catégories",
+    "all_zones": "Toutes zones",
+    "all_labs": "Tous laboratoires",
+    "showing_expiring": "Affichage des produits bientôt expirés",
+    "filter_expiring": "Filtrer les produits bientôt expirés",
+    "active_filters": "Filtres actifs",
+    "showing_all": "Affichage de tous les produits"
+  },
+  "stockTable": {
+    "product": "Produit",
+    "stock": "Stock",
+    "reserved": "Réservé",
+    "available": "Disponible",
+    "ordered": "Commandé",
+    "pph": "PPH",
+    "ppv": "PPV",
+    "zone": "Zone",
+    "expiry": "Expiration",
+    "barcode": "Code barre",
+    "barcode2": "Code 2",
+    "expired": "Expiré",
+    "days": "jours",
+    "edit_stock": "Modifier le stock",
+    "no_products": "Aucun produit dans l'inventaire"
+  },
+  "stockSummary": {
+    "pph_value": "Valeur PPH",
+    "ppv_value": "Valeur PPV",
+    "gross_margin": "Marge brute",
+    "low_stock_products": "{{count}} produits en stock faible",
+    "expiring_soon": "{{count}} bientôt expirés"
+  },
+  "editStockModal": {
+    "title": "Ajuster le Stock",
+    "product": "Produit",
+    "current_stock": "Stock actuel",
+    "new_stock": "Nouveau stock",
+    "ordered": "Commandé",
+    "expiry_date": "Date d'expiration",
+    "adjustment_reason": "Motif de l'ajustement",
+    "select_reason": "Sélectionner un motif",
+    "order_receipt": "Réception de commande",
+    "sale": "Vente",
+    "inventory_adjustment": "Ajustement d'inventaire",
+    "return": "Retour",
+    "expired": "Produit expiré",
+    "inventory_error": "Erreur d'inventaire",
+    "breakage": "Casse",
+    "notes": "Notes (optionnel)",
+    "notes_placeholder": "Informations supplémentaires...",
+    "units": "unités"
+  },
+  "pagination": {
+    "showing": "Affichage de",
+    "to": "à",
+    "of": "sur",
+    "products": "produits",
+    "per_page": "par page",
+    "page": "Page"
   }
 }

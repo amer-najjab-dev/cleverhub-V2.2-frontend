@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Edit } from 'lucide-react';
 import { useCurrencyFormatter } from '../../utils/formatters';
 import { InventoryProduct } from '../../services/inventory.service';
@@ -10,6 +11,7 @@ interface StockTableProps {
 }
 
 export const StockTable = ({ products, loading, onEdit }: StockTableProps) => {
+  const { t } = useTranslation();
   const [sortField, setSortField] = useState<keyof InventoryProduct>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const { formatCurrency } = useCurrencyFormatter();
@@ -45,9 +47,9 @@ export const StockTable = ({ products, loading, onEdit }: StockTableProps) => {
     const expiry = new Date(expiryDate);
     const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return { class: 'bg-red-600 text-white', text: 'Caducado' };
-    if (diffDays < 90) return { class: 'bg-red-500 text-white', text: `${diffDays} días` };
-    if (diffDays < 180) return { class: 'bg-orange-400 text-white', text: `${diffDays} días` };
+    if (diffDays < 0) return { class: 'bg-red-600 text-white', text: t('stockTable.expired') };
+    if (diffDays < 90) return { class: 'bg-red-500 text-white', text: `${diffDays} ${t('stockTable.days')}` };
+    if (diffDays < 180) return { class: 'bg-orange-400 text-white', text: `${diffDays} ${t('stockTable.days')}` };
     return { class: 'bg-gray-100 text-gray-700', text: expiry.toLocaleDateString() };
   };
 
@@ -70,22 +72,22 @@ export const StockTable = ({ products, loading, onEdit }: StockTableProps) => {
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700"
                   onClick={() => handleSort('name')}>
-                Producto {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                {t('stockTable.product')} {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:text-gray-700"
                   onClick={() => handleSort('stock')}>
-                Stock {sortField === 'stock' && (sortDirection === 'asc' ? '↑' : '↓')}
+                {t('stockTable.stock')} {sortField === 'stock' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reservado</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Disponible</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedido</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PPH</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PPV</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Zona</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Caducidad</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code barre</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code 2</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.reserved')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.available')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.ordered')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.pph')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.ppv')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.zone')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.expiry')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.barcode')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('stockTable.barcode2')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -122,7 +124,7 @@ export const StockTable = ({ products, loading, onEdit }: StockTableProps) => {
                     <button
                       onClick={() => onEdit(product)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                      title="Editar stock"
+                      title={t('stockTable.edit_stock')}
                     >
                       <Edit size={18} />
                     </button>
@@ -136,7 +138,7 @@ export const StockTable = ({ products, loading, onEdit }: StockTableProps) => {
       
       {products.length === 0 && (
         <div className="p-8 text-center text-gray-500">
-          No hay productos en el inventario
+          {t('stockTable.no_products')}
         </div>
       )}
     </div>

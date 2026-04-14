@@ -510,19 +510,18 @@
       "calendar": "Calendrier",
       "requests": "Demandes",
       "config": "Configuration"
-    }
-  },
-  "coverage": {
-    "new_shift": "Nouvel Horaire",
-    "shift": "Horaire",
-    "schedule": "Horaire",
-    "min_staff": "Min. Personnel",
-    "color": "Couleur",
-    "shift_day": "Horaire / Jour",
-    "confirm_delete_shift": "Supprimer l'horaire \"{{name}}\" ?",
-    "shift_deleted": "Horaire supprimé avec succès",
-    "delete_error": "Erreur lors de la suppression de l'horaire"
-  },
+    },
+    "coverage": {
+      "new_shift": "Nouvel Horaire",
+      "shift": "Horaire",
+      "schedule": "Horaire",
+      "min_staff": "Min. Personnel",
+      "color": "Couleur",
+      "shift_day": "Horaire / Jour",
+      "confirm_delete_shift": "Supprimer l'horaire \"{{name}}\" ?",
+      "shift_deleted": "Horaire supprimé avec succès",
+      "delete_error": "Erreur lors de la suppression de l'horaire"
+    },
     "employees": {
       "title": "Employés",
       "new_employee": "Nouvel Employé",
@@ -555,4 +554,7 @@
       "title": "Configuration",
       "coming_soon": "Gestion des horaires, employés, jours fériés et gardes - Prochainement"
     }
+  }
 }
+  
+    

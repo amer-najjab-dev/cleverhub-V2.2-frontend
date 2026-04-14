@@ -491,6 +491,7 @@
     "payment_obligations_title": "Obligations de Paiement",
     "payment_obligations_description": "Gérez les paiements en attente avec ce fournisseur."
   },
+  "proveedor_list": {  
     "name_placeholder": "Nom du fournisseur",
     "phone_placeholder": "Téléphone",
     "address_placeholder": "Rue et numéro",
@@ -498,4 +499,60 @@
     "postal_code_placeholder": "Code Postal",
     "tax_id_placeholder": "Numéro d'identification fiscale",
     "payment_terms_placeholder": "Ex: 30 jours"
+  },
+  "hr": {
+    "title": "RH",
+    "coming_soon": "Prochainement...",
+    "tabs": {
+      "coverage": "Couverture",
+      "employees": "Employés",
+      "payroll": "Paies",
+      "calendar": "Calendrier",
+      "requests": "Demandes",
+      "config": "Configuration"
+    }
+  },
+  "coverage": {
+    "new_shift": "Nouvel Horaire",
+    "shift": "Horaire",
+    "schedule": "Horaire",
+    "min_staff": "Min. Personnel",
+    "color": "Couleur",
+    "shift_day": "Horaire / Jour",
+    "confirm_delete_shift": "Supprimer l'horaire \"{{name}}\" ?",
+    "shift_deleted": "Horaire supprimé avec succès",
+    "delete_error": "Erreur lors de la suppression de l'horaire"
+  },
+    "employees": {
+      "title": "Employés",
+      "new_employee": "Nouvel Employé",
+      "name": "Nom",
+      "phone": "Téléphone",
+      "cni": "CNI",
+      "na": "N/D",
+      "employee": "employé",
+      "load_error": "Erreur lors du chargement des employés",
+      "confirm_delete": "Supprimer {{name}} ?",
+      "delete_success": "Employé supprimé",
+      "delete_error": "Erreur lors de la suppression de l'employé"
+    },
+    "calendar": {
+      "today": "Aujourd'hui",
+      "month": "Mois",
+      "week": "Semaine",
+      "legend": "Légende",
+      "holidays": "Jours fériés",
+      "vacations": "Vacances",
+      "sick_leave": "Arrêts maladie",
+      "maternity_leave": "Congé maternité",
+      "paternity_leave": "Congé paternité"
+    },
+    "requests": {
+      "title": "Demandes",
+      "coming_soon": "Gestion des demandes de vacances et absences - Prochainement"
+    },
+    "config": {
+      "title": "Configuration",
+      "coming_soon": "Gestion des horaires, employés, jours fériés et gardes - Prochainement"
+    }
 }

@@ -1,4 +1,5 @@
-// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN FINAL
+// src/components/CleverHubPanel/CleverHubPanel.tsx - VERSIÓN TRADUCIDA
+import { useTranslation } from 'react-i18next';
 import { Brain, TrendingUp, AlertTriangle, Trophy } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
 import { ToastNotification } from '../ui/ToastNotification';
@@ -7,6 +8,7 @@ import { productsService, Product } from '../../services/products.service';
 import { useCurrencyFormatter } from '../../utils/formatters';
 
 export const CleverHubPanel = () => {
+  const { t } = useTranslation();
   const { addItem } = useCartStore();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
@@ -31,7 +33,7 @@ export const CleverHubPanel = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching products:', err);
-        setError('No se pudieron cargar los productos');
+        setError(t('cleverHub.load_error'));
       } finally {
         setLoading(false);
       }
@@ -52,7 +54,7 @@ export const CleverHubPanel = () => {
       lowStock: product.stock < 20
     });
     
-    setNotificationMessage(`✅ ${product.name} añadido al carrito`);
+    setNotificationMessage(t('cleverHub.added_to_cart', { name: product.name }));
     setShowNotification(true);
   };
 
@@ -65,9 +67,9 @@ export const CleverHubPanel = () => {
               <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">CleverHub IA</h3>
+              <h3 className="text-lg font-bold text-gray-900">{t('cleverHub.title')}</h3>
               <p className="text-sm text-gray-600">
-                Sugerencias basadas en productos con buen stock
+                {t('cleverHub.subtitle')}
               </p>
             </div>
           </div>
@@ -76,8 +78,8 @@ export const CleverHubPanel = () => {
           <div className="flex items-center bg-white px-4 py-2 rounded-full border border-purple-200">
             <Trophy className="w-5 h-5 text-amber-500 mr-2" />
             <div>
-              <div className="text-sm font-semibold text-gray-900">Nivel 7</div>
-              <div className="text-xs text-gray-500">Especialista</div>
+              <div className="text-sm font-semibold text-gray-900">{t('cleverHub.level')} 7</div>
+              <div className="text-xs text-gray-500">{t('cleverHub.specialist')}</div>
             </div>
           </div>
         </div>
@@ -86,13 +88,13 @@ export const CleverHubPanel = () => {
         <div className="mb-6">
           <div className="flex items-center mb-4">
             <TrendingUp className="w-5 h-5 text-green-600 mr-2" />
-            <h4 className="font-semibold text-gray-900">Sugerencias de Venta</h4>
+            <h4 className="font-semibold text-gray-900">{t('cleverHub.sales_suggestions')}</h4>
           </div>
           
           {loading ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Cargando productos...</p>
+              <p className="text-gray-600 mt-2">{t('common.loading')}</p>
             </div>
           ) : error ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -100,7 +102,7 @@ export const CleverHubPanel = () => {
             </div>
           ) : products.length === 0 ? (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-gray-600">No hay productos disponibles para mostrar</p>
+              <p className="text-gray-600">{t('cleverHub.no_products')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -116,23 +118,19 @@ export const CleverHubPanel = () => {
                     <div className="font-medium text-gray-900">{product.name}</div>
                     <div className="text-sm text-gray-500 mt-1">{product.category}</div>
                     
-                    {/* SOLO STOCK - SIN COSTE */}
                     <div className="mt-2 text-center">
                       <span className={`text-xs ${product.stock < 20 ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
-                        Stock: {product.stock} {product.stock < 10 ? '⚠️' : ''}
+                        {t('cleverHub.stock')}: {product.stock} {product.stock < 10 ? '⚠️' : ''}
                       </span>
                     </div>
                     
-                    {/* PRECIO MÁS PEQUEÑO + BOTÓN DEBAJO */}
                     <div className="mt-4 space-y-3">
-                      {/* Precio más pequeño */}
                       <div className="text-center">
                         <span className="text-base font-semibold text-gray-900">
                           {formatCurrency(pricePPV)}
                         </span>
                       </div>
                       
-                      {/* Botón Añadir centrado */}
                       <button 
                         className="w-full bg-blue-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                         onClick={(e) => {
@@ -140,7 +138,7 @@ export const CleverHubPanel = () => {
                           handleAddToCart(product);
                         }}
                       >
-                        Añadir al carrito
+                        {t('cleverHub.add_to_cart')}
                       </button>
                     </div>
                   </div>
@@ -154,15 +152,14 @@ export const CleverHubPanel = () => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center mb-2">
             <AlertTriangle className="w-5 h-5 text-red-600 mr-2" />
-            <h4 className="font-semibold text-red-700">INTERACCIÓN DETECTADA</h4>
+            <h4 className="font-semibold text-red-700">{t('cleverHub.interaction_detected')}</h4>
           </div>
           <p className="text-red-700">
-            <span className="font-semibold">IBUPROFENO • PARACETAMOL</span> • Riesgo de daño hepático aumentado.
-            Considera recomendar solo uno de los dos analgésicos.
+            <span className="font-semibold">{t('cleverHub.interaction_products')}</span> • {t('cleverHub.interaction_risk')}
           </p>
           <div className="flex items-center mt-3 text-sm text-red-600">
             <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-            <span>Severidad: Alta • Consulta con el farmacéutico</span>
+            <span>{t('cleverHub.severity')}</span>
           </div>
         </div>
 
@@ -172,19 +169,19 @@ export const CleverHubPanel = () => {
             <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
               <span className="text-blue-700 font-bold">5</span>
             </div>
-            <span className="text-gray-600">Upselling completados</span>
+            <span className="text-gray-600">{t('cleverHub.upselling_completed')}</span>
           </div>
           <div className="flex items-center">
             <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2">
               <span className="text-green-700 font-bold">3</span>
             </div>
-            <span className="text-gray-600">Interacciones prevenidas</span>
+            <span className="text-gray-600">{t('cleverHub.interactions_prevented')}</span>
           </div>
           <div className="flex items-center">
             <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center mr-2">
               <span className="text-amber-700 font-bold">85%</span>
             </div>
-            <span className="text-gray-600">Tasa de conversión</span>
+            <span className="text-gray-600">{t('cleverHub.conversion_rate')}</span>
           </div>
         </div>
       </div>

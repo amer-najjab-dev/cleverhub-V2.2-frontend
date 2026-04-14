@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CreditCard, Wallet, TrendingUp, DollarSign, Percent, Tag, AlertCircle, Star } from 'lucide-react';
 import { useCartStore } from '../../store/cart.store';
 import { salesService } from '../../services/sales.service';
@@ -8,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 type PaymentMethod = 'efectivo' | 'tarjeta' | 'transferencia' | 'cheque' | 'mixto' | 'credito' | 'puntos';
 
 export const FinancialSummary = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [paidAmount, setPaidAmount] = useState<string>('');
   const [discountInput, setDiscountInput] = useState<string>('');
@@ -131,7 +133,7 @@ export const FinancialSummary = () => {
     }
     
     if (paymentMethod === 'credito' || paymentMethod === 'puntos') {
-      return total; // ← DEVOLVER TOTAL PARA CRÉDITO
+      return total;
     }
     
     if (paymentMethod === 'efectivo') {
@@ -147,39 +149,39 @@ export const FinancialSummary = () => {
   
   // ============ FUNCIÓN MEJORADA PARA TEXTO DEL BOTÓN ============
   const getButtonText = (): string => {
-    if (isProcessing) return 'Procesando...';
-    if (items.length === 0) return 'Carrito vacío';
+    if (isProcessing) return t('financialSummary.processing');
+    if (items.length === 0) return t('financialSummary.empty_cart');
     
     if (paymentMethod === 'credito' && !clientId) {
-      return '⚠️ Selecciona cliente para habilitar crédito';
+      return t('financialSummary.select_client_credit');
     }
     
     if (paymentMethod === 'puntos' && !clientId) {
-      return '⚠️ Selecciona cliente para habilitar pago con puntos';
+      return t('financialSummary.select_client_points');
     }
     
     if (!canCompleteSale()) {
       if (paymentMethod === 'efectivo' && parseFloat(paidAmount || '0') < total) {
         const falta = total - parseFloat(paidAmount || '0');
-        return `Monto insuficiente (falta ${formatCurrency(falta)})`;
+        return t('financialSummary.insufficient_amount', { amount: formatCurrency(falta) });
       }
         
       if (paymentMethod === 'mixto') {
         if (!mixedPayments || mixedPayments.step !== 'completed') {
-          return 'Selecciona dos métodos de pago';
+          return t('financialSummary.select_two_methods');
         }
         const firstAmount = mixedPayments.firstAmount || 0;
         const secondAmount = mixedPayments.secondAmount || 0;
         const sum = firstAmount + secondAmount;
         if (Math.abs(sum - total) >= 0.01) {
-          return `La suma (${formatCurrency(sum)}) no coincide con el total (${formatCurrency(total)})`;
+          return t('financialSummary.sum_mismatch', { sum: formatCurrency(sum), total: formatCurrency(total) });
         }
       }
         
-      return 'Configuración de pago incompleta';
+      return t('financialSummary.incomplete_payment');
     }
     
-    return `✅ Finalizar venta - ${formatCurrency(total)}`;
+    return t('financialSummary.finalize', { total: formatCurrency(total) });
   };
 
   const handleApplyDiscount = () => {
@@ -308,12 +310,12 @@ export const FinancialSummary = () => {
     if (isProcessing) return;
     
     if (items.length === 0) {
-      alert('No hay productos en el carrito');
+      alert(t('financialSummary.no_products'));
       return;
     }
 
     if (!user?.id) {
-      alert('Error: No se ha identificado al usuario. Por favor, cierra sesión y vuelve a iniciar.');
+      alert(t('financialSummary.no_user'));
       return;
     }
 
@@ -374,7 +376,7 @@ export const FinancialSummary = () => {
       
       const result = response.data || response;
       const saleNumber = result.saleNumber || result.id || 'N/A';
-      alert(`✅ Venta #${saleNumber} completada exitosamente\nTotal: ${formatCurrency(total)}`);
+      alert(t('financialSummary.sale_completed', { saleNumber, total: formatCurrency(total) }));
       
       setTimeout(() => {
         window.location.href = '/sales';
@@ -385,21 +387,21 @@ export const FinancialSummary = () => {
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error ||
                           error.message || 
-                          'Error al finalizar la venta';
-      alert(`❌ Error: ${errorMessage}\n\nRevisa la consola para más detalles.`);
+                          t('financialSummary.sale_error');
+      alert(`${t('financialSummary.sale_error_prefix')}: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const paymentMethods = [
-    { id: 'efectivo', label: 'Efectivo', icon: Wallet },
-    { id: 'tarjeta', label: 'Tarjeta', icon: CreditCard },
-    { id: 'transferencia', label: 'Transferencia', icon: TrendingUp },
-    { id: 'credito', label: 'Crédito', icon: CreditCard },
-    { id: 'cheque', label: 'Cheque', icon: DollarSign },
-    { id: 'mixto', label: 'Mixto', icon: Wallet },
-    { id: 'puntos', label: 'Pago con Puntos', icon: Star },
+    { id: 'efectivo', label: t('financialSummary.cash'), icon: Wallet },
+    { id: 'tarjeta', label: t('financialSummary.card'), icon: CreditCard },
+    { id: 'transferencia', label: t('financialSummary.transfer'), icon: TrendingUp },
+    { id: 'credito', label: t('financialSummary.credit'), icon: CreditCard },
+    { id: 'cheque', label: t('financialSummary.check'), icon: DollarSign },
+    { id: 'mixto', label: t('financialSummary.mixed'), icon: Wallet },
+    { id: 'puntos', label: t('financialSummary.points'), icon: Star },
   ];
 
   const renderMixedPaymentUI = () => {
@@ -410,25 +412,25 @@ export const FinancialSummary = () => {
 
     return (
       <div className="mb-4 border border-gray-300 rounded-lg p-3 bg-blue-50">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Pago Mixto</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">{t('financialSummary.mixed_payment')}</h4>
         
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-gray-600">
-            Paso: {step === 'selecting_first' ? '1. Selecciona primer método' :
-                   step === 'selecting_second' ? '2. Selecciona segundo método' :
-                   '3. Pago configurado'}
+            {step === 'selecting_first' ? t('financialSummary.step1') :
+                   step === 'selecting_second' ? t('financialSummary.step2') :
+                   t('financialSummary.step3')}
           </div>
           <div className="flex gap-2">
             <button
               onClick={resetMixedPayment}
               className="text-xs text-red-600 hover:text-red-800"
             >
-              Reiniciar
+              {t('common.reset')}
             </button>
             <button
               onClick={exitMixedPayment}
               className="text-xs text-gray-600 hover:text-gray-800"
-              title="Salir del pago mixto"
+              title={t('financialSummary.exit_mixed')}
             >
               ✕
             </button>
@@ -438,16 +440,16 @@ export const FinancialSummary = () => {
         {firstMethod && (
           <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-green-700">1er método: {firstMethod}</span>
+              <span className="text-sm font-medium text-green-700">{t('financialSummary.first_method')} {firstMethod}</span>
               {step === 'selecting_second' && (
-                <span className="text-xs text-green-600">✔ Seleccionado</span>
+                <span className="text-xs text-green-600">✔ {t('financialSummary.selected')}</span>
               )}
             </div>
             
             {step === 'selecting_second' && (
               <div className="mt-2">
                 <label className="text-xs text-gray-600 block mb-1">
-                  Ingresa el monto para {firstMethod}
+                  {t('financialSummary.enter_amount_for')} {firstMethod}
                 </label>
                 <div className="relative">
                   <input
@@ -464,7 +466,7 @@ export const FinancialSummary = () => {
                 </div>
                 {firstAmount && firstAmount > 0 && (
                   <div className="mt-1 text-xs text-gray-500">
-                    Restante: {formatCurrency(total - firstAmount)}
+                    {t('financialSummary.remaining')}: {formatCurrency(total - firstAmount)}
                   </div>
                 )}
               </div>
@@ -472,7 +474,7 @@ export const FinancialSummary = () => {
             
             {step === 'completed' && firstAmount && (
               <div className="text-xs text-green-600 mt-1">
-                Monto: {formatCurrency(firstAmount)}
+                {t('financialSummary.amount')}: {formatCurrency(firstAmount)}
               </div>
             )}
           </div>
@@ -481,15 +483,15 @@ export const FinancialSummary = () => {
         {secondMethod && (
           <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-green-700">2do método: {secondMethod}</span>
+              <span className="text-sm font-medium text-green-700">{t('financialSummary.second_method')} {secondMethod}</span>
               {step === 'completed' && (
-                <span className="text-xs text-green-600">✔ Auto-completado</span>
+                <span className="text-xs text-green-600">✔ {t('financialSummary.auto_completed')}</span>
               )}
             </div>
             
             {step === 'completed' && secondAmount && (
               <div className="text-xs text-green-600 mt-1">
-                Monto: {formatCurrency(secondAmount)} (calculado automáticamente)
+                {t('financialSummary.amount')}: {formatCurrency(secondAmount)} ({t('financialSummary.auto_calculated')})
               </div>
             )}
           </div>
@@ -498,24 +500,24 @@ export const FinancialSummary = () => {
         {step === 'completed' && (
           <div className="mt-3 p-2 bg-blue-100 border border-blue-300 rounded">
             <div className="flex justify-between text-sm">
-              <span className="font-medium">Total pagado:</span>
+              <span className="font-medium">{t('financialSummary.total_paid')}:</span>
               <span className="font-bold">{formatCurrency(totalPaid)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span>Total de la venta:</span>
+              <span>{t('financialSummary.total_sale')}:</span>
               <span>{formatCurrency(total)}</span>
             </div>
             <div className={`flex justify-between text-sm ${Math.abs(totalPaid - total) < 0.01 ? 'text-green-700' : 'text-red-700'}`}>
-              <span>Diferencia:</span>
+              <span>{t('financialSummary.difference')}:</span>
               <span className="font-bold">{formatCurrency(totalPaid - total)}</span>
             </div>
           </div>
         )}
 
         <div className="mt-2 text-xs text-gray-600">
-          {step === 'selecting_first' && 'Selecciona el primer método de pago (todos tienen borde rojo)'}
-          {step === 'selecting_second' && 'Selecciona el segundo método de pago (los disponibles tienen borde rojo)'}
-          {step === 'completed' && 'Pago mixto configurado correctamente. Verifica que la suma sea igual al total.'}
+          {step === 'selecting_first' && t('financialSummary.select_first_method')}
+          {step === 'selecting_second' && t('financialSummary.select_second_method')}
+          {step === 'completed' && t('financialSummary.mixed_configured')}
         </div>
       </div>
     );
@@ -589,10 +591,10 @@ export const FinancialSummary = () => {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-fit">
-      <h3 className="text-lg font-bold text-gray-900 mb-3">Resumen Financiero</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-3">{t('financialSummary.title')}</h3>
       
       <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Método de pago</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">{t('financialSummary.payment_method')}</h4>
         <div className="flex flex-wrap gap-1.5">
           {paymentMethods.map((method) => {
             const { style, icon: Icon, disabled } = getButtonStyle(method.id);
@@ -602,7 +604,7 @@ export const FinancialSummary = () => {
                 onClick={() => handlePaymentMethodClick(method.id, disabled)}
                 className={`flex items-center px-2.5 py-1.5 rounded-lg border transition-colors text-xs ${style}`}
                 disabled={disabled}
-                title={disabled ? 'Selecciona un cliente para usar crédito o puntos' : ''}
+                title={disabled ? t('financialSummary.select_client_hint') : ''}
               >
                 <Icon className="w-3.5 h-3.5 mr-1.5" />
                 {method.label}
@@ -614,7 +616,7 @@ export const FinancialSummary = () => {
         
         {(paymentMethod === 'credito' || paymentMethod === 'puntos') && !clientId && (
           <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
-            ⚠️ El método "{paymentMethod === 'credito' ? 'Crédito' : 'Pago con Puntos'}" solo está disponible cuando seleccionas un cliente.
+            ⚠️ {paymentMethod === 'credito' ? t('financialSummary.credit_client_required') : t('financialSummary.points_client_required')}
           </div>
         )}
       </div>
@@ -624,10 +626,10 @@ export const FinancialSummary = () => {
       <div className={`mb-4 border rounded-lg p-3 ${hasProductLevelDiscounts ? 'bg-gray-100 border-gray-300' : 'bg-amber-50 border-amber-200'}`}>
         <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
           <Tag className="w-3.5 h-3.5 mr-1.5" />
-          Descuento por carrito
+          {t('financialSummary.cart_discount')}
           {hasProductLevelDiscounts && (
             <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
-                No disponible
+              {t('financialSummary.not_available')}
             </span>
           )}
         </h4>
@@ -635,7 +637,7 @@ export const FinancialSummary = () => {
         {hasProductLevelDiscounts ? (
           <div className="flex items-center text-amber-700 text-sm">
             <AlertCircle className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-            <span className="text-xs">Hay descuentos aplicados a productos individuales. No se puede aplicar descuento al carrito completo.</span>
+            <span className="text-xs">{t('financialSummary.product_discounts_active')}</span>
           </div>
         ) : (
           <div className="space-y-2">
@@ -649,7 +651,7 @@ export const FinancialSummary = () => {
                 }`}
               >
                 <Percent className="w-3.5 h-3.5 inline mr-1" />
-                Porcentaje
+                {t('financialSummary.percentage')}
               </button>
               <button
                 onClick={() => setDiscountTypeInput('amount')}
@@ -660,7 +662,7 @@ export const FinancialSummary = () => {
                 }`}
               >
                 <DollarSign className="w-3.5 h-3.5 inline mr-1" />
-                Monto fijo
+                {t('financialSummary.fixed_amount')}
               </button>
             </div>
             
@@ -689,20 +691,20 @@ export const FinancialSummary = () => {
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                Aplicar
+                {t('common.apply')}
               </button>
             </div>
 
             {discountAmount > 0 && !hasProductLevelDiscounts && (
               <div className="flex items-center justify-between pt-1.5 border-t border-amber-200">
                 <span className="text-xs text-gray-600">
-                  Descuento aplicado: {discountType === 'percentage' ? `${discountValue}%` : formatCurrency(discountValue)}
+                  {t('financialSummary.discount_applied')}: {discountType === 'percentage' ? `${discountValue}%` : formatCurrency(discountValue)}
                 </span>
                 <button
                   onClick={handleRemoveDiscount}
                   className="text-red-600 hover:text-red-800 text-xs font-medium"
                 >
-                  Eliminar
+                  {t('common.remove')}
                 </button>
               </div>
             )}
@@ -710,24 +712,24 @@ export const FinancialSummary = () => {
         )}
       </div>
 
-      {/* Sección de Totales - Costo y Margen eliminados */}
+      {/* Sección de Totales */}
       <div className="mb-4 border border-gray-200 rounded-lg p-3">
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-xs text-gray-600">Subtotal (PPV)</span>
+            <span className="text-xs text-gray-600">{t('financialSummary.subtotal_ppv')}</span>
             <span className="font-medium text-sm">{formatCurrency(subtotal)}</span>
           </div>
           
           {productDiscountsAmount > 0 && (
             <div className="flex justify-between">
-              <span className="text-xs text-gray-600">Descuentos por producto</span>
+              <span className="text-xs text-gray-600">{t('financialSummary.product_discounts')}</span>
               <span className="font-medium text-sm text-green-600">-{formatCurrency(productDiscountsAmount)}</span>
             </div>
           )}
           
           {discountAmount > 0 && productDiscountsAmount === 0 && (
             <div className="flex justify-between">
-              <span className="text-xs text-gray-600">Descuento por carrito</span>
+              <span className="text-xs text-gray-600">{t('financialSummary.cart_discount_label')}</span>
               <span className="font-medium text-sm text-red-600">-{formatCurrency(discountAmount)}</span>
             </div>
           )}
@@ -736,14 +738,14 @@ export const FinancialSummary = () => {
           {region !== 'MA' && (
             <div className="flex justify-between">
               <span className="text-xs text-gray-600">
-                IVA ({region === 'FR' ? '20' : region === 'ES' ? '21' : '19'}%)
+                {t('financialSummary.vat')} ({region === 'FR' ? '20' : region === 'ES' ? '21' : '19'}%)
               </span>
               <span className="font-medium text-sm">{formatCurrency(taxAmount)}</span>
             </div>
           )}
           
           <div className="flex justify-between pt-2 border-t border-gray-200">
-            <span className="font-bold text-md text-gray-900">Total a pagar</span>
+            <span className="font-bold text-md text-gray-900">{t('financialSummary.total_to_pay')}</span>
             <span className="font-bold text-lg text-blue-700">{formatCurrency(total)}</span>
           </div>
         </div>
@@ -752,8 +754,8 @@ export const FinancialSummary = () => {
       {showAmountField() && (
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-1.5">
-            Pago recibido
-            {paymentMethod === 'efectivo' && ` (mínimo: ${formatCurrency(total)})`}
+            {t('financialSummary.payment_received')}
+            {paymentMethod === 'efectivo' && ` (${t('financialSummary.minimum')}: ${formatCurrency(total)})`}
           </h4>
           <div className="relative">
             <input
@@ -773,7 +775,7 @@ export const FinancialSummary = () => {
       {changeAmount > 0 && (
         <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
           <div className="flex justify-between items-center">
-            <span className="text-green-800 font-medium text-sm">Cambio a devolver</span>
+            <span className="text-green-800 font-medium text-sm">{t('financialSummary.change_to_return')}</span>
             <span className="text-green-800 font-bold text-md">{formatCurrency(changeAmount)}</span>
           </div>
         </div>
@@ -794,7 +796,7 @@ export const FinancialSummary = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Procesando...
+            {t('financialSummary.processing')}
           </span>
         ) : (
           getButtonText()

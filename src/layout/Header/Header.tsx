@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { 
   Home, ShoppingCart, Users, Package, ClipboardCheck, 
   Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown, Store,
@@ -30,21 +29,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   Bell: Bell
 };
 
-// Traducciones manuales para el navbar (fallback)
-const navTranslations: Record<string, { es: string; fr: string }> = {
-  dashboard: { es: "Dashboard", fr: "Tableau de bord" },
-  sales: { es: "Ventas", fr: "Ventes" },
-  clients: { es: "Clientes", fr: "Clients" },
-  products: { es: "Productos", fr: "Produits" },
-  stock: { es: "Stock", fr: "Stock" },
-  providers: { es: "Proveedores", fr: "Fournisseurs" },
-  reports: { es: "Reportes", fr: "Rapports" },
-  hr: { es: "RRHH", fr: "RH" },
-  admin: { es: "Admin", fr: "Admin" }
-};
-
 export const Header = () => {
-  const { i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -52,33 +37,8 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
   
   const { user, logout } = useAuth();
-
-  // Escuchar cambios de idioma
-  useEffect(() => {
-    const handleLanguageChange = () => {
-      setCurrentLanguage(i18n.language);
-    };
-    
-    i18n.on('languageChanged', handleLanguageChange);
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
-  }, [i18n]);
-
-  // Obtener nombre traducido del módulo
-  const getTranslatedModuleName = (modulePath: string, defaultName: string): string => {
-    const key = modulePath.replace('/', '') || 'dashboard';
-    // Intentar usar t() primero
-    const translation = navTranslations[key];
-    if (translation) {
-      return currentLanguage === 'es' ? translation.es : translation.fr;
-    }
-    // Fallback a traducciones manuales
-    return defaultName;
-  };
 
   // Cargar módulos según el rol del usuario
   useEffect(() => {
@@ -141,14 +101,14 @@ export const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="w-full">
-        <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
-            <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-xs lg:text-sm">CH</span>
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+              <span className="text-white font-bold text-sm lg:text-base">CH</span>
             </div>
-            <span className="font-bold text-gray-900 text-base lg:text-lg hidden sm:inline">CleverHub</span>
+            <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
           {/* Desktop Navigation (xl+) */}
@@ -157,7 +117,6 @@ export const Header = () => {
               {modules.map((module) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
-                const displayName = getTranslatedModuleName(module.path, module.name);
                 
                 return (
                   <Link
@@ -170,7 +129,7 @@ export const Header = () => {
                     }`}
                   >
                     <Icon className={`w-4 h-4 2xl:w-5 2xl:h-5 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                    <span>{displayName}</span>
+                    <span>{module.name}</span>
                   </Link>
                 );
               })}
@@ -189,13 +148,12 @@ export const Header = () => {
 
           {/* Menú móvil/tablet desplegable */}
           {mobileMenuOpen && (
-            <div className="lg:hidden pb-3 overflow-x-auto px-4 sm:px-6">
+            <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="space-y-2">
                   {modules.map((module) => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
-                    const displayName = getTranslatedModuleName(module.path, module.name);
                     
                     return (
                       <Link
@@ -209,7 +167,7 @@ export const Header = () => {
                         }`}
                       >
                         <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                        <span className="text-base font-medium">{displayName}</span>
+                        <span className="text-base font-medium">{module.name}</span>
                       </Link>
                     );
                   })}
@@ -225,7 +183,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-lg hover:bg-gray-50 relative group"
-                title={currentLanguage === 'es' ? 'Notificaciones' : 'Notifications'}
+                title="Notificaciones"
               >
                 <Bell className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-1 ring-white"></span>
@@ -234,26 +192,16 @@ export const Header = () => {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                   <div className="px-5 py-3 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900 text-sm">
-                      {currentLanguage === 'es' ? 'Notificaciones' : 'Notifications'}
-                    </h3>
+                    <h3 className="font-semibold text-gray-900 text-sm">Notificaciones</h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-sm font-medium text-gray-900">
-                        {currentLanguage === 'es' ? 'Stock bajo: Paracetamol' : 'Stock faible: Paracetamol'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {currentLanguage === 'es' ? 'Quedan 12 unidades' : 'Il reste 12 unités'}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900">Stock bajo: Paracetamol</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Quedan 12 unidades</p>
                     </div>
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors border-t border-gray-50">
-                      <p className="text-sm font-medium text-gray-900">
-                        {currentLanguage === 'es' ? 'Caducidad próxima' : 'Expiration proche'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Ibuprofeno {currentLanguage === 'es' ? 'vence en 30 días' : 'expire dans 30 jours'}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900">Caducidad próxima</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ibuprofeno vence en 30 días</p>
                     </div>
                   </div>
                 </div>
@@ -265,7 +213,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center space-x-2 p-1.5 pr-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                title={currentLanguage === 'es' ? 'Menú de usuario' : 'Menu utilisateur'}
+                title="Menú de usuario"
               >
                 <div className="w-7 h-7 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
                   {getInitials()}
@@ -273,9 +221,7 @@ export const Header = () => {
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{user.fullName.split(' ')[0]}</p>
                   <p className="text-xs text-gray-400">
-                    {user.role === 'ADMIN' ? (currentLanguage === 'es' ? 'Admin' : 'Admin') : 
-                     user.role === 'SUPER_ADMIN' ? (currentLanguage === 'es' ? 'Super Admin' : 'Super Admin') : 
-                     (currentLanguage === 'es' ? 'Empleado' : 'Employé')}
+                    {user.role === 'ADMIN' ? 'Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Empleado'}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
@@ -295,7 +241,7 @@ export const Header = () => {
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="w-4 h-4 mr-3 text-gray-500" />
-                      <span>{currentLanguage === 'es' ? 'Mi perfil' : 'Mon profil'}</span>
+                      <span>Mi perfil</span>
                     </Link>
                     
                     {user.role === 'ADMIN' && (
@@ -305,7 +251,7 @@ export const Header = () => {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Settings className="w-4 h-4 mr-3 text-gray-500" />
-                        <span>{currentLanguage === 'es' ? 'Usuarios' : 'Utilisateurs'}</span>
+                        <span>Usuarios</span>
                       </Link>
                     )}
                   </div>
@@ -316,7 +262,7 @@ export const Header = () => {
                       className="flex items-center w-full px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut className="w-4 h-4 mr-3" />
-                      <span>{currentLanguage === 'es' ? 'Cerrar sesión' : 'Déconnexion'}</span>
+                      <span>Cerrar sesión</span>
                     </button>
                   </div>
                 </div>
@@ -336,7 +282,6 @@ export const Header = () => {
             {modules.map((module) => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
-              const displayName = getTranslatedModuleName(module.path, module.name);
               
               return (
                 <Link
@@ -349,7 +294,7 @@ export const Header = () => {
                   }`}
                 >
                   <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">{displayName}</span>
+                  <span className="text-xs font-medium">{module.name}</span>
                 </Link>
               );
             })}

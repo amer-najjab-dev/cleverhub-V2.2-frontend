@@ -495,5 +495,12 @@
     "delivery_description": "Registra la entrada de mercancía. Se actualizará el stock y se creará una obligación de pago.",
     "payment_obligations_title": "Obligaciones de Pago",
     "payment_obligations_description": "Gestiona los pagos pendientes con este proveedor."
-  }
+  },
+    "name_placeholder": "Nombre del proveedor",
+    "phone_placeholder": "Teléfono",
+    "address_placeholder": "Calle y número",
+    "city_placeholder": "Ciudad",
+    "postal_code_placeholder": "Código Postal",
+    "tax_id_placeholder": "Número de identificación fiscal",
+    "payment_terms_placeholder": "Ej: 30 días"
 }

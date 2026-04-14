@@ -357,7 +357,7 @@ export const SupplierListPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Nuevo Proveedor</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('suppliers.new_supplier_title')}</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
@@ -365,99 +365,99 @@ export const SupplierListPage: React.FC = () => {
             
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.name_required')}</label>
                 <input
                   type="text"
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nombre del proveedor"
+                  placeholder={t('suppliers.name_placeholder')}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.phone_required')}</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Teléfono"
+                  placeholder={t('suppliers.phone_placeholder')}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.email')}</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Email"
+                  placeholder={t('common.email')}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.address')}</label>
                 <input
                   type="text"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Calle y número"
+                  placeholder={t('suppliers.address_placeholder')}
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.city')}</label>
                   <input
                     type="text"
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ciudad"
+                    placeholder={t('suppliers.city_placeholder')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.postal_code')}</label>
                   <input
                     type="text"
                     name="postalCode"
                     value={formData.postalCode}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Código Postal"
+                    placeholder={t('suppliers.postal_code_placeholder')}
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">NIF</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.tax_id')}</label>
                 <input
                   type="text"
                   name="taxId"
                   value={formData.taxId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Número de identificación fiscal"
+                  placeholder={t('suppliers.tax_id_placeholder')}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('suppliers.payment_terms')}</label>
                 <input
                   type="text"
                   name="paymentTerms"
                   value={formData.paymentTerms}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: 30 días"
+                  placeholder={t('suppliers.payment_terms_placeholder')}
                 />
               </div>
             </div>
@@ -467,7 +467,7 @@ export const SupplierListPage: React.FC = () => {
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleCreateSupplier}
@@ -475,7 +475,7 @@ export const SupplierListPage: React.FC = () => {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
               >
                 {modalLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Check className="w-4 h-4" />}
-                Crear
+                {t('common.create')}
               </button>
             </div>
           </div>

@@ -490,5 +490,12 @@
     "delivery_description": "Enregistrez l'entrée de marchandise. Le stock sera mis à jour et une obligation de paiement sera créée.",
     "payment_obligations_title": "Obligations de Paiement",
     "payment_obligations_description": "Gérez les paiements en attente avec ce fournisseur."
-  }
+  },
+    "name_placeholder": "Nom du fournisseur",
+    "phone_placeholder": "Téléphone",
+    "address_placeholder": "Rue et numéro",
+    "city_placeholder": "Ville",
+    "postal_code_placeholder": "Code Postal",
+    "tax_id_placeholder": "Numéro d'identification fiscale",
+    "payment_terms_placeholder": "Ex: 30 jours"
 }

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { calendarService, CalendarEvent } from '../../../../services/hr/calendar.service';
 
 export const CalendarTab = () => {
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const initialLoadDone = useRef(false);
@@ -35,7 +37,7 @@ export const CalendarTab = () => {
     };
     
     loadEvents();
-  }, []); // Array vacío: solo se ejecuta una vez
+  }, []);
 
   // Manejar cambio de mes en el calendario (sin recargar todo)
   const handleDatesSet = async (info: any) => {
@@ -68,7 +70,7 @@ export const CalendarTab = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Cargando calendario...</div>;
+    return <div className="flex justify-center p-8">{t('common.loading')}</div>;
   }
 
   return (
@@ -77,7 +79,7 @@ export const CalendarTab = () => {
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        locale="es"
+        locale={i18n.language === 'es' ? 'es' : 'fr'}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
@@ -96,34 +98,34 @@ export const CalendarTab = () => {
         datesSet={handleDatesSet}
         height="auto"
         buttonText={{
-          today: 'Hoy',
-          month: 'Mes',
-          week: 'Semana'
+          today: t('hr.calendar.today'),
+          month: t('hr.calendar.month'),
+          week: t('hr.calendar.week')
         }}
       />
       
       <div className="mt-6 pt-4 border-t">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Leyenda</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">{t('hr.calendar.legend')}</h4>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-xs text-gray-600">Festivos</span>
+            <span className="text-xs text-gray-600">{t('hr.calendar.holidays')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="text-xs text-gray-600">Vacaciones</span>
+            <span className="text-xs text-gray-600">{t('hr.calendar.vacations')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-xs text-gray-600">Bajas médicas</span>
+            <span className="text-xs text-gray-600">{t('hr.calendar.sick_leave')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-            <span className="text-xs text-gray-600">Baja de maternidad</span>
+            <span className="text-xs text-gray-600">{t('hr.calendar.maternity_leave')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-xs text-gray-600">Baja de paternidad</span>
+            <span className="text-xs text-gray-600">{t('hr.calendar.paternity_leave')}</span>
           </div>
         </div>
       </div>

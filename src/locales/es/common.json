@@ -496,6 +496,7 @@
     "payment_obligations_title": "Obligaciones de Pago",
     "payment_obligations_description": "Gestiona los pagos pendientes con este proveedor."
   },
+  "proveedor_list": {
     "name_placeholder": "Nombre del proveedor",
     "phone_placeholder": "Teléfono",
     "address_placeholder": "Calle y número",
@@ -503,4 +504,60 @@
     "postal_code_placeholder": "Código Postal",
     "tax_id_placeholder": "Número de identificación fiscal",
     "payment_terms_placeholder": "Ej: 30 días"
+  },
+  "hr": {
+    "title": "RRHH",
+    "coming_soon": "Próximamente...",
+    "tabs": {
+      "coverage": "Cobertura",
+      "employees": "Empleados",
+      "payroll": "Nóminas",
+      "calendar": "Calendario",
+      "requests": "Solicitudes",
+      "config": "Configuración"
+    }
+  },
+    "coverage": {
+      "new_shift": "Nuevo Turno",
+      "shift": "Turno",
+      "schedule": "Horario",
+      "min_staff": "Min. Personal",
+      "color": "Color",
+      "shift_day": "Turno / Día",
+      "confirm_delete_shift": "¿Eliminar el turno \"{{name}}\"?",
+      "shift_deleted": "Turno eliminado correctamente",
+      "delete_error": "Error al eliminar el turno"
+    },
+    "employees": {
+      "title": "Empleados",
+      "new_employee": "Nuevo Empleado",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "cni": "CNI",
+      "na": "N/A",
+      "employee": "empleado",
+      "load_error": "Error al cargar empleados",
+      "confirm_delete": "¿Eliminar a {{name}}?",
+      "delete_success": "Empleado eliminado",
+      "delete_error": "Error al eliminar empleado"
+    },
+    "calendar": {
+      "today": "Hoy",
+      "month": "Mes",
+      "week": "Semana",
+      "legend": "Leyenda",
+      "holidays": "Festivos",
+      "vacations": "Vacaciones",
+      "sick_leave": "Bajas médicas",
+      "maternity_leave": "Baja de maternidad",
+      "paternity_leave": "Baja de paternidad"
+    },
+    "requests": {
+      "title": "Solicitudes",
+      "coming_soon": "Gestión de solicitudes de vacaciones y ausencias - Próximamente"
+    },
+    "config": {
+      "title": "Configuración",
+      "coming_soon": "Gestión de turnos, empleados, festivos y guardias - Próximamente"
+    }
 }

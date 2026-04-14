@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Home, ShoppingCart, Users, Package, ClipboardCheck, 
   Truck, BarChart3, Bell, LogOut, User, Settings, ChevronDown, Store,
@@ -8,7 +9,6 @@ import { useState, useEffect } from 'react';
 import { RegionSelector } from '../../components/RegionSelector';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { moduleService, Module } from '../../services/module.service';
 
 // Mapa de iconos
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -29,31 +29,63 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   Bell: Bell
 };
 
+// Módulos estáticos según el rol
+const getModulesByRole = (role: string | undefined) => {
+  const userRole = role?.toUpperCase();
+  
+  if (userRole === 'SUPER_ADMIN') {
+    return [
+      { nameKey: 'nav.dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
+      { nameKey: 'nav.pharmacies', path: '/admin/pharmacies', icon: 'Store' },
+      { nameKey: 'nav.global_users', path: '/admin/users', icon: 'Users' },
+      { nameKey: 'nav.subscriptions', path: '/admin/subscriptions', icon: 'CreditCard' },
+      { nameKey: 'nav.communication', path: '/admin/broadcast', icon: 'Bell' },
+      { nameKey: 'nav.health_signal', path: '/admin/health', icon: 'Activity' },
+      { nameKey: 'nav.settings', path: '/settings', icon: 'Settings' }
+    ];
+  }
+  
+  if (userRole === 'ADMIN') {
+    return [
+      { nameKey: 'nav.dashboard', path: '/', icon: 'Home' },
+      { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
+      { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
+      { nameKey: 'nav.products', path: '/products', icon: 'Package' },
+      { nameKey: 'nav.stock', path: '/stock', icon: 'Box' },
+      { nameKey: 'nav.providers', path: '/providers', icon: 'Truck' },
+      { nameKey: 'nav.hr', path: '/hr', icon: 'Users' },
+      { nameKey: 'nav.reports', path: '/reports', icon: 'FileText' }
+    ];
+  }
+  
+  // EMPLOYEE
+  return [
+    { nameKey: 'nav.dashboard', path: '/', icon: 'Home' },
+    { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
+    { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
+    { nameKey: 'nav.products', path: '/products', icon: 'Package' }
+  ];
+};
+
 export const Header = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [modules, setModules] = useState<Module[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const { user, logout } = useAuth();
 
-  // Cargar módulos según el rol del usuario
+  // Cargar módulos según el rol del usuario (estático, sin llamada al backend)
   useEffect(() => {
-    const loadModules = async () => {
-      if (!user) return;
-      try {
-        const data = await moduleService.getModules();
-        setModules(data);
-      } catch (error) {
-        console.error('Error loading modules:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadModules();
+    if (user) {
+      const userModules = getModulesByRole(user.role);
+      setModules(userModules);
+      setLoading(false);
+    }
   }, [user]);
 
   const handleLogout = async () => {
@@ -117,6 +149,7 @@ export const Header = () => {
               {modules.map((module) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
+                const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
                 
                 return (
                   <Link
@@ -129,7 +162,7 @@ export const Header = () => {
                     }`}
                   >
                     <Icon className={`w-4 h-4 2xl:w-5 2xl:h-5 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                    <span>{module.name}</span>
+                    <span>{displayName}</span>
                   </Link>
                 );
               })}
@@ -154,6 +187,7 @@ export const Header = () => {
                   {modules.map((module) => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
+                    const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey);
                     
                     return (
                       <Link
@@ -167,7 +201,7 @@ export const Header = () => {
                         }`}
                       >
                         <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                        <span className="text-base font-medium">{module.name}</span>
+                        <span className="text-base font-medium">{String(displayName)}</span>
                       </Link>
                     );
                   })}
@@ -183,7 +217,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-lg hover:bg-gray-50 relative group"
-                title="Notificaciones"
+                title={t('header.notifications')}
               >
                 <Bell className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-1 ring-white"></span>
@@ -192,16 +226,16 @@ export const Header = () => {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                   <div className="px-5 py-3 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900 text-sm">Notificaciones</h3>
+                    <h3 className="font-semibold text-gray-900 text-sm">{t('header.notifications_title')}</h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors">
-                      <p className="text-sm font-medium text-gray-900">Stock bajo: Paracetamol</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Quedan 12 unidades</p>
+                      <p className="text-sm font-medium text-gray-900">{t('header.low_stock')}: Paracetamol</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{t('header.units_left')}: 12</p>
                     </div>
                     <div className="px-5 py-3 hover:bg-gray-50 transition-colors border-t border-gray-50">
-                      <p className="text-sm font-medium text-gray-900">Caducidad próxima</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Ibuprofeno vence en 30 días</p>
+                      <p className="text-sm font-medium text-gray-900">{t('header.expiring_soon')}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Ibuprofeno {t('header.expires_in')} 30 {t('header.days')}</p>
                     </div>
                   </div>
                 </div>
@@ -213,7 +247,7 @@ export const Header = () => {
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center space-x-2 p-1.5 pr-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                title="Menú de usuario"
+                title={t('header.user_menu')}
               >
                 <div className="w-7 h-7 lg:w-9 lg:h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
                   {getInitials()}
@@ -221,7 +255,7 @@ export const Header = () => {
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{user.fullName.split(' ')[0]}</p>
                   <p className="text-xs text-gray-400">
-                    {user.role === 'ADMIN' ? 'Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Empleado'}
+                    {user.role === 'ADMIN' ? t('header.admin') : user.role === 'SUPER_ADMIN' ? t('header.super_admin') : t('header.employee')}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
@@ -241,7 +275,7 @@ export const Header = () => {
                       onClick={() => setShowUserMenu(false)}
                     >
                       <User className="w-4 h-4 mr-3 text-gray-500" />
-                      <span>Mi perfil</span>
+                      <span>{t('header.my_profile')}</span>
                     </Link>
                     
                     {user.role === 'ADMIN' && (
@@ -251,7 +285,7 @@ export const Header = () => {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Settings className="w-4 h-4 mr-3 text-gray-500" />
-                        <span>Usuarios</span>
+                        <span>{t('header.users')}</span>
                       </Link>
                     )}
                   </div>
@@ -262,7 +296,7 @@ export const Header = () => {
                       className="flex items-center w-full px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut className="w-4 h-4 mr-3" />
-                      <span>Cerrar sesión</span>
+                      <span>{t('header.logout')}</span>
                     </button>
                   </div>
                 </div>
@@ -282,6 +316,7 @@ export const Header = () => {
             {modules.map((module) => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
+              const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey);
               
               return (
                 <Link
@@ -294,7 +329,7 @@ export const Header = () => {
                   }`}
                 >
                   <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">{module.name}</span>
+                  <span className="text-xs font-medium">{String(displayName)}</span>
                 </Link>
               );
             })}

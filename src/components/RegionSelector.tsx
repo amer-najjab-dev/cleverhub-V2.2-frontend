@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRegion } from '../contexts/RegionContext';
-import { Globe, ChevronDown } from 'lucide-react';
+import { Globe } from 'lucide-react';
 
 const regionFlags: Record<string, string> = {
   MA: '🇲🇦',
@@ -25,10 +25,10 @@ export const RegionSelector: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+        title={regionFlags[currentRegion.code]}
       >
         <Globe className="w-4 h-4" />
         <span>{regionFlags[currentRegion.code] || '🌍'}</span>
-        <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

@@ -68,7 +68,7 @@ const getModulesByRole = (role: string | undefined) => {
 };
 
 export const Header = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -76,8 +76,21 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [languageKey, setLanguageKey] = useState(0);
   
   const { user, logout } = useAuth();
+
+  // Forzar re-render cuando cambia el idioma
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguageKey(prev => prev + 1);
+    };
+    
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
 
   // Cargar módulos según el rol del usuario (estático, sin llamada al backend)
   useEffect(() => {
@@ -146,14 +159,14 @@ export const Header = () => {
           {/* Desktop Navigation (xl+) */}
           <nav className="hidden xl:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
             <div className="flex items-center space-x-1 2xl:space-x-2">
-              {modules.map((module) => {
+              {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
                 const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
                 
                 return (
                   <Link
-                    key={module.path}
+                    key={`${module.path}-${languageKey}-${index}`}
                     to={module.path}
                     className={`flex items-center px-3 2xl:px-4 py-2.5 rounded-lg transition-all duration-200 whitespace-nowrap text-sm 2xl:text-base font-medium ${
                       isActive 
@@ -184,14 +197,14 @@ export const Header = () => {
             <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="space-y-2">
-                  {modules.map((module) => {
+                  {modules.map((module, index) => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
-                    const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey);
+                    const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
                     
                     return (
                       <Link
-                        key={module.path}
+                        key={`mobile-${module.path}-${languageKey}-${index}`}
                         to={module.path}
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center px-4 py-3 rounded-lg transition-all ${
@@ -201,7 +214,7 @@ export const Header = () => {
                         }`}
                       >
                         <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                        <span className="text-base font-medium">{String(displayName)}</span>
+                        <span className="text-base font-medium">{displayName}</span>
                       </Link>
                     );
                   })}
@@ -313,14 +326,14 @@ export const Header = () => {
         {/* Navegación móvil (menor que lg) */}
         <div className="lg:hidden pb-3 overflow-x-auto">
           <div className="flex space-x-2">
-            {modules.map((module) => {
+            {modules.map((module, index) => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
-              const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey);
+              const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
               
               return (
                 <Link
-                  key={module.path}
+                  key={`mobile-bottom-${module.path}-${languageKey}-${index}`}
                   to={module.path}
                   className={`flex flex-col items-center px-3 py-2 rounded-xl min-w-16 ${
                     isActive 
@@ -329,7 +342,7 @@ export const Header = () => {
                   }`}
                 >
                   <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium">{String(displayName)}</span>
+                  <span className="text-xs font-medium">{displayName}</span>
                 </Link>
               );
             })}

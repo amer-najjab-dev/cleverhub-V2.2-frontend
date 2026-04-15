@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminService, Pharmacy } from '../../services/admin.service';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 export const PharmaciesPage = () => {
+  const { t } = useTranslation();
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -48,18 +50,18 @@ export const PharmaciesPage = () => {
       loadPharmacies();
     } catch (error) {
       console.error('Error saving pharmacy:', error);
-      alert('Error al guardar la farmacia');
+      alert(t('adminPharmacies.save_error'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta farmacia? Se eliminarán todos sus datos.')) return;
+    if (!confirm(t('adminPharmacies.confirm_delete'))) return;
     try {
       await adminService.deletePharmacy(id);
       loadPharmacies();
     } catch (error) {
       console.error('Error deleting pharmacy:', error);
-      alert('Error al eliminar la farmacia');
+      alert(t('adminPharmacies.delete_error'));
     }
   };
 
@@ -89,8 +91,8 @@ export const PharmaciesPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestión de Farmacias</h1>
-            <p className="text-gray-600 mt-1">Administra todas las farmacias de la plataforma</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('adminPharmacies.title')}</h1>
+            <p className="text-gray-600 mt-1">{t('adminPharmacies.subtitle')}</p>
           </div>
           <button
             onClick={() => {
@@ -98,11 +100,10 @@ export const PharmaciesPage = () => {
               setFormData({ name: '', license: '', address: '', phone: '', email: '', is_active: true });
               setShowModal(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
-transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            Nueva Farmacia
+            {t('adminPharmacies.new_pharmacy')}
           </button>
         </div>
 
@@ -111,18 +112,12 @@ transition-colors"
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase 
-tracking-wider">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase 
-tracking-wider">Licencia</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase 
-tracking-wider">Contacto</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase 
-tracking-wider">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha 
-registro</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase 
-tracking-wider">Acciones</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('adminPharmacies.name')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('adminPharmacies.license')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('adminPharmacies.contact')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('adminPharmacies.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('adminPharmacies.registration_date')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -140,7 +135,7 @@ tracking-wider">Acciones</th>
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         pharmacy.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {pharmacy.is_active ? 'Activa' : 'Inactiva'}
+                        {pharmacy.is_active ? t('adminPharmacies.active') : t('adminPharmacies.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
@@ -172,11 +167,11 @@ tracking-wider">Acciones</th>
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 max-w-md w-full">
               <h2 className="text-xl font-bold mb-4">
-                {editingPharmacy ? 'Editar Farmacia' : 'Nueva Farmacia'}
+                {editingPharmacy ? t('adminPharmacies.edit_pharmacy') : t('adminPharmacies.new_pharmacy')}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminPharmacies.name')} *</label>
                   <input
                     type="text"
                     value={formData.name}
@@ -186,7 +181,7 @@ tracking-wider">Acciones</th>
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Licencia *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminPharmacies.license')} *</label>
                   <input
                     type="text"
                     value={formData.license}
@@ -196,7 +191,7 @@ tracking-wider">Acciones</th>
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminPharmacies.phone')}</label>
                   <input
                     type="tel"
                     value={formData.phone}
@@ -205,7 +200,7 @@ tracking-wider">Acciones</th>
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.email')}</label>
                   <input
                     type="email"
                     value={formData.email}
@@ -214,7 +209,7 @@ tracking-wider">Acciones</th>
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminPharmacies.address')}</label>
                   <textarea
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -230,7 +225,7 @@ tracking-wider">Acciones</th>
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                     className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <label htmlFor="is_active" className="text-sm text-gray-700">Activa</label>
+                  <label htmlFor="is_active" className="text-sm text-gray-700">{t('adminPharmacies.active')}</label>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
@@ -238,13 +233,13 @@ tracking-wider">Acciones</th>
                     onClick={() => setShowModal(false)}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
-                    {editingPharmacy ? 'Actualizar' : 'Crear'}
+                    {editingPharmacy ? t('common.update') : t('common.create')}
                   </button>
                 </div>
               </form>

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminService, HealthStatus } from '../../services/admin.service';
 import { useAuth } from '../../contexts/AuthContext';
 import { Store, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
 export const AdminDashboard = () => {
+  const { t } = useTranslation();
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -28,7 +30,7 @@ export const AdminDashboard = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando dashboard...</p>
+          <p className="mt-4 text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -36,25 +38,25 @@ export const AdminDashboard = () => {
 
   const stats = [
     {
-      title: 'Total Farmacias',
+      title: t('adminDashboard.total_pharmacies'),
       value: health?.summary.total || 0,
       icon: Store,
       color: 'bg-blue-500',
     },
     {
-      title: 'Estado Verde',
+      title: t('adminDashboard.green_status'),
       value: health?.summary.green || 0,
       icon: CheckCircle,
       color: 'bg-green-500',
     },
     {
-      title: 'Estado Amarillo',
+      title: t('adminDashboard.yellow_status'),
       value: health?.summary.yellow || 0,
       icon: Clock,
       color: 'bg-yellow-500',
     },
     {
-      title: 'Estado Rojo',
+      title: t('adminDashboard.red_status'),
       value: health?.summary.red || 0,
       icon: AlertCircle,
       color: 'bg-red-500',
@@ -65,9 +67,9 @@ export const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard SUPER_ADMIN</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('adminDashboard.title')}</h1>
           <p className="text-gray-600 mt-1">
-            Bienvenido, {user?.fullName}. Aquí tienes el resumen global de la plataforma.
+            {t('adminDashboard.welcome', { name: user?.fullName || '' })}
           </p>
         </div>
 
@@ -96,17 +98,17 @@ export const AdminDashboard = () => {
           {/* Verdes */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-green-50 px-6 py-4 border-b border-green-200">
-              <h2 className="font-semibold text-green-800">🟢 Estado Verde</h2>
-              <p className="text-sm text-green-600">Activas y con ventas recientes</p>
+              <h2 className="font-semibold text-green-800">🟢 {t('adminDashboard.green_status_title')}</h2>
+              <p className="text-sm text-green-600">{t('adminDashboard.green_status_desc')}</p>
             </div>
             <div className="divide-y divide-gray-100">
               {health?.status.green.length === 0 ? (
-                <p className="p-6 text-center text-gray-500">No hay farmacias en estado verde</p>
+                <p className="p-6 text-center text-gray-500">{t('adminDashboard.no_pharmacies')}</p>
               ) : (
                 health?.status.green.map((pharmacy) => (
                   <div key={pharmacy.id} className="p-4 hover:bg-gray-50">
                     <p className="font-medium text-gray-900">{pharmacy.name}</p>
-                    <p className="text-sm text-gray-500">Licencia: {pharmacy.license}</p>
+                    <p className="text-sm text-gray-500">{t('adminDashboard.license')}: {pharmacy.license}</p>
                   </div>
                 ))
               )}
@@ -116,18 +118,18 @@ export const AdminDashboard = () => {
           {/* Amarillas */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-yellow-50 px-6 py-4 border-b border-yellow-200">
-              <h2 className="font-semibold text-yellow-800">🟡 Estado Amarillo</h2>
-              <p className="text-sm text-yellow-600">Vencen pronto o sin actividad</p>
+              <h2 className="font-semibold text-yellow-800">🟡 {t('adminDashboard.yellow_status_title')}</h2>
+              <p className="text-sm text-yellow-600">{t('adminDashboard.yellow_status_desc')}</p>
             </div>
             <div className="divide-y divide-gray-100">
               {health?.status.yellow.length === 0 ? (
-                <p className="p-6 text-center text-gray-500">No hay farmacias en estado amarillo</p>
+                <p className="p-6 text-center text-gray-500">{t('adminDashboard.no_pharmacies')}</p>
               ) : (
                 health?.status.yellow.map((pharmacy) => (
                   <div key={pharmacy.id} className="p-4 hover:bg-gray-50">
                     <p className="font-medium text-gray-900">{pharmacy.name}</p>
                     <p className="text-sm text-gray-500">
-                      Expira: {new Date(pharmacy.subscription_end).toLocaleDateString()}
+                      {t('adminDashboard.expires')}: {new Date(pharmacy.subscription_end).toLocaleDateString()}
                     </p>
                   </div>
                 ))
@@ -138,17 +140,17 @@ export const AdminDashboard = () => {
           {/* Rojas */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-red-50 px-6 py-4 border-b border-red-200">
-              <h2 className="font-semibold text-red-800">🔴 Estado Rojo</h2>
-              <p className="text-sm text-red-600">Suspendidas o sin actividad</p>
+              <h2 className="font-semibold text-red-800">🔴 {t('adminDashboard.red_status_title')}</h2>
+              <p className="text-sm text-red-600">{t('adminDashboard.red_status_desc')}</p>
             </div>
             <div className="divide-y divide-gray-100">
               {health?.status.red.length === 0 ? (
-                <p className="p-6 text-center text-gray-500">No hay farmacias en estado rojo</p>
+                <p className="p-6 text-center text-gray-500">{t('adminDashboard.no_pharmacies')}</p>
               ) : (
                 health?.status.red.map((pharmacy) => (
                   <div key={pharmacy.id} className="p-4 hover:bg-gray-50">
                     <p className="font-medium text-gray-900">{pharmacy.name}</p>
-                    <p className="text-sm text-red-600">Estado: {pharmacy.status}</p>
+                    <p className="text-sm text-red-600">{t('adminDashboard.status')}: {pharmacy.status}</p>
                   </div>
                 ))
               )}
@@ -159,4 +161,3 @@ export const AdminDashboard = () => {
     </div>
   );
 };
-

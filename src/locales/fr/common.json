@@ -31,7 +31,12 @@
     "users": "Utilisateurs",
     "settings": "Paramètres",
     "sales": "Ventes",
-    "hr": "RH"
+    "hr": "RH",
+    "pharmacies": "Pharmacies",
+    "global_users": "Utilisateurs Globaux",
+    "subscriptions": "Abonnements",
+    "communication": "Communication",
+    "health_signal": "Feu Santé"
   },
   "reports": {
     "cash": "Caisse",

@@ -34,7 +34,12 @@
     "stock": "Stock",
     "providers": "Proveedores",
     "hr": "RRHH",
-    "admin": "Admin"
+    "admin": "Admin",
+    "pharmacies": "Farmacias",
+    "global_users": "Usuarios Globales",
+    "subscriptions": "Suscripciones",
+    "communication": "Comunicación",
+    "health_signal": "Semáforo Salud"
   },
   "reports": {
     "cash": "Caja",

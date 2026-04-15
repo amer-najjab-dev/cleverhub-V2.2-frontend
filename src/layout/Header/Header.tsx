@@ -52,7 +52,7 @@ const getModulesByRole = (role: string | undefined) => {
       { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
       { nameKey: 'nav.products', path: '/products', icon: 'Package' },
       { nameKey: 'nav.stock', path: '/stock', icon: 'Box' },
-      { nameKey: 'nav.providers', path: '/providers', icon: 'Truck' },
+      { nameKey: 'nav.suppliers', path: '/providers', icon: 'Truck' },
       { nameKey: 'nav.hr', path: '/hr', icon: 'Users' },
       { nameKey: 'nav.reports', path: '/reports', icon: 'FileText' }
     ];
@@ -163,6 +163,7 @@ export const Header = () => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
                 const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
+                console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                 
                 return (
                   <Link
@@ -201,6 +202,7 @@ export const Header = () => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
                     const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
+                    console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                     
                     return (
                       <Link
@@ -330,6 +332,7 @@ export const Header = () => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
               const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
+              console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
               
               return (
                 <Link

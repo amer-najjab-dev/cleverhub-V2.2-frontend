@@ -162,8 +162,8 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center justify-start flex-1 ml-4">
-            <div className="flex items-center gap-1 overflow-x-auto lg:overflow-x-visible">
+          <nav className="hidden lg:flex items-center justify-center flex-1 mx-4">
+            <div className="flex items-center gap-1">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);

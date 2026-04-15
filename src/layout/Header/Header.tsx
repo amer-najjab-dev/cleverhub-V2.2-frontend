@@ -157,8 +157,8 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation (lg+) */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 mx-6 2xl:mx-10 overflow-x-visible overflow-y-visible">
-            <div className="flex items-center gap-1 overflow-x-visible overflow-y-visible">
+          <nav className="hidden lg:flex items-center justify-between flex-1 mx-4 2xl:mx-8">
+            <div className="flex items-center gap-1 2xl:gap-2 flex-wrap justify-center">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
@@ -168,14 +168,14 @@ export const Header = () => {
                   <Link
                     key={`${module.path}-${languageKey}-${index}`}
                     to={module.path}
-                    className={`flex items-center px-2 2xl:px-4 py-2.5 rounded-lg transition-all duration-200 text-sm 2xl:text-base font-medium ${
+                    className={`flex items-center px-2 2xl:px-3 py-1.5 2xl:py-2 rounded-lg transition-all duration-200 text-sm 2xl:text-base font-medium ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 2xl:w-5 2xl:h-5 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-                    <span>{displayName}</span>
+                    <Icon className={`w-4 h-4 2xl:w-4 2xl:h-4 mr-1.5 2xl:mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <span className="whitespace-nowrap">{displayName}</span>
                   </Link>
                 );
               })}

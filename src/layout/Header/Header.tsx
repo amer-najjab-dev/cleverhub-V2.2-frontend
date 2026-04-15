@@ -146,7 +146,7 @@ export const Header = () => {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
@@ -156,9 +156,9 @@ export const Header = () => {
             <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* Desktop Navigation - visible en lg y superior */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 mx-2 xl:mx-4">
-            <div className="flex items-center gap-1 xl:gap-2">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center justify-start flex-1 ml-4">
+            <div className="flex items-center gap-1 overflow-x-auto lg:overflow-x-visible">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
@@ -168,13 +168,13 @@ export const Header = () => {
                   <Link
                     key={`${module.path}-${languageKey}-${index}`}
                     to={module.path}
-                    className={`flex items-center px-2 xl:px-3 py-1.5 xl:py-2 rounded-lg transition-all duration-200 text-sm xl:text-base font-medium whitespace-nowrap ${
+                    className={`flex items-center px-2 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium whitespace-nowrap ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 xl:w-4 xl:h-4 mr-1.5 xl:mr-2 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <Icon className={`w-4 h-4 mr-1.5 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
                     <span>{displayName}</span>
                   </Link>
                 );
@@ -224,7 +224,7 @@ export const Header = () => {
           )}
 
           {/* Menú derecho */}
-          <div className="flex items-center space-x-2 lg:space-x-4 shrink-0">
+          <div className="flex items-center space-x-1 lg:space-x-2 shrink-0">
             {/* Notificaciones */}
             <div className="relative">
               <button

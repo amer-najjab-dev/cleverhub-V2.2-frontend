@@ -157,7 +157,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation (xl+) */}
-          <nav className="hidden xl:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
+          <nav className="hidden lg:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
             <div className="flex items-center space-x-1 2xl:space-x-2">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
@@ -184,7 +184,7 @@ export const Header = () => {
           </nav>
 
           {/* Tablet Navigation (lg - xl) - Botón hamburguesa */}
-          <div className="hidden lg:block xl:hidden">
+          <div className="hidden xl:block 2xl:hidden">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
               className="p-2 rounded-lg hover:bg-gray-100"

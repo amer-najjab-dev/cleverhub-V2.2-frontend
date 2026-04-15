@@ -168,7 +168,7 @@ export const Header = () => {
                   <Link
                     key={`${module.path}-${languageKey}-${index}`}
                     to={module.path}
-                    className={`flex items-center px-3 2xl:px-4 py-2.5 rounded-lg transition-all duration-200 whitespace-nowrap text-sm 2xl:text-base font-medium ${
+                    className={`flex items-center px-2 2xl:px-4 py-2.5 rounded-lg transition-all duration-200 text-sm 2xl:text-base font-medium ${
                       isActive 
                         ? 'bg-blue-50 text-blue-700 shadow-sm' 
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'

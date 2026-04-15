@@ -113,6 +113,11 @@ export const Header = () => {
   if (!user) return null;
 
   const getInitials = () => {
+    // Para SUPER_ADMIN, mostrar "SA" en lugar de las iniciales del nombre
+    if (user?.role === 'SUPER_ADMIN') {
+      return 'SA';
+    }
+    
     const nameParts = user.fullName.split(' ');
     if (nameParts.length >= 2) {
       return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();

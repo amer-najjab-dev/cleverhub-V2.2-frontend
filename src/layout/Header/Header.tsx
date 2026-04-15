@@ -156,14 +156,13 @@ export const Header = () => {
             <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* Desktop Navigation (xl+) */}
+          {/* Desktop Navigation (lg+) */}
           <nav className="hidden lg:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
             <div className="flex items-center space-x-1 2xl:space-x-2">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
                 const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-                console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                 
                 return (
                   <Link
@@ -183,7 +182,7 @@ export const Header = () => {
             </div>
           </nav>
 
-          {/* Tablet Navigation (lg - xl) - Botón hamburguesa */}
+          {/* Tablet Navigation (xl+) - Botón hamburguesa para pantallas entre lg y xl */}
           <div className="hidden xl:block 2xl:hidden">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
@@ -195,14 +194,13 @@ export const Header = () => {
 
           {/* Menú móvil/tablet desplegable */}
           {mobileMenuOpen && (
-            <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
+            <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg xl:hidden z-50">
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="space-y-2">
                   {modules.map((module, index) => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
                     const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-                    console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                     
                     return (
                       <Link
@@ -318,7 +316,7 @@ export const Header = () => {
               )}
             </div>
 
-            {/* Selector de región */}
+            {/* Selector de región compacto */}
             <div className="hidden sm:block">
               <RegionSelector />
             </div>
@@ -332,7 +330,6 @@ export const Header = () => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
               const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-              console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
               
               return (
                 <Link

@@ -113,6 +113,11 @@ export const Header = () => {
   if (!user) return null;
 
   const getInitials = () => {
+    // Para SUPER_ADMIN, mostrar "SA"
+    if (user?.role === 'SUPER_ADMIN') {
+      return 'SA';
+    }
+    
     const nameParts = user.fullName.split(' ');
     if (nameParts.length >= 2) {
       return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();
@@ -270,7 +275,7 @@ export const Header = () => {
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{user.fullName.split(' ')[0]}</p>
                   <p className="text-xs text-gray-400">
-                    {user.role === 'ADMIN' ? t('header.admin') : user.role === 'SUPER_ADMIN' ? t('header.super_admin') : t('header.employee')}
+                    {user.role === 'SUPER_ADMIN' ? '' : (user.role === 'ADMIN' ? t('header.admin') : t('header.employee'))}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />

@@ -20,6 +20,10 @@ export const HealthPage = () => {
       setHealth(data);
     } catch (error) {
       console.error('Error loading health:', error);
+      setHealth({
+        summary: { total: 0, green: 0, yellow: 0, red: 0 },
+        status: { green: [], yellow: [], red: [] }
+      });
     } finally {
       setLoading(false);
     }

@@ -162,8 +162,8 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation (xl+) */}
-          <nav className="hidden xl:flex items-center justify-center flex-1 mx-6 2xl:mx-10">
-            <div className="flex items-center space-x-1 2xl:space-x-2">
+          <nav className="hidden xl:flex items-center justify-center flex-1 mx-2 2xl:mx-4">
+            <div className="flex items-center space-x-0.5 2xl:space-x-1.5">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);

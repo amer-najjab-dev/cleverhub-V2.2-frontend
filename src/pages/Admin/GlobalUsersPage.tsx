@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminService, User, Pharmacy } from '../../services/admin.service';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 export const GlobalUsersPage = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,6 @@ export const GlobalUsersPage = () => {
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -59,18 +60,18 @@ export const GlobalUsersPage = () => {
       loadData();
     } catch (error) {
       console.error('Error saving user:', error);
-      alert('Error al guardar el usuario');
+      alert(t('adminUsers.save_error'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+    if (!confirm(t('adminUsers.confirm_delete'))) return;
     try {
       await adminService.deleteUser(id);
       loadData();
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Error al eliminar el usuario');
+      alert(t('adminUsers.delete_error'));
     }
   };
 
@@ -108,6 +109,15 @@ export const GlobalUsersPage = () => {
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  const getRoleName = (role: string) => {
+    const names: Record<string, string> = {
+      SUPER_ADMIN: t('adminUsers.super_admin'),
+      ADMIN: t('adminUsers.admin'),
+      EMPLOYEE: t('adminUsers.employee')
+    };
+    return names[role] || role;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -121,8 +131,8 @@ export const GlobalUsersPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Usuarios Globales</h1>
-            <p className="text-gray-600 mt-1">Administra todos los usuarios de la plataforma</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('adminUsers.title')}</h1>
+            <p className="text-gray-600 mt-1">{t('adminUsers.subtitle')}</p>
           </div>
           <button
             onClick={() => {
@@ -132,7 +142,7 @@ export const GlobalUsersPage = () => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <Plus className="w-5 h-5" />
-            Nuevo Usuario
+            {t('adminUsers.new_user')}
           </button>
         </div>
 
@@ -141,12 +151,12 @@ export const GlobalUsersPage = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Farmacia</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.email')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminUsers.full_name')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminUsers.role')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminUsers.pharmacy')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('adminUsers.status')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -156,17 +166,17 @@ export const GlobalUsersPage = () => {
                     <td className="px-6 py-4 text-sm text-gray-900">{user.full_name}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadge(user.role)}`}>
-                        {user.role}
+                        {getRoleName(user.role)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {user.pharmacy?.name || (user.role === 'SUPER_ADMIN' ? 'Global' : 'Sin asignar')}
+                      {user.pharmacy?.name || (user.role === 'SUPER_ADMIN' ? t('adminUsers.global') : t('adminUsers.unassigned'))}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {user.is_active ? 'Activo' : 'Inactivo'}
+                        {user.is_active ? t('adminUsers.active') : t('adminUsers.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right text-sm font-medium">
@@ -197,11 +207,11 @@ export const GlobalUsersPage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">
-                {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                {editingUser ? t('adminUsers.edit_user') : t('adminUsers.new_user')}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.email')} *</label>
                   <input
                     type="email"
                     value={formData.email}
@@ -211,7 +221,7 @@ export const GlobalUsersPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminUsers.full_name')} *</label>
                   <input
                     type="text"
                     value={formData.full_name}
@@ -222,7 +232,7 @@ export const GlobalUsersPage = () => {
                 </div>
                 {!editingUser && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminUsers.password')} *</label>
                     <input
                       type="password"
                       value={formData.password}
@@ -233,25 +243,25 @@ export const GlobalUsersPage = () => {
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminUsers.role')}</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'EMPLOYEE' })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="ADMIN">ADMIN (Dueño de farmacia)</option>
-                    <option value="EMPLOYEE">EMPLOYEE (Empleado)</option>
+                    <option value="ADMIN">{t('adminUsers.role_admin')}</option>
+                    <option value="EMPLOYEE">{t('adminUsers.role_employee')}</option>
                   </select>
                 </div>
                 {formData.role !== 'ADMIN' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Farmacia</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminUsers.pharmacy')}</label>
                     <select
                       value={formData.pharmacy_id || ''}
                       onChange={(e) => setFormData({ ...formData, pharmacy_id: parseInt(e.target.value) || null })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Seleccionar farmacia</option>
+                      <option value="">{t('adminUsers.select_pharmacy')}</option>
                       {pharmacies.map((p) => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
@@ -266,7 +276,7 @@ export const GlobalUsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                     className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <label htmlFor="is_active" className="text-sm text-gray-700">Activo</label>
+                  <label htmlFor="is_active" className="text-sm text-gray-700">{t('adminUsers.active')}</label>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
@@ -274,13 +284,13 @@ export const GlobalUsersPage = () => {
                     onClick={() => setShowModal(false)}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
-                    {editingUser ? 'Actualizar' : 'Crear'}
+                    {editingUser ? t('common.update') : t('common.create')}
                   </button>
                 </div>
               </form>

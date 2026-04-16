@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // URL hardcodeada del backend de producción
-const BACKEND_URL = 'https://cleverhub-v22-backend-production.up.railway.app/api';
+const BACKEND_URL = 'https://cleverhub-v22-backend-production.up.railway.app';
+// Sin /api al final
 
 export const API_URL = BACKEND_URL;
 

@@ -91,7 +91,7 @@ export const adminService = {
 
   // Health status
   getHealthStatus: async (): Promise<HealthStatus> => {
-    const response = await api.get('/api/admin/health-status');
+    const response = await api.get('/admin/health-status');
     return response.data.data;
   },
 

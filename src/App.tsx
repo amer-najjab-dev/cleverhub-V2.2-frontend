@@ -43,14 +43,25 @@ const SyncLanguageComponent = () => {
 };
 
 function App() {
-  // Redirigir SUPER_ADMIN desde / a /admin/dashboard
+  // Redirigir según el rol al cargar la página
   useEffect(() => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        if (user.role === 'SUPER_ADMIN' && window.location.pathname === '/') {
+        const currentPath = window.location.pathname;
+        
+        // SUPER_ADMIN: redirigir a /admin/dashboard si está en raíz
+        if (user.role === 'SUPER_ADMIN' && currentPath === '/') {
           window.location.href = '/admin/dashboard';
+        }
+        // EMPLOYEE: redirigir a /sales si está en raíz o en dashboard
+        if (user.role === 'EMPLOYEE' && (currentPath === '/' || currentPath === '/dashboard')) {
+          window.location.href = '/sales';
+        }
+        // AUXILIAR: redirigir a /sales si está en raíz o en dashboard
+        if (user.role === 'AUXILIAR' && (currentPath === '/' || currentPath === '/dashboard')) {
+          window.location.href = '/sales';
         }
       } catch (e) {
         console.error('Error parsing user from localStorage:', e);
@@ -106,7 +117,10 @@ function App() {
                   {/* Rutas protegidas principales */}
                   <Route path="/" element={
                     <ProtectedRoute>
-                      {userRole === 'AUXILIAR' ? <Navigate to="/sales" replace /> : <HomeDashboard />}
+                      {userRole === 'SUPER_ADMIN' ? <Navigate to="/admin/dashboard" replace /> : 
+                       userRole === 'EMPLOYEE' ? <Navigate to="/sales" replace /> :
+                       userRole === 'AUXILIAR' ? <Navigate to="/sales" replace /> :
+                       <HomeDashboard />}
                     </ProtectedRoute>
                   } />
                   <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />

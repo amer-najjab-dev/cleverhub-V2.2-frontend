@@ -58,6 +58,22 @@ function App() {
     }
   }, []);
 
+  // Obtener el rol del usuario para la redirección
+  const getUserRole = () => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        return user.role;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const userRole = getUserRole();
+
   return (
     <BrowserRouter>
       <RegionProvider>
@@ -88,7 +104,11 @@ function App() {
                   <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   
                   {/* Rutas protegidas principales */}
-                  <Route path="/" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      {userRole === 'AUXILIAR' ? <Navigate to="/sales" replace /> : <HomeDashboard />}
+                    </ProtectedRoute>
+                  } />
                   <Route path="/sales" element={<ProtectedRoute><SalesPage /></ProtectedRoute>} />
                   <Route path="/products" element={<ProtectedRoute><ProductTable /></ProtectedRoute>} />
                   <Route path="/products/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />

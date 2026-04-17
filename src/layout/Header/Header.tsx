@@ -33,6 +33,16 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 const getModulesByRole = (role: string | undefined) => {
   const userRole = role?.toUpperCase();
   
+  // NUEVO: Caso para AUXILIAR
+  if (userRole === 'AUXILIAR') {
+    return [
+      { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
+      { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
+      { nameKey: 'nav.products', path: '/products', icon: 'Package' },
+      { nameKey: 'nav.suppliers', path: '/providers', icon: 'Truck' }
+    ];
+  }
+  
   if (userRole === 'SUPER_ADMIN') {
     return [
       { nameKey: 'nav.dashboard', path: '/admin/dashboard', icon: 'LayoutDashboard' },
@@ -66,6 +76,7 @@ const getModulesByRole = (role: string | undefined) => {
     { nameKey: 'nav.products', path: '/products', icon: 'Package' }
   ];
 };
+
 
 export const Header = () => {
   const { t, i18n } = useTranslation();

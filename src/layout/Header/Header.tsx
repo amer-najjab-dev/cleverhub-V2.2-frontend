@@ -33,8 +33,16 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 const getModulesByRole = (role: string | undefined) => {
   const userRole = role?.toUpperCase();
   
-  // NUEVO: Caso para AUXILIAR
+  // AUXILIAR: solo ventas y productos
   if (userRole === 'AUXILIAR') {
+    return [
+      { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
+      { nameKey: 'nav.products', path: '/products', icon: 'Package' }
+    ];
+  }
+  
+  // EMPLOYEE: ventas, clientes, productos, proveedores (sin dashboard)
+  if (userRole === 'EMPLOYEE') {
     return [
       { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
       { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
@@ -55,28 +63,18 @@ const getModulesByRole = (role: string | undefined) => {
     ];
   }
   
-  if (userRole === 'ADMIN') {
-    return [
-      { nameKey: 'nav.dashboard', path: '/', icon: 'Home' },
-      { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
-      { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
-      { nameKey: 'nav.products', path: '/products', icon: 'Package' },
-      { nameKey: 'nav.stock', path: '/stock', icon: 'Box' },
-      { nameKey: 'nav.suppliers', path: '/providers', icon: 'Truck' },
-      { nameKey: 'nav.hr', path: '/hr', icon: 'Users' },
-      { nameKey: 'nav.reports', path: '/reports', icon: 'FileText' }
-    ];
-  }
-  
-  // EMPLOYEE
+  // ADMIN
   return [
     { nameKey: 'nav.dashboard', path: '/', icon: 'Home' },
     { nameKey: 'nav.sales', path: '/sales', icon: 'ShoppingCart' },
     { nameKey: 'nav.clients', path: '/clients', icon: 'Users' },
-    { nameKey: 'nav.products', path: '/products', icon: 'Package' }
+    { nameKey: 'nav.products', path: '/products', icon: 'Package' },
+    { nameKey: 'nav.stock', path: '/stock', icon: 'Box' },
+    { nameKey: 'nav.suppliers', path: '/providers', icon: 'Truck' },
+    { nameKey: 'nav.hr', path: '/hr', icon: 'Users' },
+    { nameKey: 'nav.reports', path: '/reports', icon: 'FileText' }
   ];
 };
-
 
 export const Header = () => {
   const { t, i18n } = useTranslation();
@@ -91,7 +89,6 @@ export const Header = () => {
   
   const { user, logout } = useAuth();
 
-  // Forzar re-render cuando cambia el idioma
   useEffect(() => {
     const handleLanguageChange = () => {
       setLanguageKey(prev => prev + 1);
@@ -103,7 +100,6 @@ export const Header = () => {
     };
   }, [i18n]);
 
-  // Cargar módulos según el rol del usuario (estático, sin llamada al backend)
   useEffect(() => {
     if (user) {
       const userModules = getModulesByRole(user.role);
@@ -124,7 +120,6 @@ export const Header = () => {
   if (!user) return null;
 
   const getInitials = () => {
-    // Para SUPER_ADMIN, mostrar "SA"
     if (user?.role === 'SUPER_ADMIN') {
       return 'SA';
     }
@@ -143,7 +138,6 @@ export const Header = () => {
     return location.pathname === path;
   };
 
-  // Mostrar loading mientras se cargan los módulos
   if (loading) {
     return (
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -164,7 +158,6 @@ export const Header = () => {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0 group">
             <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
               <span className="text-white font-bold text-sm lg:text-base">CH</span>
@@ -172,14 +165,12 @@ export const Header = () => {
             <span className="font-bold text-gray-900 text-lg lg:text-xl hidden sm:inline group-hover:text-blue-600 transition-colors">CleverHub</span>
           </Link>
 
-          {/* Desktop Navigation (xl+) */}
           <nav className="hidden xl:flex items-center justify-center flex-1 mx-2 2xl:mx-4">
             <div className="flex items-center space-x-0.5 2xl:space-x-1.5">
               {modules.map((module, index) => {
                 const Icon = iconMap[module.icon] || Home;
                 const isActive = isActiveRoute(module.path);
                 const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-                console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                 
                 return (
                   <Link
@@ -199,7 +190,6 @@ export const Header = () => {
             </div>
           </nav>
 
-          {/* Tablet Navigation (lg - xl) - Botón hamburguesa */}
           <div className="hidden lg:block xl:hidden">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
@@ -209,7 +199,6 @@ export const Header = () => {
             </button>
           </div>
 
-          {/* Menú móvil/tablet desplegable */}
           {mobileMenuOpen && (
             <div className="absolute top-16 lg:top-20 left-0 right-0 bg-white border-b shadow-lg lg:hidden xl:hidden z-50">
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -218,7 +207,6 @@ export const Header = () => {
                     const Icon = iconMap[module.icon] || Home;
                     const isActive = isActiveRoute(module.path);
                     const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-                    console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
                     
                     return (
                       <Link
@@ -241,9 +229,7 @@ export const Header = () => {
             </div>
           )}
 
-          {/* Menú derecho */}
           <div className="flex items-center space-x-2 lg:space-x-4 shrink-0">
-            {/* Notificaciones */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -273,7 +259,6 @@ export const Header = () => {
               )}
             </div>
 
-            {/* Avatar y menú usuario */}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -334,21 +319,18 @@ export const Header = () => {
               )}
             </div>
 
-            {/* Selector de región */}
             <div className="hidden sm:block">
               <RegionSelector />
             </div>
           </div>
         </div>
 
-        {/* Navegación móvil (menor que lg) */}
         <div className="lg:hidden pb-3 overflow-x-auto">
           <div className="flex space-x-2">
             {modules.map((module, index) => {
               const Icon = iconMap[module.icon] || Home;
               const isActive = isActiveRoute(module.path);
               const displayName = t(module.nameKey, module.nameKey.split('.').pop() || module.nameKey) as string;
-              console.log(`Módulo: ${module.nameKey}, Traducción: ${displayName}, Idioma: ${i18n.language}`);
               
               return (
                 <Link
